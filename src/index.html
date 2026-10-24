@@ -1,0 +1,1914 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>为什么越熬夜越精神</title>
+<style>
+@font-face{font-family:'NSC';src:url('file:///C:/Windows/Fonts/NotoSansSC-VF.ttf') format('truetype');font-weight:100 900;font-display:block}
+@font-face{font-family:'NSerif';src:url('file:///C:/Windows/Fonts/NotoSerifSC-VF.ttf') format('truetype');font-weight:200 900;font-display:block}
+
+:root{
+  --ink:#EDF1F7;
+  --dim:#78829A;
+  --dim2:#4A5266;
+  --lime:#C9FF4E;
+  --cyan:#57DFFF;
+  --red:#FF5A3C;
+  --bg:#07080C;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+body{font-family:'NSC','Microsoft YaHei',sans-serif;-webkit-font-smoothing:antialiased}
+
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg)}
+
+/* ---------- 覆盖层模式：底图交给 AI 素材，本层只出 alpha ---------- */
+html.ov, html.ov body{background:transparent}
+body.ov #stage{background:transparent}
+body.ov .bg{display:none}
+.ov-scrim,.ov-grain{display:none;position:absolute;inset:0;pointer-events:none}
+body.ov .ov-scrim,body.ov .ov-grain{display:block}
+.ov-scrim{
+  background:
+    linear-gradient(to top,
+      rgba(3,5,9,.95) 0%, rgba(3,5,9,.90) 22%, rgba(3,5,9,.74) 34%,
+      rgba(3,5,9,.40) 46%, rgba(3,5,9,.10) 58%, rgba(3,5,9,0) 70%),
+    linear-gradient(to bottom,
+      rgba(3,5,9,.60) 0%, rgba(3,5,9,.10) 8%, rgba(3,5,9,0) 15%),
+    linear-gradient(to right, rgba(3,5,9,.35) 0%, rgba(3,5,9,0) 12%,
+      rgba(3,5,9,0) 88%, rgba(3,5,9,.35) 100%),
+    rgba(5,7,12,.22);
+}
+.ov-grain{
+  background-image:radial-gradient(rgba(255,255,255,.20) .5px, transparent .5px);
+  background-size:3px 3px;opacity:.07;mix-blend-mode:overlay;
+}
+
+/* ---------- 全局背景层 ---------- */
+.bg{position:absolute;inset:0;pointer-events:none}
+.bg-grid{
+  background-image:
+    linear-gradient(rgba(255,255,255,.030) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.030) 1px,transparent 1px);
+  background-size:90px 90px;
+  background-position:0 0;
+}
+.bg-glow{
+  background:
+    radial-gradient(760px 760px at 50% 34%, rgba(201,255,78,.075), transparent 62%),
+    radial-gradient(900px 620px at 78% 88%, rgba(87,223,255,.055), transparent 66%);
+}
+.bg-vig{
+  background:radial-gradient(ellipse 78% 62% at 50% 44%, transparent 38%, #05060A 82%);
+}
+/* 底部压暗：保护文字不被抖音操作栏吃掉 */
+.bg-scrim{
+  background:linear-gradient(to top,
+    rgba(4,5,9,.96) 0%, rgba(4,5,9,.90) 12%, rgba(4,5,9,.55) 22%,
+    rgba(4,5,9,.16) 32%, rgba(4,5,9,0) 44%);
+}
+.bg-grain{
+  background-image:radial-gradient(rgba(255,255,255,.16) .5px, transparent .5px);
+  background-size:3px 3px;opacity:.055;
+}
+
+/* ---------- 卡点闪白 ---------- */
+.flash{position:absolute;inset:0;background:#dfe8ff;opacity:0;pointer-events:none;z-index:40;mix-blend-mode:screen}
+
+/* ---------- 进度条 ---------- */
+.progress{position:absolute;left:0;top:0;width:1080px;height:5px;background:rgba(255,255,255,.06);z-index:50}
+.progress i{display:block;height:100%;width:0;background:var(--lime);box-shadow:0 0 18px rgba(201,255,78,.65)}
+
+/* ---------- 场景通用 ---------- */
+.scene{position:absolute;inset:0;opacity:0;visibility:hidden;will-change:opacity}
+.tag{
+  position:absolute;left:90px;top:250px;
+  font-size:27px;font-weight:700;letter-spacing:.26em;color:#C3CDDF;
+  display:flex;align-items:center;gap:18px;
+  -webkit-text-stroke:.5px rgba(6,8,14,.5);
+  text-shadow:0 2px 16px rgba(0,0,0,.66),0 1px 3px rgba(0,0,0,.6);
+}
+.tag::before{content:'';width:44px;height:2px;background:var(--lime);opacity:.85}
+
+/* 布局：图表区 y 340–1040，文字区 y 1124–1460（全在抖音安全区内） */
+.txt{position:absolute;left:90px;width:900px;bottom:460px}
+/* 文字底板：软边深色光晕（不是硬玻璃板），且只在文字出现时淡入 ——
+   --sc 由 render() 按"该块最早一条文字的时间"驱动，文字没出来时完全不可见。 */
+.txt::before{
+  content:'';position:absolute;inset:-34px -52px;border-radius:40px;z-index:-1;
+  background:radial-gradient(120% 108% at 18% 100%,
+    rgba(5,7,12,.82) 0%, rgba(5,7,12,.60) 52%, rgba(5,7,12,.22) 78%, rgba(5,7,12,0) 100%);
+  filter:blur(9px);
+  opacity:var(--sc,0);
+}
+.h1{font-size:104px;font-weight:900;line-height:1.16;letter-spacing:-.03em;color:var(--ink);
+    -webkit-text-stroke:.7px rgba(6,8,14,.55);
+    text-shadow:0 3px 24px rgba(0,0,0,.66),0 1px 4px rgba(0,0,0,.6),0 0 2px rgba(0,0,0,.45)}
+.h1.lg{font-size:120px}
+.h2{font-size:72px;font-weight:800;line-height:1.28;letter-spacing:-.02em;color:var(--ink);
+    -webkit-text-stroke:.6px rgba(6,8,14,.5);
+    text-shadow:0 3px 24px rgba(0,0,0,.66),0 1px 4px rgba(0,0,0,.6)}
+.h3{font-size:58px;font-weight:700;line-height:1.34;letter-spacing:-.015em;color:var(--dim);
+    -webkit-text-stroke:.6px rgba(6,8,14,.5);text-shadow:0 2px 20px rgba(0,0,0,.6)}
+.note{
+  margin-top:34px;font-size:36px;font-weight:500;line-height:1.78;
+  color:#C9D3E4;letter-spacing:.01em;max-width:880px;
+  -webkit-text-stroke:.45px rgba(6,8,14,.45);
+  text-shadow:0 2px 18px rgba(0,0,0,.74),0 1px 3px rgba(0,0,0,.58)}
+/* 关键词强调：注释里所有 <b> 都是化学名词/核心概念，统一放大 + 青柠 + 辉光，
+   靠"字号差 + 颜色对比"抢视线（抖音强调关键词的基本手法），比单纯加粗有力得多。 */
+.note b{color:#C9FF4E;font-weight:900;font-size:1.14em;letter-spacing:-.01em;
+  text-shadow:0 0 26px rgba(201,255,78,.55),0 2px 14px rgba(0,0,0,.75)}
+/* ---------- 名词卡：术语的独立展示位（中文名 + 英文名 + 一句白话解释）---------- */
+.termcard{
+  position:relative;margin-top:24px;padding:16px 28px 18px;border-radius:18px;max-width:860px;
+  background:linear-gradient(100deg, rgba(255,255,255,.058), rgba(255,255,255,.022) 70%);
+  border:1px solid rgba(255,255,255,.10);
+  box-shadow:0 14px 44px rgba(0,0,0,.42);
+}
+.termcard::before{content:'';position:absolute;left:0;top:14px;bottom:14px;width:6px;
+  border-radius:0 6px 6px 0;background:var(--lime);box-shadow:0 0 18px rgba(201,255,78,.55)}
+.termcard.cy::before{background:var(--cyan);box-shadow:0 0 18px rgba(87,223,255,.55)}
+.termcard.rd::before{background:var(--red);box-shadow:0 0 18px rgba(255,90,60,.55)}
+.term-head{display:flex;align-items:baseline;gap:18px;flex-wrap:wrap}
+.term-zh{font-size:46px;font-weight:900;line-height:1.15;letter-spacing:-.01em;color:var(--ink);
+  -webkit-text-stroke:.6px rgba(6,8,14,.5);text-shadow:0 2px 18px rgba(0,0,0,.66)}
+.term-en{font-size:21px;font-weight:600;letter-spacing:.12em;color:#A6B2C8;text-transform:uppercase;
+  text-shadow:0 1px 10px rgba(0,0,0,.6)}
+.term-def{display:block;margin-top:8px;font-size:26px;line-height:1.55;color:#D9E2F0;font-weight:500;
+  -webkit-text-stroke:.4px rgba(6,8,14,.42);text-shadow:0 2px 14px rgba(0,0,0,.7)}
+/* 有名詞卡的镜头：图表上移并缩小，确保图表标注不被文字底板压住 */
+.scene.has-terms .plot{top:230px;height:600px}
+/* ---------- 文字动效：字符弹入 / 数字滚动 / 荧光笔扫过 ---------- */
+.ch{display:inline-block;opacity:0;will-change:transform,opacity;transform-origin:50% 62%}
+.wipe{position:relative;display:inline-block;color:var(--tc)}
+.wipe::after{content:'';position:absolute;inset:-.12em -.18em;border-radius:.12em;
+  background:linear-gradient(90deg,#C9FF4E,rgba(201,255,78,.38));
+  transform:scaleX(var(--w,0));transform-origin:left center;z-index:-1}
+.numcount{font-variant-numeric:tabular-nums}
+/* ================= 富文本排版器件（可复用） ================= */
+/* 强调字（原"渐变字"）：改用纯亮色 + 辉光。
+   踩过的坑：background-clip:text 在 headless Chrome 里一旦元素被提升为合成层
+   （.ch 的 will-change / transform / filter 都会触发），渐变填充会丢失，
+   只剩深色描边 → 字看起来是暗的甚至"消失"（s3「沉」、s11「顶」都中过招）。
+   视频要逐帧确定性，不能赌渲染路径，故用纯色，肉眼更亮更稳。 */
+.tx-grad{
+  color:#C9FF4E;-webkit-text-fill-color:#C9FF4E;
+  font-weight:900;
+  text-shadow:0 0 24px rgba(201,255,78,.62),0 2px 8px rgba(0,0,0,.55);
+}
+/* 描边空心字（适合做巨大的背景字） */
+.tx-line{color:transparent;-webkit-text-stroke:2px rgba(237,241,247,.42)}
+/* 衬线强调：给概念词换一种气质（略微放大，补偿衬线字视觉偏小） */
+.tx-serif{font-family:'NSerif',Georgia,serif;font-weight:700;letter-spacing:.02em;font-size:1.06em}
+/* 荧光块：关键词用色块标出，字反白 */
+.tx-mark{position:relative;display:inline-block;padding:0 .16em;color:#0a0e12;z-index:1}
+.tx-mark::before{content:'';position:absolute;left:-.02em;right:-.02em;top:.12em;bottom:.08em;z-index:-1;
+  background:linear-gradient(96deg,#C9FF4E,#9BE86A);transform:skewX(-7deg);border-radius:.05em}
+/* 竖排标签 */
+.tx-vert{writing-mode:vertical-rl;text-orientation:upright;letter-spacing:.34em}
+/* 轻微倾斜，打破呆板 */
+.tx-tilt{transform:rotate(-2.2deg)}
+/* 巨大的幽灵字（纯装饰，低透明度描边） */
+.ghost{position:absolute;font-weight:900;color:transparent;line-height:1;pointer-events:none;
+  letter-spacing:-.05em;-webkit-text-stroke:2px rgba(201,255,78,.07)}
+/* 数字：窄体 + 等宽 */
+.tx-num{font-family:'Bahnschrift','DIN Condensed',Consolas,sans-serif;font-variant-numeric:tabular-nums;
+  letter-spacing:-.03em}
+/* 药丸标签 */
+.tx-chip{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:999px;
+  border:1px solid rgba(201,255,78,.42);font-size:17px;font-weight:600;letter-spacing:.20em;
+  color:#C9FF4E;background:rgba(201,255,78,.07);text-transform:uppercase}
+/* 细下划线（可动） */
+.tx-under{position:relative;display:inline-block}
+.tx-under::after{content:'';position:absolute;left:0;right:0;bottom:-.06em;height:3px;border-radius:2px;
+  background:linear-gradient(90deg,#C9FF4E,#57DFFF);transform:scaleX(var(--u,1));transform-origin:left center}
+/* 关键词强调：比正文大一档 + 青柠 + 辉光（抖音常用"关键词跳出来"的做法）。
+   靠字号差与颜色对比抢视线，不靠堆特效。 */
+.tx-key{font-weight:900;color:#C9FF4E;font-size:1.24em;letter-spacing:-.01em;
+  display:inline-block;padding:0 .04em;line-height:1;
+  text-shadow:0 0 30px rgba(201,255,78,.62),0 2px 16px rgba(0,0,0,.75)}
+/* 红色告警关键词 */
+.tx-key.rd{color:#FF5A3C;text-shadow:0 0 30px rgba(255,90,60,.6),0 2px 16px rgba(0,0,0,.75)}
+/* ---------- S3 腺苷：视频当主体 + 文字由真实液面驱动 ---------- */
+.s3head{position:absolute;left:90px;top:140px;width:840px}
+/* 标题底板：标题常压在额头等亮部，需要一层软光晕托底；
+   与注释底板一致，只在标题出现时淡入（--sc），绝不提前出现。 */
+.s3head::before,.s10head::before,.s11head::before,.s12head::before,.s7head::before{
+  content:'';position:absolute;inset:-30px -46px;border-radius:40px;z-index:-1;
+  background:radial-gradient(120% 120% at 12% 0%,
+    rgba(4,6,10,.80) 0%, rgba(4,6,10,.56) 50%, rgba(4,6,10,.16) 78%, rgba(4,6,10,0) 100%);
+  filter:blur(11px);opacity:var(--sc,0)}
+/* S3 居中大标题（入睡阈值 / 醒来）：由 FNS 按时间窗淡入淡出，前一句会退场，不堆叠 */
+.s3big{position:absolute;left:0;right:0;top:396px;text-align:center;opacity:0;pointer-events:none}
+.s3big::before{content:'';position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  width:940px;height:380px;z-index:-1;border-radius:50%;
+  background:radial-gradient(closest-side, rgba(4,6,10,.74), rgba(4,6,10,.36) 62%, rgba(4,6,10,0) 100%);
+  filter:blur(16px)}
+.s3big .l1{font-size:58px;font-weight:800;letter-spacing:.02em;color:#DCE4F2;
+  -webkit-text-stroke:.6px rgba(6,8,14,.5);
+  text-shadow:0 3px 22px rgba(0,0,0,.78),0 1px 4px rgba(0,0,0,.6)}
+.s3big .l2{font-size:84px;font-weight:900;letter-spacing:-.02em;color:#EDF1F7;margin-top:2px;
+  -webkit-text-stroke:.7px rgba(6,8,14,.55);
+  text-shadow:0 4px 26px rgba(0,0,0,.8),0 1px 5px rgba(0,0,0,.6)}
+/* 字体变形层：腺苷二字 → 融成水滴 → 滴入眼睛 */
+.s3morph{position:absolute;inset:0;width:1080px;height:1920px;pointer-events:none;overflow:visible}
+/* s6 回路图缩小一点，给下方标题让位 */
+#s6 .plot{transform:scale(.84);transform-origin:50% 0}
+/* ---------- 人体定位图：这个器官/分泌物到底在身体的哪里 ---------- */
+/* 多巴胺功能链：想要 → 得到 → 更想要（循环） */
+.loopchain{display:flex;align-items:center;gap:14px;font-family:'NSC';
+  font-size:30px;font-weight:900;letter-spacing:.02em;color:#C9FF4E;
+  text-shadow:0 0 22px rgba(201,255,78,.45),0 2px 12px rgba(0,0,0,.7)}
+.loopchain i{font-style:normal;color:#57DFFF;font-size:26px;font-weight:700;
+  text-shadow:0 0 16px rgba(87,223,255,.5)}
+.loopchain .cyc{color:#C9FF4E;font-size:34px;text-shadow:0 0 22px rgba(201,255,78,.7)}
+/* 竖排变体：贴在人体定位图下方，与图合成一个「器官 + 功能」面板 */
+.loopchain.v{flex-direction:column;align-items:flex-end;gap:2px;font-size:23px;line-height:1.25}
+.loopchain.v i{font-size:17px}
+.loopchain.v .cyc{font-size:25px}
+.bodymap{position:absolute;right:44px;top:404px;width:380px;pointer-events:none}
+.bodymap.left{left:44px;right:auto}
+.bodymap svg{display:block;width:380px;height:380px;overflow:visible}
+.bodymap .bm-lbl{margin-top:4px;text-align:center;font-family:'NSC';
+  font-size:18px;font-weight:600;line-height:1.42;color:#9FADC4;letter-spacing:.02em;
+  text-shadow:0 2px 14px rgba(0,0,0,.85)}
+.bodymap .bm-lbl b{display:block;font-size:22px;font-weight:900;color:#C9FF4E;
+  letter-spacing:.02em;margin-bottom:1px;text-shadow:0 0 20px rgba(201,255,78,.5)}
+/* ---------- 脑区定位图：侧脸 + 脑剖面，半透明医学插画风 ---------- */
+.brainmap{position:absolute;right:40px;top:398px;width:400px;pointer-events:none}
+.brainmap.left{left:40px;right:auto}
+.brainmap svg{display:block;width:400px;height:491px;overflow:visible}
+.brainmap.sm{width:300px}
+.brainmap.sm svg{width:300px;height:368px}
+.brainmap .bm-lbl{margin-top:0;text-align:center;font-family:'NSC';
+  font-size:19px;font-weight:600;line-height:1.42;color:#A9B7CC;letter-spacing:.02em;
+  text-shadow:0 2px 14px rgba(0,0,0,.85)}
+.brainmap .bm-lbl b{display:block;font-size:25px;font-weight:900;color:#C9FF4E;
+  letter-spacing:.03em;margin-bottom:2px;text-shadow:0 0 22px rgba(201,255,78,.55)}
+.s3read{position:absolute;right:88px;top:138px;width:310px;text-align:right}
+.s3lbl{display:flex;align-items:baseline;justify-content:flex-end;gap:10px;font-size:24px;font-weight:700;
+  letter-spacing:.10em;color:#57DFFF;text-shadow:0 2px 14px rgba(0,0,0,.72)}
+.s3lbl span{font-size:14px;font-weight:500;letter-spacing:.16em;color:#9FB0C8;text-transform:uppercase}
+.s3num{font-size:104px;font-weight:900;line-height:1;color:#EDF1F7;margin-top:12px;letter-spacing:-.03em;
+  text-shadow:0 3px 26px rgba(0,0,0,.8)}
+.s3bar{position:relative;width:232px;height:10px;border-radius:5px;background:rgba(255,255,255,.16);
+  margin-top:16px;margin-left:auto;overflow:hidden}
+.s3bar i{position:absolute;left:0;top:0;height:100%;width:100%;transform-origin:left center;
+  background:linear-gradient(90deg,#2f9fd0,#8ff2e4);box-shadow:0 0 16px rgba(87,223,255,.55)}
+.s3cap{margin-top:12px;font-size:18px;color:#B9C4D6;letter-spacing:.18em;text-shadow:0 2px 12px rgba(0,0,0,.7)}
+.s3mark{position:absolute;left:0;top:0;width:1080px;height:1920px;pointer-events:none}
+.s3mark .mk{font-family:'NSC';font-size:26px;font-weight:700;letter-spacing:.06em}
+.s3mark .mk2{font-family:'NSC';font-size:15px;font-weight:500;letter-spacing:.16em}
+.s3note{position:absolute;left:90px;width:900px;bottom:460px}
+/* 注释底板：同样是软光晕 + 随文字淡入 */
+.s3note::before{content:'';position:absolute;inset:-30px -46px;border-radius:36px;z-index:-1;
+  background:radial-gradient(118% 106% at 16% 100%,
+    rgba(4,6,10,.84) 0%, rgba(4,6,10,.62) 54%, rgba(4,6,10,.20) 80%, rgba(4,6,10,0) 100%);
+  filter:blur(8px);opacity:var(--sc,0)}
+/* ---------- 新增名词镜头（s10/s11/s12）通用布局：标题在上 / 读数在侧 / 注释在底 ---------- */
+.s10head,.s11head,.s12head{position:absolute;left:90px;top:150px;width:840px}
+.s10note,.s11note,.s12note{position:absolute;left:90px;width:900px;bottom:460px}
+.s10note::before,.s11note::before,.s12note::before{content:'';position:absolute;inset:-30px -46px;
+  border-radius:36px;z-index:-1;
+  background:radial-gradient(118% 106% at 16% 100%,
+    rgba(4,6,10,.84) 0%, rgba(4,6,10,.62) 54%, rgba(4,6,10,.20) 80%, rgba(4,6,10,0) 100%);
+  filter:blur(8px);opacity:var(--sc,0)}
+.s11read{position:absolute;right:88px;top:150px;width:300px;text-align:right}
+.s5read{position:absolute;right:88px;top:150px;width:300px;text-align:right}
+.s12read{position:absolute;right:88px;top:150px;width:340px;text-align:right}
+.s12warn{position:absolute;left:0;right:0;top:988px;text-align:center;font-family:'NSC';
+  font-size:44px;font-weight:900;letter-spacing:.12em;color:#FF5A3C;opacity:0;
+  text-shadow:0 0 24px rgba(255,90,60,.7);transition:transform .08s ease-out}
+.s9read{position:absolute;right:88px;top:150px;width:300px;text-align:right}
+/* S10 阈值尺：由「眼皮真实开合高度」驱动的横向阈值进度条 —— 眼睛合到哪儿，条就走到哪儿，
+   越过 100% 阈值线时数字转青柠并发光，宣告「撑不住了」。 */
+.s10read{position:absolute;left:90px;top:660px;width:900px}
+.s10thr{position:relative;height:14px;border-radius:7px;background:rgba(255,255,255,.14);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.10)}
+.s10thr i{position:absolute;left:0;top:0;height:100%;width:100%;border-radius:7px;
+  transform-origin:left center;
+  background:linear-gradient(90deg,#4E8FD8 0%,#7C6BF0 55%,#C9FF4E 100%)}
+.s10thr u{position:absolute;top:-9px;bottom:-9px;left:100%;width:2px;
+  background:rgba(255,255,255,.55);box-shadow:0 0 12px rgba(255,255,255,.5)}
+.s10thr u::after{content:'阈值';position:absolute;left:50%;top:-30px;transform:translateX(-50%);
+  font-size:16px;letter-spacing:.20em;color:rgba(255,255,255,.72);white-space:nowrap;
+  font-family:'NSC';font-weight:700}
+.s10cap{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;
+  font-size:17px;letter-spacing:.14em;color:#B9C4D6;font-family:'NSC'}
+.s10cap b{font-size:34px;font-weight:900;color:#EDF1F7;letter-spacing:-.02em;
+  text-shadow:0 2px 14px rgba(0,0,0,.7)}
+.s7head{position:absolute;left:90px;top:150px;width:700px}
+.s7read{position:absolute;right:88px;top:150px;width:300px;text-align:right}
+.s7note{position:absolute;left:90px;width:900px;bottom:452px}
+.s7note::before{content:'';position:absolute;inset:-32px -50px;border-radius:38px;z-index:-1;
+  background:radial-gradient(118% 106% at 16% 100%,
+    rgba(4,6,10,.86) 0%, rgba(4,6,10,.64) 54%, rgba(4,6,10,.22) 80%, rgba(4,6,10,0) 100%);
+  filter:blur(9px);opacity:var(--sc,0)}
+.note b{color:var(--ink);font-weight:600}
+em{font-style:normal;color:var(--lime);font-weight:900;
+  text-shadow:0 0 30px rgba(201,255,78,.5),0 2px 16px rgba(0,0,0,.7)}
+.red{color:var(--red);text-shadow:0 0 30px rgba(255,90,60,.55),0 2px 16px rgba(0,0,0,.72)}
+.cyan{color:var(--cyan)}
+
+.ln{display:block;overflow:hidden;padding-bottom:.10em;margin-bottom:-.10em}
+.ln>i{display:block;font-style:normal;will-change:transform}
+
+/* 数字字体 */
+.num{font-family:'Bahnschrift','DIN Condensed','Consolas',sans-serif;font-variant-numeric:tabular-nums}
+
+/* ---------- S1 时钟 ---------- */
+#s1 .clockbox{position:absolute;left:90px;top:340px;width:900px;height:700px}
+#s1 .bigtime{
+  position:absolute;left:0;top:0;width:900px;height:700px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:168px;font-weight:600;letter-spacing:.02em;color:var(--ink);
+}
+#s1 .bigtime span{font-stretch:88%}
+
+/* ---------- 通用 svg 画布 ---------- */
+.plot{position:absolute;left:90px;top:340px;width:900px;height:700px}
+.axlabel{font-family:'NSC';font-size:22px;font-weight:500;fill:var(--dim2);letter-spacing:.04em}
+.dlabel{font-family:'NSC';font-size:26px;font-weight:700;letter-spacing:.06em}
+.mini{font-family:'NSC';font-size:21px;font-weight:500;fill:var(--dim);letter-spacing:.04em}
+
+/* ---------- S8 时间尺 + 额度条 ---------- */
+#s8 .rulerlbl{position:absolute;left:90px;top:428px;width:900px;display:flex;justify-content:space-between;
+  font-size:23px;color:var(--dim);letter-spacing:.14em}
+#s8 .ruler{position:absolute;left:90px;top:466px;width:900px;height:72px;display:flex;gap:4px;align-items:flex-end}
+#s8 .ruler i{display:block;width:40px;height:44px;border-radius:3px;background:rgba(255,255,255,.20)}
+#s8 .ruler i.hot{background:var(--red);opacity:.9}
+#s8 .pct{position:absolute;left:88px;top:622px;font-size:180px;font-weight:600;
+  color:var(--red);line-height:1;letter-spacing:-.02em}
+#s8 .gauge{position:absolute;left:90px;top:828px;width:900px}
+#s8 .gbar{position:relative;width:900px;height:100px;border:2px solid rgba(255,255,255,.16);
+  border-radius:8px;overflow:hidden;background:rgba(255,255,255,.03)}
+#s8 .gfill{position:absolute;left:0;top:0;height:100%;width:100%;
+  background:linear-gradient(90deg,var(--red),#FF9B3C);transform-origin:left center}
+#s8 .gcap{position:absolute;left:0;top:118px;width:900px;display:flex;justify-content:space-between;
+  font-size:24px;color:var(--dim);letter-spacing:.12em}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="bg bg-grid"></div>
+  <div class="bg bg-glow"></div>
+  <div class="bg bg-vig"></div>
+  <div class="bg bg-scrim"></div>
+  <div class="bg bg-grain"></div>
+
+  <!-- 覆盖层模式：压暗 AI 素材、保证文字可读、统一颗粒 -->
+  <div class="ov-scrim"></div>
+  <div class="ov-grain"></div>
+
+  <!-- ============ S1 钩子 ============ -->
+  <section class="scene" id="s1">
+    <div class="tag" data-t="0.35" data-anim="fade" data-d="0.5">第 19 个小时</div>
+    <div class="clockbox">
+      <svg width="900" height="700" viewBox="0 0 900 700">
+        <g id="s1-ticks" transform="translate(450,340)"></g>
+        <circle cx="450" cy="340" r="252" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="2"/>
+        <path id="s1-arc" fill="none" stroke="#C9FF4E" stroke-width="5" stroke-linecap="round"
+              data-t="0.45" data-anim="draw" data-d="2.3"></path>
+        <circle id="s1-dot" cx="0" cy="0" r="9" fill="#C9FF4E" data-t="2.6" data-anim="pop" data-d="0.5"></circle>
+      </svg>
+      <div class="bigtime num" data-t="0.7" data-anim="fade" data-d="0.9"><span>02:47</span></div>
+    </div>
+    <div class="txt">
+      <div class="h1">
+        <span class="ln"><i data-t="3.35" data-anim="mask" data-d="0.85">你已经醒了</i></span>
+        <span class="ln"><i data-t="3.85" data-anim="mask" data-d="0.85"><em>十九个小时</em></i></span>
+      </div>
+      <p class="note" data-t="5.55" data-anim="up" data-d="0.8">却突然，一点都不困了。</p>
+    </div>
+  </section>
+
+  <!-- ============ S2 反转 ============ -->
+  <section class="scene" id="s2">
+    <div class="tag" data-t="0.15" data-anim="fade" data-d="0.5">反常识</div>
+    <svg class="plot" viewBox="0 0 900 700">
+      <!-- 网格 -->
+      <g stroke="rgba(255,255,255,.055)" stroke-width="1">
+        <line x1="70" y1="120" x2="850" y2="120"/>
+        <line x1="70" y1="270" x2="850" y2="270"/>
+        <line x1="70" y1="420" x2="850" y2="420"/>
+        <line x1="70" y1="560" x2="850" y2="560"/>
+      </g>
+      <text class="axlabel" x="70" y="98">清醒度</text>
+      <text class="axlabel" x="70" y="600">07:00</text>
+      <text class="axlabel" x="640" y="600">02:47</text>
+
+      <!-- 借来的区域 -->
+      <path id="s2-wedge" fill="url(#wg)" stroke="none" data-t="2.55" data-anim="fade" data-d="0.7"></path>
+      <defs>
+        <linearGradient id="wg" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#C9FF4E" stop-opacity=".30"/>
+          <stop offset="1" stop-color="#C9FF4E" stop-opacity=".03"/>
+        </linearGradient>
+      </defs>
+
+      <!-- 本该继续下降 -->
+      <path id="s2-natural" fill="none" stroke="rgba(255,255,255,.22)" stroke-width="3"
+            stroke-dasharray="10 12" stroke-linecap="round"
+            data-t="1.15" data-anim="draw" data-d="1.5"></path>
+
+      <!-- 实际曲线 -->
+      <path id="s2-real" fill="none" stroke="#C9FF4E" stroke-width="6" stroke-linecap="round"
+            data-t="0.55" data-anim="draw" data-d="2.2"></path>
+
+      <circle id="s2-dot" r="10" fill="#C9FF4E" data-t="2.7" data-anim="pop" data-d="0.5"></circle>
+      <text class="dlabel" x="700" y="150" fill="#C9FF4E" data-t="2.9" data-anim="up" data-d="0.6">借来的</text>
+      <text class="mini" x="700" y="188" data-t="3.1" data-anim="up" data-d="0.6">明天的清醒</text>
+    </svg>
+    <div class="txt" style="bottom:560px">
+      <div class="h1">
+        <span class="ln"><i data-t="3.45" data-anim="mask" data-d="0.8">这不是回血</i></span>
+        <span class="ln"><i data-t="3.95" data-anim="mask" data-d="0.8">是身体在<em>向你借钱</em></i></span>
+      </div>
+      <p class="note" data-t="5.0" data-anim="up" data-d="0.8">本该一路下滑的清醒度，在这儿翘了个头 —— 这个多出来的高点，是<em>借来的</em>。</p>
+    </div>
+  </section>
+
+  <!-- ============ S3 腺苷（功能化表达：眼皮越来越沉 → 睡一觉清零） ============ -->
+  <section class="scene" id="s3">
+    <div class="tag" style="top:118px" data-t="0.19" data-anim="fade" data-d="0.5">01 / 困意</div>
+
+    <!-- 右侧竖排标签 -->
+    <div class="tx-vert" style="position:absolute;right:22px;top:640px;font-size:19px;
+         letter-spacing:.42em;color:rgba(201,255,78,.55)">睡眠压力</div>
+
+    <!-- 顶部标题：字符逐个弹入 + 衬线强调 -->
+    <div class="s3head">
+      <div class="h1" style="font-size:96px">
+        <span class="ln"><i data-t="0.375" data-anim="chars" data-d="0.7" data-stagger="0.045">眼皮越来越<span class="tx-serif tx-grad">沉</span></i></span>
+        <span class="ln"><i data-t="1.125" data-anim="chars" data-d="0.7" data-stagger="0.045">是<span class="tx-mark">腺苷</span>攒满了</i></span>
+      </div>
+    </div>
+
+    <!-- ===== 字体变形：腺苷二字融成水滴，滴进眼睛，溅开渗入 =====
+         实现要点：goo 滤镜 = 高斯模糊 + alpha 阈值化，模糊量从 0 推到 11，
+         两个字就会「融化」并互相粘连成一坨液体；再交接给泪滴路径下落。 -->
+    <svg class="s3morph" viewBox="0 0 1080 1920" aria-hidden="true">
+      <defs>
+        <radialGradient id="s3dropG" cx="34%" cy="26%" r="74%">
+          <stop offset="0" stop-color="#F4FFD8" stop-opacity=".98"/>
+          <stop offset="42%" stop-color="#C9FF4E" stop-opacity=".94"/>
+          <stop offset="100%" stop-color="#3FD8FF" stop-opacity=".82"/>
+        </radialGradient>
+        <radialGradient id="s3absorbG" cx="50%" cy="50%" r="50%">
+          <stop offset="0" stop-color="#C9FF4E" stop-opacity=".80"/>
+          <stop offset="58%" stop-color="#C9FF4E" stop-opacity=".18"/>
+          <stop offset="100%" stop-color="#C9FF4E" stop-opacity="0"/>
+        </radialGradient>
+        <filter id="s3goo" filterUnits="userSpaceOnUse" x="-240" y="-240" width="1560" height="2400">
+          <feGaussianBlur id="s3gooBlur" in="SourceGraphic" stdDeviation="0" result="b"/>
+          <feColorMatrix in="b" mode="matrix"
+            values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"/>
+        </filter>
+      </defs>
+
+      <!-- 文字层：两个字分别向中间收拢，被 goo 滤镜融成一坨液体 -->
+      <g id="s3m-text" filter="url(#s3goo)" opacity="0">
+        <text id="s3m-a" x="452" y="600" text-anchor="middle"
+              font-family="NSC" font-size="170" font-weight="900" fill="#C9FF4E">腺</text>
+        <text id="s3m-b" x="628" y="600" text-anchor="middle"
+              font-family="NSC" font-size="170" font-weight="900" fill="#C9FF4E">苷</text>
+      </g>
+
+      <!-- 下落拖影 -->
+      <line id="s3m-trail" x1="540" y1="600" x2="540" y2="600"
+            stroke="#C9FF4E" stroke-width="4" stroke-linecap="round" opacity="0"/>
+
+      <!-- 水滴（泪滴形，带高光） -->
+      <g id="s3m-drop" opacity="0">
+        <path d="M0,-56 C 15,-25 27,-7 27,13 A 27,27 0 1 1 -27,13 C -27,-7 -15,-25 0,-56 Z"
+              fill="url(#s3dropG)"/>
+        <ellipse cx="-8" cy="7" rx="6.5" ry="9.5" fill="#FFFFFF" opacity=".6"/>
+      </g>
+
+      <!-- 落点涟漪 -->
+      <ellipse id="s3m-rip1" cx="540" cy="1168" rx="20" ry="6" fill="none"
+               stroke="#C9FF4E" stroke-width="3" opacity="0"/>
+      <ellipse id="s3m-rip2" cx="540" cy="1168" rx="20" ry="6" fill="none"
+               stroke="#8CFFD0" stroke-width="2" opacity="0"/>
+      <circle id="s3m-absorb" cx="540" cy="1168" r="0" fill="url(#s3absorbG)" opacity="0"/>
+      <g id="s3m-splash"></g>
+    </svg>
+
+    <!-- 右上读数：百分比与液位条由画面里眼睛的真实开合高度驱动 -->
+    <svg class="s3mark" viewBox="0 0 1080 1920">
+      <circle id="s3-flash" cx="892" cy="252" r="60" fill="none"
+              stroke="#C9FF4E" stroke-width="4" opacity="0"/>
+    </svg>
+    <div class="s3read" data-t="2.75" data-anim="up" data-d="0.6">
+      <div class="s3lbl">腺苷<span>Adenosine</span></div>
+      <div class="s3num num" id="s3-pct">0%</div>
+      <div class="s3bar"><i id="s3-bar"></i></div>
+      <div class="s3cap">困意存款</div>
+    </div>
+
+    <div class="brainmap sm" id="s3-brain" style="right:26px;top:566px" data-region="prefrontal" data-name="大脑" data-place="腺苷在脑内累积"></div>
+    <!-- 入睡阈值（并入本镜，不再单独切镜）：眼睛合上那一刻 -->
+    <div class="s3big" id="s3-thr">
+      <div class="l1">眼睛合上的那一刻</div>
+      <div class="l2">就是<span class="tx-mark">入睡阈值</span></div>
+    </div>
+    <!-- 醒来：睡够之后人精神了 -->
+    <div class="s3big" id="s3-wake">
+      <div class="l1">睡够了</div>
+      <div class="l2">醒来，脑子是<span class="tx-grad">清</span>的</div>
+    </div>
+
+    <!-- 底部注释：存一点 / 清走 / 命名 -->
+    <div class="s3note">
+      <p class="note" data-t="1.375" data-anim="blur" data-d="0.6" style="font-size:34px;margin-top:0">醒着每一分钟，<b>腺苷</b>就往脑子里存一点。</p>
+      <p class="note" data-t="8.5" data-anim="chars" data-d="0.7" data-stagger="0.02" style="font-size:34px;margin-top:16px">这股非睡不可的劲儿，就叫<b>睡眠压力</b>。</p>
+    </div>
+  </section>
+
+  <!-- ============ S4 生物钟 ============ -->
+  <section class="scene has-terms" id="s4">
+    <div class="tag" data-t="0.15" data-anim="fade" data-d="0.5">02 / 生物钟</div>
+    <svg class="plot" viewBox="0 0 900 700">
+      <g stroke="rgba(255,255,255,.055)" stroke-width="1">
+        <line x1="70" y1="150" x2="850" y2="150"/>
+        <line x1="70" y1="330" x2="850" y2="330"/>
+        <line x1="70" y1="510" x2="850" y2="510"/>
+      </g>
+      <g class="axlabel">
+        <text x="70" y="612">18:00</text>
+        <text x="255" y="612">21:00</text>
+        <text x="470" y="612">00:00</text>
+        <text x="680" y="612">03:00</text>
+        <text x="800" y="612">06:00</text>
+      </g>
+
+      <!-- 清醒信号 -->
+      <path id="s4-alert" fill="none" stroke="#C9FF4E" stroke-width="6" stroke-linecap="round"
+            data-t="0.55" data-anim="draw" data-d="2.0"></path>
+      <!-- 睡眠压力 -->
+      <path id="s4-sleep" fill="none" stroke="#57DFFF" stroke-width="6" stroke-linecap="round"
+            stroke-dasharray="2 0" data-t="1.0" data-anim="draw" data-d="2.0"></path>
+
+      <text class="dlabel" x="238" y="124" fill="#C9FF4E" data-t="2.2" data-anim="up" data-d="0.6">清醒信号</text>
+      <text class="dlabel" x="596" y="276" fill="#57DFFF" data-t="2.4" data-anim="up" data-d="0.6">困意存款</text>
+
+      <!-- 21点峰值 -->
+      <circle id="s4-peak" cx="255" cy="0" r="9" fill="#C9FF4E" data-t="2.5" data-anim="pop" data-d="0.5"></circle>
+      <text class="mini" x="300" y="442" fill="#C9FF4E" data-t="2.7" data-anim="up" data-d="0.6">假清醒</text>
+
+      <!-- 此刻 -->
+      <g id="s4-now" opacity="0">
+        <line x1="660" y1="150" x2="660" y2="560" stroke="rgba(255,255,255,.30)" stroke-width="2" stroke-dasharray="7 9"/>
+        <circle cx="660" cy="480" r="10" fill="#FF5A3C"/>
+        <text class="mini" x="676" y="578" fill="#FF5A3C">此刻 02:47</text>
+      </g>
+    </svg>
+    <div class="txt">
+      <div class="h1" style="font-size:92px">
+        <span class="ln"><i data-t="4.20" data-anim="mask" data-d="0.8">晚上九点半</i></span>
+        <span class="ln"><i data-t="4.80" data-anim="mask" data-d="0.8">你突然清醒过一次</i></span>
+      </div>
+      <div class="termcard" data-t="8.00" data-anim="term" data-d="0.7">
+        <div class="term-head"><span class="term-zh">生物钟</span><span class="term-en">Circadian Rhythm</span></div>
+        <span class="term-def">身体自带的作息表，大约 24 小时一轮</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ S13 生物钟 · 假清醒 / 觉醒维持区（承接 s4，接新生成的月光房视频） ============ -->
+  <section class="scene has-terms" id="s13">
+    <div class="tag" data-t="0.15" data-anim="fade" data-d="0.5">02 / 回光返照</div>
+    <svg class="plot" viewBox="0 0 900 700">
+      <g stroke="rgba(255,255,255,.055)" stroke-width="1">
+        <line x1="70" y1="330" x2="850" y2="330"/>
+      </g>
+      <g class="axlabel">
+        <text x="70" y="612">18:00</text>
+        <text x="255" y="612">21:00</text>
+        <text x="680" y="612">03:00</text>
+        <text x="800" y="612">06:00</text>
+      </g>
+
+      <!-- 觉醒维持区高亮带：21 点前后那一小段 -->
+      <rect id="s13-wmz" x="185" y="160" width="150" height="300"
+            fill="rgba(201,255,78,.07)" opacity="0"/>
+      <!-- 清醒信号：21 点假清醒尖峰，随后跌到底 -->
+      <path id="s13-alert" fill="none" stroke="#C9FF4E" stroke-width="6"
+            stroke-linecap="round" data-t="0.5" data-anim="draw" data-d="1.8"></path>
+
+      <!-- 假清醒峰值 -->
+      <circle id="s13-peak" cx="255" cy="0" r="10" fill="#C9FF4E" opacity="0"/>
+      <text class="mini" x="300" y="150" fill="#C9FF4E" data-t="2.2" data-anim="up" data-d="0.5">假清醒</text>
+
+      <!-- 此刻 02:47：清醒信号已见底 -->
+      <g id="s13-now" opacity="0">
+        <line x1="660" y1="160" x2="660" y2="560" stroke="rgba(255,90,60,.5)" stroke-width="2" stroke-dasharray="7 9"/>
+        <circle cx="660" cy="520" r="10" fill="#FF5A3C"/>
+        <text class="mini" x="676" y="578" fill="#FF5A3C">此刻 02:47 · 已见底</text>
+      </g>
+    </svg>
+    <div class="txt">
+      <div class="h1" style="font-size:92px">
+        <span class="ln"><i data-t="3.4" data-anim="mask" data-d="0.8">它在骗你</i></span>
+        <span class="ln"><i data-t="4.0" data-anim="mask" data-d="0.8">还早，还能熬</i></span>
+      </div>
+      <div class="termcard cy" data-t="6.2" data-anim="term" data-d="0.7">
+        <div class="term-head"><span class="term-zh">觉醒维持区</span><span class="term-en">Wake Maintenance Zone</span></div>
+        <span class="term-def">睡前那阵「回光返照」——生物钟故意的</span>
+      </div>
+      <p class="note" data-t="8.2" data-anim="up" data-d="0.8">这股清醒不是你赚的，是<b>生物钟按点发放的最后一批</b>。</p>
+    </div>
+  </section>
+
+  <!-- ============ S5 应激 ============ -->
+  <section class="scene has-terms" id="s5">
+    <div class="tag" data-t="0.15" data-anim="fade" data-d="0.5">03 / 应急</div>
+    <!-- HPA 轴：下丘脑 →CRH→ 垂体 →ACTH→ 肾上腺皮质 → 皮质醇 → 负反馈 -->
+    <svg class="plot" viewBox="0 0 900 700">
+      <defs>
+        <radialGradient id="hpaG" cx="38%" cy="34%" r="72%">
+          <stop offset="0" stop-color="#FFE2BC" stop-opacity=".95"/>
+          <stop offset="58%" stop-color="#FF9A5C" stop-opacity=".52"/>
+          <stop offset="100%" stop-color="#FF5A3C" stop-opacity=".12"/>
+        </radialGradient>
+        <filter id="hpaF" x="-140%" y="-140%" width="380%" height="380%">
+          <feGaussianBlur stdDeviation="13"/>
+        </filter>
+      </defs>
+
+      <!-- 主干连线 -->
+      <path d="M300,176 L300,262" stroke="rgba(255,190,120,.30)" stroke-width="2"/>
+      <path d="M300,346 L300,432" stroke="rgba(255,190,120,.30)" stroke-width="2"/>
+      <path d="M292,256 L300,272 L308,256" fill="rgba(255,190,120,.55)"/>
+      <path d="M292,426 L300,442 L308,426" fill="rgba(255,190,120,.55)"/>
+      <text x="316" y="222" fill="#FFBE78" font-size="21" font-weight="700">CRH</text>
+      <text x="316" y="392" fill="#FFBE78" font-size="21" font-weight="700">ACTH</text>
+
+      <!-- 传递光点 -->
+      <circle id="hpa-dot" cx="300" cy="176" r="7" fill="#FFE2BC" opacity="0"/>
+
+      <!-- 负反馈：从皮质醇回到下丘脑 -->
+      <path id="hpa-fb" d="M742,500 C856,500 856,126 350,122"
+            stroke="#57DFFF" stroke-width="1.8" fill="none" stroke-dasharray="7 9" opacity="0"/>
+      <text id="hpa-fbm" x="838" y="316" text-anchor="middle" fill="#57DFFF"
+            font-size="32" font-weight="800" opacity="0">−</text>
+
+      <!-- 节点 1 下丘脑 -->
+      <g id="hpa-n1" opacity="0">
+        <circle cx="300" cy="130" r="48" fill="url(#hpaG)" filter="url(#hpaF)"/>
+        <circle cx="300" cy="130" r="31" fill="none" stroke="#FFC98A" stroke-width="1.8"/>
+        <circle cx="300" cy="130" r="5" fill="#FFF0DC"/>
+        <text x="352" y="126" fill="#FFE2BC" font-size="27" font-weight="800">下丘脑</text>
+        <text x="352" y="154" fill="rgba(255,226,188,.55)" font-size="18">Hypothalamus</text>
+      </g>
+
+      <!-- 节点 2 垂体 -->
+      <g id="hpa-n2" opacity="0">
+        <circle cx="300" cy="300" r="48" fill="url(#hpaG)" filter="url(#hpaF)"/>
+        <circle cx="300" cy="300" r="31" fill="none" stroke="#FFC98A" stroke-width="1.8"/>
+        <circle cx="300" cy="300" r="5" fill="#FFF0DC"/>
+        <text x="352" y="296" fill="#FFE2BC" font-size="27" font-weight="800">垂体</text>
+        <text x="352" y="324" fill="rgba(255,226,188,.55)" font-size="18">Pituitary</text>
+      </g>
+
+      <!-- 节点 3 肾上腺皮质 -->
+      <g id="hpa-n3" opacity="0">
+        <circle cx="300" cy="470" r="48" fill="url(#hpaG)" filter="url(#hpaF)"/>
+        <circle cx="300" cy="470" r="31" fill="none" stroke="#FFC98A" stroke-width="1.8"/>
+        <circle cx="300" cy="470" r="5" fill="#FFF0DC"/>
+        <text x="352" y="466" fill="#FFE2BC" font-size="27" font-weight="800">肾上腺皮质</text>
+        <text x="352" y="494" fill="rgba(255,226,188,.55)" font-size="18">Adrenal cortex</text>
+      </g>
+
+      <!-- 皮质醇：从肾上腺喷出的一团 -->
+      <g id="hpa-cort" opacity="0">
+        <circle cx="700" cy="470" r="78" fill="url(#hpaG)" filter="url(#hpaF)" opacity=".5"/>
+        <g id="hpa-parts"></g>
+        <text x="700" y="586" text-anchor="middle" fill="#FFD9A8" font-size="27" font-weight="800">皮质醇</text>
+        <text x="700" y="614" text-anchor="middle" fill="rgba(255,217,168,.55)" font-size="18">Cortisol</text>
+      </g>
+
+      <!-- 刹车失灵 -->
+      <text id="hpa-brake" x="452" y="44" text-anchor="middle" fill="#FF5A3C"
+            font-size="30" font-weight="900" letter-spacing=".1em" opacity="0">⚠ 负反馈失灵 · 刹不住</text>
+    </svg>
+    <div class="s5read" data-t="2.0" data-anim="up" data-d="0.5">
+      <div class="s3lbl" style="color:#FFBE78">皮质醇 Cortisol</div>
+      <div class="s3num num" id="s5-bpm">12</div>
+      <div class="s3cap">μg / dL</div>
+    </div>
+    <div class="txt">
+      <div class="h1" style="font-size:96px">
+        <span class="ln"><i data-t="5.6" data-anim="mask" data-d="0.8">现在撑住你的</i></span>
+        <span class="ln"><i data-t="6.1" data-anim="mask" data-d="0.8">不是生物钟</i></span>
+      </div>
+      <div class="termcard rd" data-t="9.6" data-anim="term" data-d="0.7">
+        <div class="term-head"><span class="term-zh">皮质醇</span><span class="term-en">Cortisol</span></div>
+        <span class="term-def">身体的「应急贷款」，一有危险就叫它提神</span>
+      </div>
+      <p class="note" data-t="12.8" data-anim="up" data-d="0.8">生物钟的清醒信号已经见底。可凌晨两三点，<b>皮质醇</b>开始往上爬 —— 身体以为你出事了，得续命。</p>
+    </div>
+  </section>
+
+  <!-- ============ S6 多巴胺 ============ -->
+  <section class="scene has-terms" id="s6">
+    <div class="brainmap sm" style="right:22px;top:118px" data-t="4.6" data-anim="fade" data-d="0.9" data-region="midbrain" data-name="中脑 · 多巴胺" data-place="想要 → 再来一次（循环）"></div>
+    <div class="tag" data-t="0.15" data-anim="fade" data-d="0.5">04 / 奖励</div>
+    <!-- 奖赏回路：中脑 → 伏隔核 → 前额叶 → 中脑（一圈一圈加速） -->
+    <svg class="plot" viewBox="0 0 900 700">
+      <defs>
+        <radialGradient id="dopG" cx="38%" cy="34%" r="72%">
+          <stop offset="0" stop-color="#EAFFB8" stop-opacity=".95"/>
+          <stop offset="58%" stop-color="#C9FF4E" stop-opacity=".5"/>
+          <stop offset="100%" stop-color="#57DFFF" stop-opacity=".12"/>
+        </radialGradient>
+        <filter id="dopF" x="-140%" y="-140%" width="380%" height="380%">
+          <feGaussianBlur stdDeviation="13"/>
+        </filter>
+        <marker id="dopArrow" viewBox="0 0 10 10" refX="8" refY="5"
+                markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+          <path d="M0,0 L10,5 L0,10 Z" fill="rgba(201,255,78,.55)"/>
+        </marker>
+      </defs>
+
+      <!-- 三条有向边 -->
+      <path d="M486,214 L604,420" stroke="rgba(201,255,78,.35)" stroke-width="2"
+            fill="none" marker-end="url(#dopArrow)"/>
+      <path d="M604,486 L296,486" stroke="rgba(201,255,78,.35)" stroke-width="2"
+            fill="none" marker-end="url(#dopArrow)"/>
+      <path d="M296,420 L414,214" stroke="rgba(201,255,78,.35)" stroke-width="2"
+            fill="none" marker-end="url(#dopArrow)"/>
+
+      <!-- 三个节点 -->
+      <g id="dop-n1" opacity="0">
+        <circle cx="450" cy="180" r="56" fill="url(#dopG)" filter="url(#dopF)"/>
+        <circle cx="450" cy="180" r="38" fill="none" stroke="#DCFF7A" stroke-width="1.8"/>
+        <text x="450" y="188" text-anchor="middle" fill="#F4FFD2" font-size="28" font-weight="800">中脑</text>
+      </g>
+      <g id="dop-n2" opacity="0">
+        <circle cx="640" cy="460" r="56" fill="url(#dopG)" filter="url(#dopF)"/>
+        <circle cx="640" cy="460" r="38" fill="none" stroke="#DCFF7A" stroke-width="1.8"/>
+        <text x="640" y="468" text-anchor="middle" fill="#F4FFD2" font-size="28" font-weight="800">伏隔核</text>
+      </g>
+      <g id="dop-n3" opacity="0">
+        <circle cx="260" cy="460" r="56" fill="url(#dopG)" filter="url(#dopF)"/>
+        <circle cx="260" cy="460" r="38" fill="none" stroke="#DCFF7A" stroke-width="1.8"/>
+        <text x="260" y="468" text-anchor="middle" fill="#F4FFD2" font-size="28" font-weight="800">前额叶</text>
+      </g>
+
+      <!-- 环内核心字 -->
+      <text id="dop-core" x="450" y="348" text-anchor="middle" fill="#F4FFD2"
+            font-size="54" font-weight="900" opacity="0">还想要</text>
+      <text id="dop-sub" x="450" y="396" text-anchor="middle" fill="rgba(244,255,210,.6)"
+            font-size="25" opacity="0">not pleasure — wanting</text>
+
+      <!-- 循环光点 -->
+      <circle id="dop-dot" cx="450" cy="180" r="8" fill="#EAFFB8" opacity="0"/>
+
+      <!-- 圈数 -->
+      <text id="dop-count" x="450" y="562" text-anchor="middle" fill="#C9FF4E"
+            font-size="36" font-weight="800" opacity="0">第 0 次</text>
+      <text id="dop-warn" x="450" y="612" text-anchor="middle" fill="#FF5A3C"
+            font-size="34" font-weight="900" letter-spacing=".08em" opacity="0">停不下来</text>
+    </svg>
+    <div class="loopchain v" style="position:absolute;right:36px;top:700px"
+         data-t="12.6" data-anim="up" data-d="0.7">
+      <span>想要</span><i>↓</i><span>得到</span><i>↓</i><span>更想要</span><i class="cyc">↻</i>
+    </div>
+    <div class="txt">
+      <div class="h1" style="font-size:96px">
+        <span class="ln"><i data-t="4.4" data-anim="mask" data-d="0.8">大脑还顺手</i></span>
+        <span class="ln"><i data-t="4.9" data-anim="mask" data-d="0.8">给了你一点<em>奖励</em></i></span>
+      </div>
+      <div class="termcard" data-t="7.6" data-anim="term" data-d="0.7">
+        <div class="term-head"><span class="term-zh">多巴胺</span><span class="term-en">Dopamine</span></div>
+        <span class="term-def">不是快乐本身，是「还想要」的冲动</span>
+      </div>
+      <div class="termcard cy" data-t="11.2" data-anim="term" data-d="0.7">
+        <div class="term-head"><span class="term-zh">奖赏回路</span><span class="term-en">Reward Loop</span></div>
+        <span class="term-def">中脑—伏隔核—前额叶，一圈一圈自我强化</span>
+      </div>
+      <p class="note" data-t="13.9" data-anim="up" data-d="0.8">熬过夜，<b>多巴胺</b>系统被调乱，人会莫名<em>飘飘然</em> —— 于是凌晨三点坐在屏幕前，突然觉得：<b>我灵感来了。</b></p>
+    </div>
+  </section>
+
+  <!-- ============ S7 代价 ============ -->
+  <!-- ============ S7 前额叶（思想高点：你连"自己困不困"都判断不了） ============ -->
+  <section class="scene" id="s7">
+    <div class="brainmap" data-t="2.2" data-anim="fade" data-d="0.9" data-region="prefrontal" data-name="前额叶" data-place="大脑最前部 · 额头后面"></div>
+    <div class="tag" style="top:118px" data-t="0.12" data-anim="fade" data-d="0.45">06 / 代价</div>
+
+    <div class="s7head">
+      <div class="h1" style="font-size:76px">
+        <span class="ln"><i data-t="0.4" data-anim="mask" data-d="0.8">先下线的</i></span>
+        <span class="ln"><i data-t="1.5" data-anim="jolt" data-d="0.8">不是能力，是<span class="red">判断力</span></i></span>
+      </div>
+    </div>
+
+    <!-- 判断力读数：由画面运动量驱动（越静止越低） -->
+    <div class="s7read" data-t="2.4" data-anim="up" data-d="0.5">
+      <div class="s3lbl" style="color:#FF8A6A">判断力<span style="color:#C8A79A">Judgment</span></div>
+      <div class="s3num num" id="s7-pct">92%</div>
+      <div class="s3bar"><i id="s7-bar"></i></div>
+    </div>
+
+    <!-- 题眼：三拍递进，重击落在最后半句 -->
+    <div class="s7note">
+      <p class="note" data-t="5.40" data-anim="blur" data-d="0.9" style="font-size:29px;margin-top:0">你没法判断自己困不困 ——</p>
+      <p class="note" data-t="8.10" data-anim="blur" data-d="0.9" style="font-size:29px;margin-top:12px">因为负责判断的那个器官，</p>
+      <p class="note" data-t="10.60" data-anim="punch" data-d="0.9" style="font-size:34px;margin-top:14px;color:#EDF1F7">正是<span class="red">最先被关掉</span>的那个。</p>
+      <p class="note" data-t="13.20" data-anim="chars" data-d="0.9" data-stagger="0.016" style="font-size:28px;margin-top:16px;color:#9AA4B8">缺觉时前额叶第一个罢工，杏仁核反而更兴奋。</p>
+    </div>
+  </section>
+
+  <!-- ============ S8 额度 ============ -->
+  <section class="scene" id="s8">
+    <div class="tag" data-t="0.15" data-anim="fade" data-d="0.5">06 / 真相</div>
+    <div class="rulerlbl" data-t="0.15" data-anim="fade" data-d="0.5"><span>已清醒</span><span>19 小时</span></div>
+    <div class="ruler" data-t="0.35" data-anim="up" data-d="0.7">
+      <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i class="hot"></i><i class="hot"></i><i class="hot"></i><i class="hot"></i><i class="hot"></i>
+    </div>
+    <div class="pct num" id="s8-pct">100%</div>
+    <div class="gauge">
+      <div class="gbar"><div class="gfill" id="s8-fill"></div></div>
+      <div class="gcap"><span>可用清醒额度</span><span>透支中</span></div>
+    </div>
+    <div class="txt">
+      <div class="h1" style="font-size:104px">
+        <span class="ln"><i data-t="2.9" data-anim="mask" data-d="0.8">那种精神</i></span>
+        <span class="ln"><i data-t="3.35" data-anim="mask" data-d="0.8">不是能量</i></span>
+        <span class="ln"><i data-t="3.8" data-anim="mask" data-d="0.8"><em>是额度</em></i></span>
+      </div>
+      <div class="termcard rd" data-t="6.2" data-anim="term" data-d="0.7">
+        <div class="term-head"><span class="term-zh">清醒额度</span><span class="term-en">Wake Budget</span></div>
+        <span class="term-def">能调用的清醒总量有限，熬夜就是支取</span>
+      </div>
+      <p class="note" data-t="7.6" data-anim="up" data-d="0.8">而且是高利贷——利息，明天早上一起还。</p>
+    </div>
+  </section>
+
+  <!-- ============ S9 收尾 ============ -->
+  <section class="scene" id="s9">
+    <svg class="plot" style="height:700px" viewBox="0 0 900 700">
+      <g id="s9-ticks" transform="translate(450,340)"></g>
+      <circle id="s9-ring" cx="450" cy="340" r="196" fill="none" stroke="rgba(255,255,255,.14)" stroke-width="2"/>
+      <text class="num" x="450" y="374" text-anchor="middle"
+            style="font-size:96px;fill:#EDF1F7;letter-spacing:.02em" id="s9-time">23:00</text>
+    </svg>
+
+    <!-- 晨光这一镜负责「存款清零」：数字在晨光里被冲掉 -->
+    <svg class="s3mark" viewBox="0 0 1080 1920">
+      <circle id="s9-flash" cx="892" cy="252" r="60" fill="none" stroke="#C9FF4E" stroke-width="4" opacity="0"/>
+    </svg>
+    <div class="s9read" data-t="2.2" data-anim="up" data-d="0.5">
+      <div class="s3lbl" style="color:#FFD9A0">困意存款<span style="color:#C8BBA8">Adenosine</span></div>
+      <div class="s3num num" id="s9-pct">99%</div>
+      <div class="s3bar"><i id="s9-bar"></i></div>
+    </div>
+
+    <div class="txt" style="bottom:480px">
+      <div class="h1" style="font-size:112px">
+        <span class="ln"><i data-t="1.0" data-anim="mask" data-d="0.9">今晚早点睡</i></span>
+      </div>
+      <p class="note" data-t="4.7" data-anim="punch" data-d="0.85" style="font-size:36px;color:#C9FF4E">睡一觉，存款清零。</p>
+      <p class="note" data-t="6.2" data-anim="blur" data-d="0.8" style="font-size:32px;color:#9AA4B8">不是因为自律。</p>
+      <p class="note" data-t="7.4" data-anim="chars" data-d="0.9" data-stagger="0.02" style="font-size:32px;color:#EDF1F7">是因为明天的你，还得用这个脑子。</p>
+    </div>
+    <div data-t="9.2" data-anim="fade" data-d="1.0"
+         style="position:absolute;right:90px;top:120px;font-size:21px;color:#3A4256;letter-spacing:.22em;text-align:right">AI 逐帧渲染 · 112 BPM</div>
+  </section>
+
+  <!-- ============ S10 入睡阈值（眼睛合上） ============ -->
+  <section class="scene" id="s10">
+    <div class="tag" style="top:118px" data-t="0.12" data-anim="fade" data-d="0.45">02 / 入睡阈值</div>
+    <div class="ghost" style="right:-70px;bottom:150px;font-size:400px">阈</div>
+    <div class="s10head">
+      <div class="h1" style="font-size:76px">
+        <span class="ln"><i data-t="0.4" data-anim="blur" data-d="0.7">眼睛合上的那一刻</i></span>
+        <span class="ln"><i data-t="1.7" data-anim="stamp" data-d="0.8">就是<span class="tx-mark">入睡阈值</span></i></span>
+      </div>
+    </div>
+    <div class="s10read" data-t="1.2" data-anim="up" data-d="0.55">
+      <div class="s3lbl" style="color:#9AD8FF;justify-content:flex-start">睡意饱和度<span style="color:#8FA8C8">Sleep Load</span></div>
+      <div class="s10thr"><i id="s10-bar"></i><u></u></div>
+      <div class="s10cap">
+        <span>眼皮闭合度</span>
+        <span><b id="s10-eye">0</b>%</span>
+      </div>
+    </div>
+    <div class="s10note">
+      <p class="note" data-t="4.0" data-anim="chars" data-d="0.9" data-stagger="0.02" style="font-size:30px">存款越过这条线，你就再也撑不住了 —— 这跟意志力无关。</p>
+    </div>
+  </section>
+
+  <!-- ============ S11 肾上腺素（颈侧脉搏） ============ -->
+  <section class="scene" id="s11">
+    <div class="bodymap" data-t="2.0" data-anim="fade" data-d="0.9" data-organ="adrenal" data-name="肾上腺髓质" data-place="肾脏上方"></div>
+    <div class="tag" style="top:118px" data-t="0.12" data-anim="fade" data-d="0.45">05 / 肾上腺素</div>
+    <div class="ghost" style="left:-80px;bottom:120px;font-size:420px">冲</div>
+    <div class="s11head">
+      <div class="h1" style="font-size:76px">
+        <span class="ln"><i data-t="0.4" data-anim="chars" data-d="0.8" data-stagger="0.05">心跳被<span class="tx-serif tx-grad">顶</span>起来</i></span>
+      </div>
+    </div>
+    <div class="s11read" data-t="1.6" data-anim="up" data-d="0.55">
+      <div class="s3lbl" style="color:#FF8A6A">肾上腺素<span style="color:#C8A79A">Adrenaline</span></div>
+      <div class="s3num num" id="s11-bpm">72</div>
+      <div class="s3cap" style="text-align:right">次 / 分</div>
+    </div>
+    <div class="s11note">
+      <p class="note" data-t="3.4" data-anim="wipe" data-d="0.7" style="font-size:30px">肾上腺素是<b>「加速踏板」</b>：心率顶上去、反应变快，让你再撑一会儿。</p>
+      <p class="note" data-t="6.0" data-anim="blur" data-d="0.7" style="font-size:28px;color:#9AA4B8;margin-top:12px">代价，是心脏在替你加班。</p>
+    </div>
+  </section>
+
+  <!-- ============ S12 杏仁核（惊颤） ============ -->
+  <section class="scene" id="s12">
+    <div class="brainmap left" data-t="2.2" data-anim="fade" data-d="0.9" data-region="amygdala" data-name="杏仁核" data-place="颞叶内侧 · 左右各一"></div>
+    <div class="tag" style="top:118px" data-t="0.12" data-anim="fade" data-d="0.45">08 / 杏仁核</div>
+    <div class="ghost" style="right:-90px;top:380px;font-size:440px">惊</div>
+    <div class="s12head">
+      <div class="h1" style="font-size:76px">
+        <span class="ln"><i data-t="0.4" data-anim="blur" data-d="0.7">一点动静</i></span>
+        <span class="ln"><i data-t="1.4" data-anim="jolt" data-d="0.75">就<span class="tx-mark">炸</span>了</i></span>
+      </div>
+    </div>
+    <div class="s12read" data-t="1.4" data-anim="up" data-d="0.5">
+      <div class="s3lbl" style="color:#FF8A6A">警觉度 Arousal</div>
+      <div class="s3num num" id="s12-lvl">—</div>
+    </div>
+    <div class="s12warn" id="s12-warn">⚠ 杏仁核报警 · 误报率飙升</div>
+    <div class="s12note">
+      <p class="note" data-t="3.6" data-anim="chars" data-d="0.9" data-stagger="0.02" style="font-size:30px"><b>杏仁核</b>是大脑的警报器；缺觉时它过度灵敏，你更容易被激怒、被吓到。</p>
+    </div>
+  </section>
+
+  <div class="flash" id="flash"></div>
+  <div class="progress"><i id="pbar"></i></div>
+</div>
+
+<script src="timeline.js"></script>
+<script src="drive.js"></script>
+<script>
+(function(){
+const T = window.TIMELINE;
+if (/[?&]ov=1/.test(location.search)) {
+  document.documentElement.classList.add('ov');
+  document.body.classList.add('ov');
+}
+const DUR = T.duration;
+const clamp = (v)=>Math.min(1,Math.max(0,v));
+const eo = (p)=>1-Math.pow(1-p,4);          // 强 ease-out
+const eob = (p)=>{                          // easeOutBack：带回弹的入场
+  if(p<=0) return 0; if(p>=1) return 1;
+  const c1=1.70158, c3=c1+1, x=p-1;
+  return 1 + c3*x*x*x + c1*x*x;
+};
+// 把元素的文本拆成单字 <span class="ch">（保留 <b>/<em> 等内层标签与配色）
+// 注意：tx-grad / tx-mark / tx-serif / tx-under / tx-chip / tx-line 这些"带样式"的标签
+// 必须整体当作一个动画单元，绝不进入内部拆字 —— 因为它们的样式（渐变背景、荧光块）
+// 画在**自身元素**上，而 -webkit-text-fill-color:transparent 会被子元素继承、
+// 背景却不会。一旦拆进去，字就变成"透明填充 + 无背景"= 完全看不见
+// （曾导致 s11「心跳被顶起来」的"顶"、s3「沉」在成片里凭空消失）。
+const ATOMIC = /(^|\s)(tx-grad|tx-mark|tx-serif|tx-under|tx-chip|tx-line|tx-key)(\s|$)/;
+function splitChars(el){
+  if(el.__split) return el.__split;
+  const out=[];
+  (function walk(node){
+    [...node.childNodes].forEach(n=>{
+      if(n.nodeType===3){
+        const frag=document.createDocumentFragment();
+        for(const ch of n.nodeValue){
+          if(ch===' '||ch==='\n'){ frag.appendChild(document.createTextNode(' ')); continue; }
+          const s=document.createElement('span');
+          s.className='ch'; s.textContent=ch; out.push(s); frag.appendChild(s);
+        }
+        n.parentNode.replaceChild(frag,n);
+      } else if(n.nodeType===1){
+        if(ATOMIC.test(n.className||'')){
+          // 整体参与动画：补 .ch 让 apply() 能驱动它，样式原样保留
+          n.classList.add('ch');
+          n.style.display='inline-block';
+          out.push(n);
+        } else {
+          walk(n);
+        }
+      }
+    });
+  })(el);
+  el.__split=out; return out;
+}
+const eo2 = (p)=>1-Math.pow(1-p,2.4);
+
+/* ---------- 伪随机（确定性） ---------- */
+function rng(seed){let s=seed>>>0;return()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};}
+
+/* ---------- S1 表盘 ---------- */
+(function(){
+  const g=document.getElementById('s1-ticks');
+  let html='';
+  for(let i=0;i<60;i++){
+    const a=(i/60)*Math.PI*2-Math.PI/2;
+    const major=i%5===0;
+    const r1=major?214:224, r2=238;
+    const x1=Math.cos(a)*r1, y1=Math.sin(a)*r1;
+    const x2=Math.cos(a)*r2, y2=Math.sin(a)*r2;
+    html+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}"
+      stroke="${major?'rgba(255,255,255,.42)':'rgba(255,255,255,.15)'}" stroke-width="${major?3:1.5}" stroke-linecap="round"/>`;
+  }
+  g.innerHTML=html;
+
+  // 扫到 47 分（282°）的弧
+  const cx=450,cy=340,r=252, frac=282/360;
+  const a1=-Math.PI/2, a2=a1+frac*Math.PI*2;
+  const x1=cx+Math.cos(a1)*r, y1=cy+Math.sin(a1)*r;
+  const x2=cx+Math.cos(a2)*r, y2=cy+Math.sin(a2)*r;
+  document.getElementById('s1-arc').setAttribute('d',
+    `M ${x1} ${y1} A ${r} ${r} 0 ${frac>0.5?1:0} 1 ${x2} ${y2}`);
+  const dot=document.getElementById('s1-dot');
+  dot.setAttribute('cx',x2); dot.setAttribute('cy',y2);
+})();
+
+/* ---------- S2 曲线 ---------- */
+(function(){
+  const x0=70,x1=850,yTop=120,yBot=560;
+  const N=80;
+  const nat=[],real=[];
+  for(let i=0;i<=N;i++){
+    const u=i/N;
+    const x=x0+(x1-x0)*u;
+    // 自然衰减：从 120 到 560
+    const yn=yTop+(yBot-yTop)*Math.pow(u,0.85);
+    nat.push([x,yn]);
+    // 实际：0.62 之后被抬起来
+    let yr;
+    if(u<0.62){ yr=yn; }
+    else{
+      const k=(u-0.62)/0.38;
+      const lift=(yBot-yTop)*0.52*eo2(k);
+      yr=yn-lift;
+    }
+    real.push([x,yr]);
+  }
+  const toPath=(pts)=>pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  document.getElementById('s2-natural').setAttribute('d',toPath(nat));
+  document.getElementById('s2-real').setAttribute('d',toPath(real));
+
+  // 楔形：real 上沿 + nat 反向
+  const cut=Math.round(N*0.62);
+  let d='M '+real[cut][0].toFixed(1)+' '+real[cut][1].toFixed(1);
+  for(let i=cut+1;i<=N;i++) d+=' L '+real[i][0].toFixed(1)+' '+real[i][1].toFixed(1);
+  for(let i=N;i>=cut;i--) d+=' L '+nat[i][0].toFixed(1)+' '+nat[i][1].toFixed(1);
+  d+=' Z';
+  document.getElementById('s2-wedge').setAttribute('d',d);
+
+  const last=real[N];
+  const dot=document.getElementById('s2-dot');
+  dot.setAttribute('cx',last[0]); dot.setAttribute('cy',last[1]);
+})();
+
+/* ---------- S3 腺苷：曲线图已改为「量筒实拍 + 像素驱动」，此处不再生成 SVG 曲线 ---------- */
+
+/* ---------- S4 双曲线 ---------- */
+(function(){
+  const x0=70,x1=850,yTop=150,yBot=560;
+  const N=120;
+  const X=(u)=>x0+(x1-x0)*u;
+  const Y=(v)=>yBot-(yBot-yTop)*v;
+  // u: 0 = 18:00, 1 = 06:00
+  const sleep=[],alert=[];
+  for(let i=0;i<=N;i++){
+    const u=i/N;
+    const sv=0.40+0.55*(u*u*(3-2*u));                 // smoothstep
+    const av=0.15+0.85*(0.5+0.5*Math.cos(2*Math.PI*(u-0.25)));
+    sleep.push([X(u),Y(sv)]);
+    alert.push([X(u),Y(av)]);
+  }
+  const toPath=(pts)=>pts.map((p,i)=>(i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1)).join(' ');
+  document.getElementById('s4-sleep').setAttribute('d',toPath(sleep));
+  document.getElementById('s4-alert').setAttribute('d',toPath(alert));
+
+  // 21:00 峰值 u=0.25
+  const pk=alert[Math.round(N*0.25)];
+  const peak=document.getElementById('s4-peak');
+  peak.setAttribute('cx',pk[0]); peak.setAttribute('cy',pk[1]);
+
+  // 02:47 → u=(2.783+24-18)/12
+  const un=(2.783+6)/12;
+  const nowX=X(un);
+  const nowY=Y(0.40+0.55*(un*un*(3-2*un)));
+  const g=document.getElementById('s4-now');
+  g.querySelector('line').setAttribute('x1',nowX);
+  g.querySelector('line').setAttribute('x2',nowX);
+  g.querySelector('circle').setAttribute('cx',nowX);
+  g.querySelector('circle').setAttribute('cy',nowY);
+  g.querySelector('text').setAttribute('x',nowX+16);
+  g.querySelector('text').setAttribute('y',nowY+34);
+})();
+
+/* ---------- S13 假清醒：清醒信号单曲线（21 点尖峰 → 凌晨跌到底） ---------- */
+(function(){
+  const x0=70,x1=850,yTop=170,yBot=540;
+  const N=120; const X=u=>x0+(x1-x0)*u; const Y=v=>yBot-(yBot-yTop)*v;
+  const pts=[]; for(let i=0;i<=N;i++){ const u=i/N;
+    const av=0.15+0.85*Math.max(0,Math.cos(2*Math.PI*(u-0.25)));   // 21:00 峰值
+    pts.push([X(u),Y(av)]);
+  }
+  const toPath=p=>p.map((q,i)=>(i?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1)).join(' ');
+  const path=document.getElementById('s13-alert'); if(path) path.setAttribute('d',toPath(pts));
+  const pk=pts[Math.round(N*0.25)];
+  const peak=document.getElementById('s13-peak');
+  if(peak){ peak.setAttribute('cx',pk[0]); peak.setAttribute('cy',pk[1]); }
+  const un=(2.783+6)/12;                        // 02:47
+  const nowY=Y(0.15+0.85*Math.max(0,Math.cos(2*Math.PI*(un-0.25))));
+  const g=document.getElementById('s13-now');
+  if(g){
+    g.querySelector('line').setAttribute('x1',X(un)); g.querySelector('line').setAttribute('x2',X(un));
+    const c=g.querySelector('circle'); c.setAttribute('cx',X(un)); c.setAttribute('cy',nowY);
+    g.querySelector('text').setAttribute('x',X(un)+16); g.querySelector('text').setAttribute('y',nowY+34);
+  }
+})();
+
+/* ---------- S5 已改为 HPA 轴动画（柱状图/心电图废弃） ---------- */
+
+/* ---------- S6 已改为奖赏回路动画（受体点阵废弃） ---------- */
+
+/* ---------- 肾上腺定位图：腹部特写（不再画"姜饼人"全身） ----------
+   全身小图必然粗糙。改成**局部解剖图**：躯干轮廓 + 肋弓 + 双肾 + 肾上腺帽，
+   只讲"它在腰侧、肾的上方"这一件事，画面立刻专业。 */
+(function(){
+  const KIDL='M 176,190 C 146,188 128,214 128,248 C 128,284 152,308 180,300 C 196,296 202,284 199,274 C 195,261 198,248 203,238 C 208,228 205,212 197,202 C 192,196 184,191 176,190 Z';
+  const KIDR='M 264,190 C 294,188 312,214 312,248 C 312,284 288,308 260,300 C 244,296 238,284 241,274 C 245,261 242,248 237,238 C 232,228 235,212 243,202 C 248,196 256,191 264,190 Z';
+  const ADRL='M 158,182 C 166,170 190,170 198,182 C 186,192 170,192 158,182 Z';
+  const ADRR='M 282,182 C 274,170 250,170 242,182 C 254,192 270,192 282,182 Z';
+  const pulses=[];
+  let n=0;
+  document.querySelectorAll('.bodymap').forEach(el=>{
+    const u='bav'+(n++);
+    el.innerHTML=`
+      <svg viewBox="0 0 440 440" aria-hidden="true">
+        <defs>
+          <radialGradient id="${u}g" cx="40%" cy="34%" r="72%">
+            <stop offset="0" stop-color="#F4FFD2" stop-opacity=".78"/>
+            <stop offset="60%" stop-color="#C9FF4E" stop-opacity=".38"/>
+            <stop offset="100%" stop-color="#57DFFF" stop-opacity=".14"/>
+          </radialGradient>
+          <filter id="${u}f" x="-120%" y="-120%" width="340%" height="340%">
+            <feGaussianBlur stdDeviation="12"/>
+          </filter>
+        </defs>
+        <g fill="none" stroke="rgba(201,255,78,.14)" stroke-width="1.05">
+          <path d="M 92,104 C 140,142 300,142 348,104"/>
+          <path d="M 86,144 C 138,184 302,184 354,144"/>
+        </g>
+        <!-- 脊柱：把它读成"后背/腰"，而不是一张脸 -->
+        <line x1="220" y1="110" x2="220" y2="360" stroke="rgba(201,255,78,.14)"
+              stroke-width="1.2" stroke-dasharray="3 7"/>
+        <path d="${KIDL}" fill="rgba(201,255,78,.05)" stroke="rgba(201,255,78,.42)" stroke-width="1.2"/>
+        <path d="${KIDR}" fill="rgba(201,255,78,.05)" stroke="rgba(201,255,78,.42)" stroke-width="1.2"/>
+        <path d="${ADRL}" fill="url(#${u}g)" filter="url(#${u}f)" opacity=".95"/>
+        <path d="${ADRR}" fill="url(#${u}g)" filter="url(#${u}f)" opacity=".95"/>
+        <path d="${ADRL}" fill="url(#${u}g)" stroke="#EAFFA8" stroke-width="1.5"/>
+        <path d="${ADRR}" fill="url(#${u}g)" stroke="#EAFFA8" stroke-width="1.5"/>
+        <circle class="bm-pulse" cx="178" cy="182" r="5" fill="#F8FFE2" opacity=".9"/>
+        <circle class="bm-pulse" cx="262" cy="182" r="5" fill="#F8FFE2" opacity=".9"/>
+      </svg>
+      <div class="bm-lbl"><b>${el.dataset.name||''}</b>${el.dataset.place||''}</div>`;
+    el.querySelectorAll('.bm-pulse').forEach(x=>pulses.push(x));
+  });
+  window.__BM = window.__BM || {pulses:[],loops:[]};
+  pulses.forEach(x=>window.__BM.pulses.push(x));
+})();
+
+/* ---------- 脑区定位图 v4：大尺寸脑线稿 ----------
+   上一版失败的原因：脑太小、被一个大椭圆框住，看起来只是"椭圆里的一坨"。
+   这一版把**脑本身放大到占满画面**，颅骨只留一圈极淡的轮廓做暗示；
+   脑按 大脑 / 颞叶 / 小脑 / 脑干 分块勾线，沟回用手绘曲线（不用规则波纹）。 */
+(function(){
+  const BM = window.__BM || (window.__BM={pulses:[],loops:[]});
+  const SKULL='M 220,44 C 330,44 416,120 416,250 C 416,382 330,476 220,476 C 110,476 24,382 24,250 C 24,120 110,44 220,44 Z';
+  const CEREB='M 86,290 C 78,246 96,200 138,176 C 182,150 232,148 274,166 C 316,184 348,218 358,256 C 368,294 360,330 338,356 C 320,376 296,386 272,380 C 260,392 242,396 228,388 C 214,380 208,366 210,352 C 182,348 156,332 140,308 C 120,302 100,296 86,290 Z';
+  const TEMP ='M 140,308 C 158,314 168,332 162,348 C 156,364 138,370 122,362 C 106,354 100,338 106,322 C 112,310 126,304 140,308 Z';
+  const CBLL ='M 272,340 C 294,336 316,350 320,372 C 324,394 306,408 286,404 C 266,400 254,384 258,364 C 260,352 264,342 272,340 Z';
+  const STEM ='M 220,348 L 248,348 L 252,404 L 226,404 Z';
+  const GYRI=[
+    'M 112,250 C 134,238 158,242 170,260',
+    'M 134,222 C 158,210 186,214 200,234',
+    'M 174,202 C 200,192 230,198 244,220',
+    'M 224,190 C 250,182 278,190 290,212',
+    'M 276,206 C 300,200 324,212 332,234',
+    'M 112,282 C 136,272 162,276 176,294',
+    'M 146,300 C 172,290 200,296 214,316',
+    'M 192,310 C 218,302 246,310 258,330',
+    'M 250,320 C 276,314 302,324 312,346',
+    'M 300,262 C 324,256 346,268 352,290',
+    'M 292,290 C 316,284 338,296 344,316'
+  ];
+  const REG={
+    prefrontal:{d:'M 86,290 C 80,246 96,200 138,176 C 152,196 158,222 154,248 C 150,280 132,308 108,322 C 96,312 88,302 86,290 Z',c:[118,250],r:70},
+    amygdala:  {d:'M 204,320 C 218,313 232,320 233,332 C 234,345 220,352 208,346 C 196,340 196,327 204,320 Z',c:[218,333],r:54},
+    midbrain:  {d:'M 214,300 C 226,294 238,300 238,310 C 238,321 226,326 214,320 C 204,315 204,304 214,300 Z',c:[226,310],r:42},
+    scn:       {d:'M 216,312 C 224,308 233,312 233,319 C 233,326 224,330 216,326 C 209,322 209,316 216,312 Z',c:[224,319],r:32}
+  };
+  let n=0;
+  document.querySelectorAll('.brainmap').forEach(el=>{
+    const key=el.dataset.region||'prefrontal';
+    const g=REG[key]||REG.prefrontal;
+    const u='bmv'+(n++);
+    el.innerHTML=`
+      <svg viewBox="0 0 440 540" aria-hidden="true">
+        <defs>
+          <radialGradient id="${u}g" cx="36%" cy="32%" r="76%">
+            <stop offset="0" stop-color="#F4FFD2" stop-opacity=".75"/>
+            <stop offset="55%" stop-color="#C9FF4E" stop-opacity=".40"/>
+            <stop offset="100%" stop-color="#57DFFF" stop-opacity=".15"/>
+          </radialGradient>
+          <filter id="${u}f" x="-110%" y="-110%" width="320%" height="320%">
+            <feGaussianBlur stdDeviation="15"/>
+          </filter>
+        </defs>
+
+        <!-- 脑干 / 小脑 -->
+        <path d="${STEM}" fill="rgba(201,255,78,.03)" stroke="rgba(201,255,78,.34)" stroke-width="1.1"/>
+        <path d="${CBLL}" fill="rgba(201,255,78,.03)" stroke="rgba(201,255,78,.38)" stroke-width="1.15"/>
+        <g fill="none" stroke="rgba(201,255,78,.22)" stroke-width="1">
+          <path d="M 270,352 C 288,350 304,360 308,374"/>
+          <path d="M 266,366 C 284,364 300,374 304,388"/>
+        </g>
+
+        <!-- 颞叶 + 大脑 -->
+        <path d="${TEMP}" fill="rgba(201,255,78,.03)" stroke="rgba(201,255,78,.36)" stroke-width="1.15"/>
+        <path d="${CEREB}" fill="rgba(201,255,78,.035)" stroke="rgba(201,255,78,.50)" stroke-width="1.35"/>
+        <g fill="none" stroke="rgba(201,255,78,.26)" stroke-width="1.05" stroke-linecap="round">
+          ${GYRI.map(d=>`<path d="${d}"/>`).join('')}
+        </g>
+
+        <path d="${g.d}" fill="url(#${u}g)" filter="url(#${u}f)" opacity=".95"/>
+        <path d="${g.d}" fill="url(#${u}g)" stroke="#EAFFA8" stroke-width="1.6"/>
+        <circle class="bm-ring" cx="${g.c[0]}" cy="${g.c[1]}" r="${g.r}" fill="none"
+                stroke="rgba(201,255,78,.40)" stroke-width="1.2" stroke-dasharray="4 9"/>
+        <circle class="bm-pulse" cx="${g.c[0]}" cy="${g.c[1]}" r="4.5" fill="#F8FFE2" opacity=".9"/>
+      </svg>
+      <div class="bm-lbl"><b>${el.dataset.name||''}</b>${el.dataset.place||''}</div>`;
+    el.querySelectorAll('.bm-pulse').forEach(x=>BM.pulses.push(x));
+    el.querySelectorAll('.bm-ring').forEach(x=>BM.loops.push(x));
+  });
+})();
+
+/* ---------- S7 神经网络图已废弃（改为伏案剪影实拍） ---------- */
+
+/* ---------- S9 表盘 ---------- */
+(function(){
+  const g=document.getElementById('s9-ticks');
+  let html='';
+  for(let i=0;i<60;i++){
+    const a=(i/60)*Math.PI*2-Math.PI/2;
+    const major=i%5===0;
+    const r1=major?166:174, r2=186;
+    html+=`<line x1="${(Math.cos(a)*r1).toFixed(1)}" y1="${(Math.sin(a)*r1).toFixed(1)}"
+      x2="${(Math.cos(a)*r2).toFixed(1)}" y2="${(Math.sin(a)*r2).toFixed(1)}"
+      stroke="${major?'rgba(255,255,255,.26)':'rgba(255,255,255,.10)'}" stroke-width="${major?2.5:1.2}"/>`;
+  }
+  g.innerHTML=html;
+})();
+
+/* ---------- 收集动画元素 ---------- */
+const scenes = T.scenes.map(s=>{
+  const el=document.getElementById(s.id);
+  const items=[...el.querySelectorAll('[data-t]')].map(node=>{
+    const it={
+      node,
+      t0: s.start + parseFloat(node.dataset.t),
+      d: parseFloat(node.dataset.d||'0.7'),
+      anim: node.dataset.anim||'up',
+      stagger: parseFloat(node.dataset.stagger||'0.055'),
+      len: 0
+    };
+    if(it.anim==='draw' && node.getTotalLength) it.len=node.getTotalLength();
+    if(it.anim==='draw'){
+      node.style.strokeDasharray = it.len;
+      node.style.strokeDashoffset = it.len;
+    }
+    return it;
+  });
+  return {...s, el, items, out: s.id==='s9'?1.1:0.20};
+});
+
+const FNS = {
+  // S13：假清醒 —— 觉醒维持区高亮淡入、21 点峰值脉冲、"此刻已见底"标记延迟浮现
+  s13:(lt,t,el)=>{
+    const wmz=el.querySelector('#s13-wmz');
+    if(wmz) wmz.setAttribute('opacity',(0.9*clamp((lt-0.3)/0.8)).toFixed(3));
+    const peak=el.querySelector('#s13-peak');
+    if(peak){
+      const p=0.5+0.5*Math.sin(lt*3.0);
+      peak.setAttribute('opacity',(lt>2.0?(0.55+0.45*p):0).toFixed(3));
+      peak.setAttribute('r',(9+2.4*p).toFixed(2));
+    }
+    const now=el.querySelector('#s13-now');
+    if(now) now.setAttribute('opacity',clamp((lt-4.6)/0.7).toFixed(3));
+  },
+  // S3：存款 = 眼皮"沉度"的积分。把真实闭眼高度当涨速，累加后归一化到 [0,1]：
+  // 起点 0%、终点 100%、全程单调；眼皮沉得快涨得快、睁开时涨得慢 —— 即"随视频节奏慢慢攒"，
+  // 不会再出现 71→100 的突跳。清零放到 s9 晨光那一镜。
+  s3:(lt,t,el)=>{
+    lt/=1.25;   // s3 放慢 1.25×：把本地时间压回"设计时刻表"，Morph/读数/文案随更慢的眼视频一起延展，
+                // 水滴仍在 olt=2.25（即 lt=2.81）落点 = 放慢后眼皮合上的那一拍，声画同步不破。
+    /* ===== 存款：涨满 → 睡着清空 → 醒来归零 =====
+       曲线跟叙事走，不再靠噪声：0→5.2s 腺苷累积到 100%（水滴正好在这一刻落进眼睛），
+       5.2→7s 满格保持，7→16.5s 睡着时被清走 → 0，之后保持 0。
+       只叠一点实测信号的微起伏（±1.75%），避免数字完全死板。 */
+    const D = window.DRIVE && window.DRIVE.s3;
+    let wob = 0;
+    if(D && D.norm && D.norm.length){
+      const idx=Math.max(0, Math.min(D.norm.length-1, Math.round(lt*D.fps)));
+      wob = (D.norm[idx]-0.5)*0.035;
+    }
+    const ss=(p)=>p*p*(3-2*p);                    // smoothstep
+    let v;
+    if(lt<2.25){ const p=clamp(lt/2.25); v=0.6*p+0.4*ss(p); }
+    else if(lt<2.85){ v=1; }
+    else if(lt<6.20){ const p=clamp((lt-2.85)/3.35); v=1-ss(p); }
+    else { v=0; }
+    v = clamp(v + (lt<2.25 ? wob : 0));
+
+    const pct = el.querySelector('#s3-pct');
+    if(pct){
+      pct.textContent = Math.round(v*100)+'%';
+      const pulse = v>0.97 ? (0.92+0.08*(0.5+0.5*Math.sin(lt*2.6))) : 1;
+      pct.style.opacity = pulse.toFixed(3);
+    }
+    const bar = el.querySelector('#s3-bar');
+    if(bar) bar.style.transform = `scaleX(${Math.max(0.002,v).toFixed(3)})`;
+
+    // 标题在"醒来"时退场，把位置让给"脑子是清的"
+    const head=el.querySelector('.s3head');
+    if(head) head.style.opacity=(1-clamp((lt-5.30)/0.6)).toFixed(3);
+
+    /* ===== 字体变形：腺苷 → 两字向中间融合 → 水滴 → 滴进眼睛 =====
+       全部按 lt 逐帧计算（不用 CSS transition、不用随机数）。 */
+    const M = el.querySelector('.s3morph');
+    if(M){
+      const txt = M.querySelector('#s3m-text');
+      const ga  = M.querySelector('#s3m-a');
+      const gb  = M.querySelector('#s3m-b');
+      const blur= M.querySelector('#s3gooBlur');
+      const trail=M.querySelector('#s3m-trail');
+      const drop= M.querySelector('#s3m-drop');
+      const rip1= M.querySelector('#s3m-rip1');
+      const rip2= M.querySelector('#s3m-rip2');
+      const abs = M.querySelector('#s3m-absorb');
+      const sp  = M.querySelector('#s3m-splash');
+
+      const IMPACT = 1168;                 // 落点：眼窝
+      const A0=0.30, A1=0.66;              // 浮现
+      const B0=0.66, B1=1.45;              // 向中间收拢 + 融合
+      const C0=1.45, C1=1.76;              // 收束成水滴
+      const D0=1.76, D1=2.25;              // 重力下落（落点＝眼皮合上那一拍）
+      const E0=2.25, E1=3.40;              // 涟漪 + 渗入
+
+      let tOp = clamp((lt-A0)/(A1-A0));
+      if(lt>B1) tOp *= (1-clamp((lt-B1)/0.28));
+      txt.setAttribute('opacity', tOp.toFixed(3));
+
+      // 两个字相向靠拢（452/628 → 524/556）：靠到一定距离后 goo 把它们粘成一坨
+      const conv=eo(clamp((lt-B0)/(B1-B0)));
+      ga.setAttribute('x',(452+(524-452)*conv).toFixed(1));
+      gb.setAttribute('x',(628+(556-628)*conv).toFixed(1));
+      // 融合时整体像液体下塌：纵向拉长、略微变宽
+      const sy=1+0.22*conv, sx=1+0.06*conv;
+      txt.setAttribute('transform',
+        `translate(540,600) scale(${sx.toFixed(3)},${sy.toFixed(3)}) translate(-540,-600)`);
+      blur.setAttribute('stdDeviation',(conv*11).toFixed(2));
+
+      // 水滴：收束 → 重力下落（拉伸 + 压缩）
+      let dy=600, ds=0, dOp=0, q=0;
+      if(lt>=C0 && lt<D0){
+        q=clamp((lt-C0)/(C1-C0));
+        dOp=q; ds=0.38+0.62*eo(q); dy=600;
+      } else if(lt>=D0 && lt<D1){
+        q=clamp((lt-D0)/(D1-D0));
+        dOp=1; ds=1+0.16*q;
+        dy=600+(IMPACT-600)*(q*q);
+      }
+      const stretch=(lt>=D0&&lt<D1)?1+0.55*clamp((lt-D0)/(D1-D0)):1;
+      const squeeze=(lt>=D0&&lt<D1)?1-0.22*clamp((lt-D0)/(D1-D0)):1;
+      drop.setAttribute('opacity',dOp.toFixed(3));
+      drop.setAttribute('transform',
+        `translate(540,${dy.toFixed(1)}) scale(${(ds*squeeze).toFixed(3)},${(ds*stretch).toFixed(3)})`);
+
+      if(lt>=D0 && lt<D1){
+        trail.setAttribute('y2',dy.toFixed(1));
+        trail.setAttribute('opacity',(0.26*(1-q)).toFixed(3));
+      } else trail.setAttribute('opacity','0');
+
+      const rq=clamp((lt-E0)/(E1-E0));
+      const rOn=(lt>=E0&&lt<E1)?1:0;
+      rip1.setAttribute('opacity',(rOn*(1-rq)*0.9).toFixed(3));
+      rip1.setAttribute('rx',(24+215*eo(rq)).toFixed(1));
+      rip1.setAttribute('ry',(8+64*eo(rq)).toFixed(1));
+      const rq2=clamp((lt-E0-0.12)/0.9);
+      rip2.setAttribute('opacity',(rOn*(1-rq2)*0.55).toFixed(3));
+      rip2.setAttribute('rx',(14+150*eo(rq2)).toFixed(1));
+      rip2.setAttribute('ry',(5+44*eo(rq2)).toFixed(1));
+
+      const aq=clamp((lt-E0)/1.05);
+      abs.setAttribute('opacity',(lt>=E0?(1-aq)*0.92:0).toFixed(3));
+      abs.setAttribute('r',(28+130*eo(aq)).toFixed(1));
+
+      if(!M.__sp){
+        let h='';
+        for(let k=0;k<7;k++){
+          h+=`<circle class="s3sp" cx="540" cy="${IMPACT}" r="${(3+(k%3)*1.7).toFixed(1)}" fill="#C9FF4E" opacity="0"/>`;
+        }
+        sp.innerHTML=h; M.__sp=[...sp.querySelectorAll('.s3sp')];
+      }
+      if(lt>=E0){
+        const sq=clamp((lt-E0)/0.85);
+        M.__sp.forEach((c,k)=>{
+          const ang=-Math.PI/2+(k-3)*0.40;
+          const dist=(88+42*(k%3))*sq;
+          c.setAttribute('cx',(540+Math.cos(ang)*dist).toFixed(1));
+          c.setAttribute('cy',(IMPACT+Math.sin(ang)*dist+250*sq*sq).toFixed(1));
+          c.setAttribute('opacity',(1-sq).toFixed(3));
+        });
+      }
+    }
+
+    // 入睡阈值 / 醒来 两个大标题：按时间窗淡入淡出，前一句会退场
+    const thr=el.querySelector('#s3-thr');
+    if(thr){
+      const a=clamp((lt-2.55)/0.5), b=1-clamp((lt-5.05)/0.55);
+      thr.style.opacity=Math.min(a,b).toFixed(3);
+    }
+    const wk=el.querySelector('#s3-wake');
+    if(wk){
+      const a=clamp((lt-5.55)/0.55), b=1-clamp((lt-7.55)/0.55);
+      wk.style.opacity=Math.min(a,b).toFixed(3);
+    }
+    // 睡眠段的脑图：只在 8.2–15.5s 出现（闭眼睡着时讲"腺苷在脑内累积/被清走"）
+    const bm3=el.querySelector('#s3-brain');
+    if(bm3){
+      const a=clamp((lt-3.55)/0.6), b=1-clamp((lt-5.35)/0.6);
+      bm3.style.opacity=Math.min(a,b).toFixed(3);
+    }
+  },
+  s1:(lt,t,el)=>{
+    const p=clamp(lt/2.9);
+    const rot=-1150*(1-eo(p));
+    el.querySelector('#s1-ticks').setAttribute('transform',`translate(450,340) rotate(${rot.toFixed(2)})`);
+  },
+  s4:(lt,t,el)=>{
+    const g=el.querySelector('#s4-now');
+    g.setAttribute('opacity', clamp((lt-2.9)/0.7).toFixed(3));
+  },
+  // S5 皮质醇：呼吸读数 12→22 平滑爬升（设计值），「数字辉光」由胸口真实起伏驱动 ——
+  // 数字随画面里那口气一起呼吸；心电图滚动速度也随呼吸进度加快（文字与画面同一节奏）。
+  s5:(lt,t,el)=>{
+    /* HPA 轴：下丘脑 →CRH→ 垂体 →ACTH→ 肾上腺皮质 → 皮质醇 → 负反馈
+       节奏：0.8/2.2/3.6 三个节点依次亮；1.3/2.7/4.2 三个光点逐段传递；
+       5.0 皮质醇喷出；8.5 负反馈画出；14.5 负反馈断裂 → "刹不住"。 */
+    let lvl;
+    if(lt<4) lvl = 12 + 8*(lt/4);
+    else if(lt<11) lvl = 20 + 18*((lt-4)/7);
+    else lvl = 38;
+    const e = el.querySelector('#s5-bpm');
+    if(e){
+      e.textContent = Math.round(lvl);
+      const glow = 0.35 + 0.45*clamp((lvl-12)/26);
+      e.style.textShadow = `0 0 ${(30*glow).toFixed(0)}px rgba(255,190,120,${glow.toFixed(2)})`;
+    }
+
+    const show=(id,t0,dur=0.55)=>{
+      const n=el.querySelector(id); if(!n) return;
+      n.setAttribute('opacity', clamp((lt-t0)/dur).toFixed(2));
+    };
+    show('#hpa-n1', 0.8);
+    show('#hpa-n2', 2.2);
+    show('#hpa-n3', 3.6);
+    show('#hpa-cort', 5.0);
+
+    // 传递光点
+    const dot=el.querySelector('#hpa-dot');
+    if(dot){
+      let x=300,y=176,op=0;
+      if(lt>=1.3 && lt<2.3){ const q=(lt-1.3); y=176+86*q; op=1; }
+      else if(lt>=2.7 && lt<3.7){ const q=(lt-2.7); y=346+86*q; op=1; }
+      else if(lt>=4.2 && lt<5.2){ const q=(lt-4.2); x=300+400*q; y=470; op=1; }
+      dot.setAttribute('cx',x.toFixed(1));
+      dot.setAttribute('cy',y.toFixed(1));
+      dot.setAttribute('opacity',op.toFixed(2));
+    }
+
+    // 皮质醇粒子
+    const parts=el.querySelector('#hpa-parts');
+    if(parts && !parts.__built){
+      let h='';
+      for(let k=0;k<14;k++){
+        const ang=k*(Math.PI*2/14), rr=26+(k%4)*11;
+        h+=`<circle class="hpa-p" cx="${(700+Math.cos(ang)*rr).toFixed(1)}" cy="${(470+Math.sin(ang)*rr).toFixed(1)}" r="${(3+(k%3)*1.4).toFixed(1)}" fill="#FFD9A8" opacity="0"/>`;
+      }
+      parts.innerHTML=h; parts.__built=true; parts.__nodes=[...parts.querySelectorAll('.hpa-p')];
+    }
+    if(parts && parts.__nodes){
+      const q=clamp((lt-5.0)/2.2);
+      parts.__nodes.forEach((c,k)=>{
+        const ang=k*(Math.PI*2/14);
+        const rr=26+(k%4)*11 + 58*q;
+        c.setAttribute('cx',(700+Math.cos(ang)*rr).toFixed(1));
+        c.setAttribute('cy',(470+Math.sin(ang)*rr).toFixed(1));
+        c.setAttribute('opacity',(lt>5.0 ? (0.85*(1-q*0.55)) : 0).toFixed(2));
+      });
+    }
+
+    // 负反馈
+    const fb=el.querySelector('#hpa-fb');
+    const fbm=el.querySelector('#hpa-fbm');
+    const fbt=el.querySelector('#hpa-fbt');
+    const on=clamp((lt-8.5)/1.0);
+    const broken = lt>14.5;
+    if(fb){
+      fb.setAttribute('opacity',(on*(broken ? (0.35+0.65*Math.abs(Math.sin(lt*9))) : 0.9)).toFixed(2));
+      fb.setAttribute('stroke-dashoffset',(-lt*26).toFixed(1));
+      fb.setAttribute('stroke', broken ? '#FF5A3C' : '#57DFFF');
+    }
+    if(fbm) fbm.setAttribute('opacity',(on*(broken?0:0.9)).toFixed(2));
+    if(fbt) fbt.setAttribute('opacity',(on*(broken?0:0.8)).toFixed(2));
+
+    const brk=el.querySelector('#hpa-brake');
+    if(brk){
+      const q=clamp((lt-14.5)/0.5);
+      brk.setAttribute('opacity',(q*(0.55+0.45*Math.abs(Math.sin(lt*7)))).toFixed(2));
+    }
+  },
+  // S6 多巴胺：受体点阵的「活跃度」由真实手机屏幕亮度驱动 —— 屏幕越亮（刷得越凶），受体越躁动。
+  s6:(lt,t,el)=>{
+    /* 奖赏回路：中脑 → 伏隔核 → 前额叶 → 中脑。
+       光点一圈一圈跑，**每圈都比上一圈快**（速度随时间线性增长），
+       圈数到 4 次后变红并闪"停不下来"——这就是多巴胺的功能：
+       不是给快乐，是给"还想要"，于是行为自我强化。 */
+    const show=(id,t0,dur=0.5)=>{
+      const n=el.querySelector(id); if(!n) return;
+      n.setAttribute('opacity', clamp((lt-t0)/dur).toFixed(2));
+    };
+    show('#dop-n1', 0.6);
+    show('#dop-n2', 1.3);
+    show('#dop-n3', 2.0);
+    show('#dop-core', 2.6, 0.7);
+    show('#dop-sub', 2.95, 0.7);
+
+    const P=[[450,180],[640,460],[260,460]];
+    const L=[Math.hypot(P[1][0]-P[0][0],P[1][1]-P[0][1]),
+             Math.hypot(P[2][0]-P[1][0],P[2][1]-P[1][1]),
+             Math.hypot(P[0][0]-P[2][0],P[0][1]-P[2][1])];
+    const TOT=L[0]+L[1]+L[2];
+    const t0=2.4;
+    const dt=Math.max(0, lt-t0);
+    // 相位（圈）= ∫v dt，v = 0.28 + 0.055t  →  加速
+    const phase = 0.28*dt + 0.0275*dt*dt;
+    const laps  = Math.floor(phase);
+
+    const dot=el.querySelector('#dop-dot');
+    if(dot){
+      if(lt<t0){ dot.setAttribute('opacity','0'); }
+      else{
+        const u=phase-Math.floor(phase);
+        let d=u*TOT, k=0;
+        while(k<2 && d>L[k]){ d-=L[k]; k++; }
+        const a=P[k], b=P[(k+1)%3], r=d/L[k];
+        dot.setAttribute('cx',(a[0]+(b[0]-a[0])*r).toFixed(1));
+        dot.setAttribute('cy',(a[1]+(b[1]-a[1])*r).toFixed(1));
+        dot.setAttribute('opacity','1');
+        dot.setAttribute('fill', laps>=4 ? '#FF5A3C' : '#EAFFB8');
+      }
+    }
+
+    const cnt=el.querySelector('#dop-count');
+    if(cnt){
+      cnt.textContent='第 '+laps+' 次';
+      cnt.setAttribute('opacity', lt>t0?1:0);
+      cnt.setAttribute('fill', laps>=4 ? '#FF5A3C' : '#C9FF4E');
+    }
+    const warn=el.querySelector('#dop-warn');
+    if(warn){
+      warn.setAttribute('opacity', laps>=4 ? (0.55+0.45*Math.abs(Math.sin(lt*6))).toFixed(2) : '0');
+    }
+  },
+  // S7：判断力由「画面运动量」驱动 —— 越静止（人越呆滞）判断力越低；
+  // 取累计最小值，保证"判断力一路下滑"，不会因为抬头那一下又涨回去。
+  s7:(lt,t,el)=>{
+    const D = window.DRIVE && window.DRIVE.s7;
+    let v;
+    if(D && D.norm && D.norm.length){
+      const idx = Math.max(0, Math.min(D.norm.length-1, Math.round(lt * D.fps)));
+      if(!D.__min){
+        const c=[]; let m=1;
+        for(let k=0;k<D.norm.length;k++){ m=Math.min(m, 0.92 - 0.61*(1-D.norm[k])); c.push(m); }
+        D.__min=c;
+      }
+      v = D.__min[idx];
+    } else {
+      v = 0.92 - 0.61*clamp((lt-2.4)/6.5);      // 无驱动数据时按时间线性下滑
+    }
+    const pct=el.querySelector('#s7-pct');
+    if(pct) pct.textContent=Math.round(v*100)+'%';
+    const bar=el.querySelector('#s7-bar');
+    if(bar) bar.style.transform=`scaleX(${Math.max(0.02,v).toFixed(3)})`;
+  },
+  s8:(lt,t,el)=>{
+    const p=clamp((lt-0.5)/4.6);
+    const val=100-88*eo2(p);
+    el.querySelector('#s8-fill').style.transform=`scaleX(${(val/100).toFixed(4)})`;
+    el.querySelector('#s8-pct').textContent=Math.round(val)+'%';
+  },
+  // S9 黎明：存款清零由「晨光实测亮度」触发 —— 画面真正亮起来的那个瞬间，
+  // 存款才开始被冲掉（不是掐着秒表人为清零）；4.7s 的文案落点正好对上归零时刻。
+  s9:(lt,t,el)=>{
+    const D = window.DRIVE && window.DRIVE.s9;
+    const k=clamp((lt-1.2)/5);
+    el.querySelector('#s9-ring').setAttribute('stroke',`rgba(255,255,255,${(0.14*(1-k*0.6)).toFixed(3)})`);
+    el.querySelector('#s9-ticks').setAttribute('opacity',(1-k*0.55).toFixed(3));
+    let v;
+    if(D && D.norm && D.norm.length){
+      if(!D.__dawn){
+        // 亮度归一曲线 → 重映射成 3.0s→4.7s 的清零进度（eased），
+        // 这样"光越强、掉得越快"，末尾刚好在 4.7s 落到 0，与 punch 文案对齐。
+        const c=[]; let m=0;
+        for(let kk=0;kk<D.norm.length;kk++){ m=Math.max(m, D.norm[kk]); c.push(m); }
+        D.__dawn=c;
+      }
+      const idx=Math.max(0, Math.min(D.__dawn.length-1, Math.round(lt*D.fps)));
+      const lit=D.__dawn[idx];                       // 实测天光 0..1（单调渐亮）
+      const d=clamp((lt-3.0)/1.7);
+      v=(1-eo(d*Math.min(1.35,0.55+0.75*lit)))*0.99; // 天越亮，清零越快
+    } else {
+      const d=clamp((lt-3.0)/1.7);
+      v=(1-eo(d))*0.99;
+    }
+    const pct=el.querySelector('#s9-pct');
+    if(pct) pct.textContent=Math.round(v*100)+'%';
+    const bar=el.querySelector('#s9-bar');
+    if(bar) bar.style.transform=`scaleX(${Math.max(0.002,v).toFixed(3)})`;
+    const fl=el.querySelector('#s9-flash');
+    if(fl){
+      const age=lt-4.7;
+      const kk=(age>=0&&age<0.6)?(1-age/0.6):0;
+      fl.setAttribute('opacity',(kk*0.85).toFixed(3));
+      fl.setAttribute('r',(60+(1-kk)*150).toFixed(1));
+    }
+  },
+  // S10 入睡阈值：阈值尺由「眼皮真实开合高度」驱动 —— 画面里眼睛合上多少，条就走多少；
+  // 越过 100% 阈值线时读数转青柠并发光，正是「再也撑不住」的那一刻。
+  // 注意方向：这段素材里眼皮合上时，被打亮的眼睑皮肤形成「更高」的亮块，
+  // 实测 height_v 是「睁眼低 / 闭眼高」（开 0.10 → 闭 0.67），故闭合度直接取 norm，
+  // 不可用 1-norm，否则阈值条会朝反方向走。
+  s10:(lt,t,el)=>{
+    const D = window.DRIVE && window.DRIVE.s10;
+    let cl=0;                                  // 闭合度 0..1（1=完全闭上）
+    if(D && D.norm && D.norm.length){
+      if(!D.__cl){
+        // 取累计最大值保证单调上升（眼皮只会越来越合），峰值即完全闭合
+        const c=[]; let m=0;
+        for(let k=0;k<D.norm.length;k++){ m=Math.max(m, D.norm[k]); c.push(m); }
+        D.__cl=c;
+      }
+      const idx=Math.max(0, Math.min(D.__cl.length-1, Math.round(lt*D.fps)));
+      cl=D.__cl[idx];
+    } else {
+      cl=clamp((lt-1.4)/4.0);                  // 无驱动数据时按时间合眼
+    }
+    const bar=el.querySelector('#s10-bar');
+    if(bar){
+      // 略微过冲：越过阈值线一点点，视觉上才有「压过去了」的感觉
+      bar.style.transform=`scaleX(${Math.min(1.06,Math.max(0.004,cl)).toFixed(3)})`;
+    }
+    const n=el.querySelector('#s10-eye');
+    if(n){
+      const over=cl>=1;
+      n.textContent=Math.round(cl*100);
+      n.style.color=over?'#C9FF4E':'#EDF1F7';
+      n.style.textShadow=over
+        ? '0 0 30px rgba(201,255,78,.85), 0 2px 14px rgba(0,0,0,.7)'
+        : '0 2px 14px rgba(0,0,0,.7)';
+    }
+  },
+  // S11 肾上腺素：心率读数 72→96 平滑爬升（设计值），但「数字辉光」由颈侧动脉真实搏动驱动 ——
+  // 数字随画面里的脉搏一跳一跳地亮，文字与视频同一心跳。
+  s11:(lt,t,el)=>{
+    const ramp = clamp((lt-1.6)/5);            // 72 → 96 平滑爬升
+    const bpm = 72 + 24*ramp;
+    /* 新底板 s14 的颈侧轮廓光近乎静态（实测去趋势波动无逐拍振荡，过零率 0.02），
+       旧 DRIVE.s11 搏动数据已失效。故搏动改为**由读数本身驱动**：
+       lub-dub 双峰波形（主峰+收缩末期回摆），频率=当前 bpm。
+       读数数字与它的辉光同频同拍 —— 生理上自洽，且逐帧确定性。 */
+    const period = 60/bpm;                     // 72bpm→0.833s … 96bpm→0.625s
+    const ph = (lt % period) / period;
+    const beat = Math.exp(-ph*6.5)*0.9 + Math.exp(-Math.pow((ph-0.18)/0.05,2))*0.30;
+    const e = el.querySelector('#s11-bpm');
+    if(e){
+      e.textContent = Math.round(bpm);
+      e.style.textShadow = `0 0 ${(26*beat).toFixed(0)}px rgba(255,138,106,${(0.6*beat).toFixed(2)})`;
+    }
+  },
+  // S12 杏仁核：警觉度读数由「肩背运动量」驱动；惊颤瞬间（信号突增）触发红色报警字。
+  s12:(lt,t,el)=>{
+    const D = window.DRIVE && window.DRIVE.s12;
+    let spike = 0;
+    if(D && D.norm && D.norm.length){
+      const idx = Math.max(0, Math.min(D.norm.length-1, Math.round(lt*D.fps)));
+      spike = D.norm[idx];                      // 实测肩背运动：惊颤 = 单帧突增
+    }
+    const lvl = el.querySelector('#s12-lvl');
+    if(lvl) lvl.textContent = Math.round(20 + spike*80) + '%';
+    const warn = el.querySelector('#s12-warn');
+    if(warn){
+      const on = spike > 0.55 ? 1 : 0;          // 惊颤阈值（实测后校准）
+      warn.style.opacity = on.toFixed(2);
+      warn.style.transform = `scale(${(1 + 0.12*on).toFixed(3)})`;
+    }
+  }
+};
+
+/* ---------- 渲染 ---------- */
+const pbar=document.getElementById('pbar');
+const flashEl=document.getElementById('flash');
+
+function apply(it,t){
+  const p=clamp((t-it.t0)/it.d);
+  const e=eo(p);
+  const n=it.node;
+  switch(it.anim){
+    case 'up':
+      n.style.opacity=Math.min(1,p*1.8);
+      n.style.transform=`translateY(${((1-e)*36).toFixed(2)}px)`;
+      break;
+    case 'mask':
+      n.style.opacity=1;
+      n.style.transform=`translateY(${((1-e)*106).toFixed(2)}%)`;
+      break;
+    case 'fade':
+      n.style.opacity=p;
+      break;
+    case 'term':
+      // 名词卡：从左滑入 + 淡入，强调"这是专门给你讲的一个词"
+      n.style.opacity=Math.min(1,p*2.2);
+      n.style.transform=`translateX(${((1-e)*64).toFixed(1)}px)`;
+      break;
+    case 'chars': {
+      // 字符逐个弹入：带回弹缩放 + 左右交替旋转 + 更大上浮，节奏更像"打字机/弹幕"砸下来
+      const arr = it.chars || (it.chars = splitChars(n));
+      const st = it.stagger||0.055, cd = it.d||0.42;
+      for(let k=0;k<arr.length;k++){
+        const q=clamp((t-it.t0-k*st)/cd);
+        const b=eob(q);
+        const rot=(1-eo(q))*(k%2?13:-13);
+        arr[k].style.opacity=Math.min(1,q*2.6);
+        arr[k].style.transform=`translateY(${((1-eo(q))*66).toFixed(1)}%) rotate(${rot.toFixed(1)}deg) scale(${(0.28+0.72*b).toFixed(3)})`;
+      }
+      break;
+    }
+    case 'stamp': {
+      // 关键词"砸下来"：从大到小硬着陆 + 冲击辉光 + 轻微旋转归正（抖音高强调字常用）
+      const q=clamp((t-it.t0)/it.d);
+      const b=eob(q);
+      n.style.opacity=Math.min(1,q*7);
+      n.style.transformOrigin='50% 62%';
+      n.style.transform=`scale(${(2.05-1.05*b).toFixed(3)}) rotate(${((1-q)*-5).toFixed(2)}deg)`;
+      n.style.filter=`drop-shadow(0 0 ${(46*(1-q)).toFixed(0)}px rgba(201,255,78,${(0.9*(1-q)).toFixed(2)}))`;
+      break;
+    }
+    case 'count': {
+      // 数字滚动：从 0 滚到目标值（data-count），可带单位 data-suffix
+      const q=clamp((t-it.t0)/it.d);
+      const target=parseFloat(n.dataset.count||'0');
+      const dec=parseFloat(n.dataset.dec||'0');
+      const cur=(target*eo(q));
+      n.textContent=cur.toFixed(dec)+(n.dataset.suffix||'');
+      n.style.opacity=Math.min(1,q*3.2);
+      break;
+    }
+    case 'blur': {
+      // 对焦式入场：从虚焦拉到实焦（比淡入有"镜头感"）
+      const q=clamp((t-it.t0)/it.d);
+      const b=eo(q);
+      n.style.opacity=Math.min(1,q*1.9);
+      n.style.filter=`blur(${((1-b)*15).toFixed(2)}px)`;
+      n.style.transform=`scale(${(1.07-0.07*b).toFixed(3)})`;
+      break;
+    }
+    case 'punch': {
+      // 重击式入场：从大缩到位 + 青柠辉光衰减（用于"清零"这类关键节点）
+      const q=clamp((t-it.t0)/it.d);
+      const b=eob(q);
+      n.style.opacity=Math.min(1,q*5);
+      n.style.transform=`scale(${(1.58-0.58*b).toFixed(3)})`;
+      n.style.textShadow=`0 0 ${(46*(1-q)).toFixed(0)}px rgba(201,255,78,${(0.95*(1-q)).toFixed(2)}),`+
+                         `0 2px 18px rgba(0,0,0,.75)`;
+      break;
+    }
+    case 'jolt': {
+      // 认知冲击：先左右抖一下再归位放大 + 辉光炸开，比 punch 更有"被击中"的体感
+      const q=clamp((t-it.t0)/it.d);
+      const b=eob(q);
+      const sh = q<0.42 ? Math.sin(q*40)*8*(1-q/0.42) : 0;   // 入场前 0.42d 内抖动
+      n.style.opacity=Math.min(1,q*4);
+      n.style.transform=`translateX(${sh.toFixed(1)}px) scale(${(0.78+0.22*b).toFixed(3)})`;
+      n.style.filter=`drop-shadow(0 0 ${(30*(1-q)).toFixed(0)}px rgba(201,255,78,${(0.9*(1-q)).toFixed(2)}))`;
+      break;
+    }
+    case 'wipe': {
+      // 荧光笔扫过：色条从左推到右，随后文字反色
+      const q=clamp((t-it.t0)/it.d);
+      n.style.setProperty('--w',(eo(q)*1.06).toFixed(3));
+      n.style.setProperty('--tc', q>0.55?'#0b0f14':'#EDF1F7');
+      n.style.opacity=Math.min(1,q*3);
+      break;
+    }
+    case 'pop':
+      n.style.opacity=Math.min(1,p*2);
+      const s=0.4+0.6*eo(p);
+      n.style.transform=`scale(${s.toFixed(3)})`;
+      n.style.transformOrigin='center';
+      break;
+    case 'draw':
+      n.style.strokeDashoffset=(it.len*(1-e)).toFixed(2);
+      break;
+  }
+}
+
+// 每镜卡点光效：f=强度(0=无闪光)、d=衰减秒数、c=光色（screen 混合，呈现为彩色光晕而非单一爆白）
+const FLASH = {
+  s1:{f:0.00,d:0.20,c:'#9ab8ff'},   // 卧室：柔入，无爆闪
+  s2:{f:0.13,d:0.22,c:'#5fa8ff'},   // 手机：冷蓝脉冲
+  s3:{f:0.10,d:0.26,c:'#7CFFB2'},   // 腺苷：生物绿，缓亮
+  s4:{f:0.15,d:0.22,c:'#FFD9A0'},   // 生物钟：黄铜暖金
+  s13:{f:0.11,d:0.24,c:'#FFC896'},  // 假清醒：暖金渐暗
+  s5:{f:0.13,d:0.22,c:'#FFBE78'},   // 多巴胺：琥珀暖光
+  s6:{f:0.12,d:0.20,c:'#C8FF78'},   // 神经放电：电光绿金
+  s7:{f:0.11,d:0.26,c:'#FFA05A'},   // 前额叶：深琥珀缓燃
+  s8:{f:0.09,d:0.30,c:'#78DCFF'},   // 皮质醇：冷青，宿命缓暗
+  s9:{f:0.00,d:0.30,c:'#FFC896'},   // 黎明：温柔释然，无爆闪
+};
+
+function render(t){
+  let flash=0; let flashColor='#dfe8ff';
+  for(const sc of scenes){
+    let vis=0;
+    if(t>=sc.start-0.001 && t<=sc.end+0.001){
+      const inP=clamp((t-sc.start)/0.22);
+      const outP=clamp((sc.end-t)/sc.out);
+      vis=Math.min(inP,outP);
+      // 卡点光效：每镜独立配色 / 强度 / 衰减，杜绝单一爆闪
+      const fs=FLASH[sc.id]||{f:0.10,d:0.16,c:'#dfe8ff'};
+      flash=fs.f*(1-clamp((t-sc.start)/fs.d));
+      flashColor=fs.c;
+    }
+    sc.el.style.opacity=vis.toFixed(3);
+    sc.el.style.visibility=vis>0.002?'visible':'hidden';
+    if(vis<=0.002) continue;
+    for(const it of sc.items) apply(it,t);
+    // 文字底板（软光晕）只在文字出现时淡入：取该块最早一条文字的 data-t 作为起点。
+    // 文字没出现前 --sc=0 → 完全不可见，不会留下"空玻璃板"影响观感。
+    if(!sc.__scrims){
+      sc.__scrims=[...sc.el.querySelectorAll('.txt,.s3head,.s7head,.s10head,.s11head,.s12head,.s3note,.s7note,.s10note,.s11note,.s12note')].map(b=>{
+        const ts=[...b.querySelectorAll('[data-t]')].map(e=>parseFloat(e.dataset.t)).filter(v=>!isNaN(v));
+        return {el:b, t0: ts.length?Math.min(...ts):0};
+      });
+    }
+    for(const sm of sc.__scrims){
+      sm.el.style.setProperty('--sc', clamp((t-sc.start-sm.t0)/0.55).toFixed(3));
+    }
+    // 文字块微呼吸位移，消除静止的"贴图感"
+    const txt=sc.el.querySelector('.txt');
+    if(txt){
+      const k=(t-sc.start)/sc.dur;
+      txt.style.transform=`translateY(${(-7*k).toFixed(2)}px)`;
+    }
+    if(FNS[sc.id]) FNS[sc.id](t-sc.start,t,sc.el);
+  }
+  // 人体定位图：器官标记脉冲 + 多巴胺环路流动。
+  // 全局按 t 统一驱动（不用 CSS 动画），保证逐帧确定性。
+  if(window.__BM){
+    const ph=0.5+0.5*Math.sin(t*4.2);
+    window.__BM.pulses.forEach(p=>{
+      p.setAttribute('r',(3.6+3.4*ph).toFixed(1));
+      p.setAttribute('opacity',(0.55+0.45*ph).toFixed(2));
+    });
+    window.__BM.loops.forEach(l=>{
+      l.setAttribute('stroke-dashoffset', (-t*30).toFixed(1));
+    });
+  }
+  if(flash>0.001) flashEl.style.background=flashColor;
+  flashEl.style.opacity=flash.toFixed(3);
+  pbar.style.width=(clamp(t/DUR)*100).toFixed(3)+'%';
+}
+
+window.__seek=function(t){render(t);};
+window.__DUR=DUR;
+render(0);
+document.fonts.ready.then(()=>{render(0);window.__ready=true;});
+})();
+</script>
+</body>
+</html>

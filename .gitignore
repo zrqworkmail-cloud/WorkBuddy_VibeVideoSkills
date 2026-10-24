@@ -1,0 +1,14 @@
+# 依赖
+node_modules/
+
+# 渲染产物（成片 / 底板 / 帧 / 音频，约 673MB，单文件超 GitHub 100MB 限制）
+out/
+
+# Python 缓存
+__pycache__/
+*.pyc
+
+# 日志与临时文件
+*.log
+.DS_Store
+Thumbs.db

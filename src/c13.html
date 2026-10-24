@@ -1,0 +1,79 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#000;overflow:hidden}
+.c{position:relative;width:704px;height:1280px;overflow:hidden;background:#020409}
+svg{position:absolute;left:0;top:0}
+</style></head><body>
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <linearGradient id="room" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a1226"/>
+      <stop offset=".45" stop-color="#060b18"/>
+      <stop offset="1" stop-color="#02040a"/>
+    </linearGradient>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#16233f"/>
+      <stop offset="1" stop-color="#070c18"/>
+    </linearGradient>
+    <radialGradient id="moonGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#dbe8ff" stop-opacity=".92"/>
+      <stop offset=".18" stop-color="#b8ccf5" stop-opacity=".48"/>
+      <stop offset=".55" stop-color="#7b93c8" stop-opacity=".14"/>
+      <stop offset="1" stop-color="#0a1226" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="patch" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#dce8ff" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#8fa8d8" stop-opacity=".12"/>
+    </linearGradient>
+    <filter id="soft" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="14"/>
+    </filter>
+    <filter id="soft2" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="34"/>
+    </filter>
+  </defs>
+
+  <!-- 房间底色 -->
+  <rect width="704" height="1280" fill="url(#room)"/>
+
+  <!-- 后墙与地板的分界 -->
+  <path d="M0,760 L704,760 L704,1280 L0,1280 Z" fill="url(#floor)"/>
+  <line x1="0" y1="760" x2="704" y2="760" stroke="rgba(190,210,255,.10)" stroke-width="2"/>
+
+  <!-- 窗：外框 + 窗格 -->
+  <g>
+    <rect x="398" y="150" width="250" height="330" rx="6"
+          fill="rgba(8,14,28,.9)" stroke="rgba(190,210,255,.30)" stroke-width="3"/>
+    <rect x="412" y="164" width="222" height="302" fill="url(#moonGlow)" filter="url(#soft2)"/>
+    <line x1="523" y1="164" x2="523" y2="466" stroke="rgba(190,210,255,.22)" stroke-width="3"/>
+    <line x1="412" y1="315" x2="634" y2="315" stroke="rgba(190,210,255,.22)" stroke-width="3"/>
+  </g>
+
+  <!-- 月光从窗口斜切到地板：一块平行四边形亮斑 -->
+  <path d="M410,200 L640,200 L560,790 L210,790 Z" fill="url(#patch)" filter="url(#soft)"/>
+  <path d="M300,790 L470,790 L430,900 L250,900 Z" fill="url(#patch)" opacity=".55" filter="url(#soft)"/>
+
+  <!-- 窗框在地板上的投影 -->
+  <path d="M470,470 L560,470 L520,790 L330,790 Z" fill="rgba(2,4,10,.55)" filter="url(#soft)" opacity=".8"/>
+
+  <!-- 床沿剪影 -->
+  <path d="M0,1010 L704,1010 L704,1280 L0,1280 Z" fill="#03060d"/>
+  <path d="M60,1010 L704,1010 L704,1060 L60,1060 Z" fill="#0a1120"/>
+  <path d="M120,1060 L300,1060 L300,1280 L120,1280 Z" fill="#070d1a" opacity=".9"/>
+
+  <!-- 空气中的浮尘（只在光斑里可见） -->
+  <g fill="#e8f0ff">
+    <circle cx="440" cy="330" r="2.2" opacity=".5"/>
+    <circle cx="500" cy="420" r="1.6" opacity=".38"/>
+    <circle cx="380" cy="470" r="2.4" opacity=".42"/>
+    <circle cx="540" cy="520" r="1.4" opacity=".3"/>
+    <circle cx="300" cy="600" r="2" opacity=".34"/>
+    <circle cx="420" cy="680" r="1.6" opacity=".26"/>
+    <circle cx="240" cy="720" r="2.2" opacity=".22"/>
+  </g>
+
+  <!-- 整体暗角 -->
+  <rect width="704" height="1280" fill="none"/>
+</svg>
+</div>
+</body></html>

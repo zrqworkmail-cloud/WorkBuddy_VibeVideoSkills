@@ -1,0 +1,65 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#000;overflow:hidden}
+.c{position:relative;width:704px;height:1280px;overflow:hidden;background:#030712}
+svg{position:absolute;left:0;top:0}
+</style></head><body>
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#070d1a"/>
+      <stop offset=".55" stop-color="#040814"/>
+      <stop offset="1" stop-color="#020409"/>
+    </linearGradient>
+    <radialGradient id="moon" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#e8f0ff" stop-opacity=".62"/>
+      <stop offset=".22" stop-color="#b9cdf2" stop-opacity=".26"/>
+      <stop offset=".6" stop-color="#6f86b8" stop-opacity=".09"/>
+      <stop offset="1" stop-color="#040814" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="cl"><feGaussianBlur stdDeviation="26"/></filter>
+    <filter id="cl2"><feGaussianBlur stdDeviation="40"/></filter>
+  </defs>
+
+  <rect width="704" height="1280" fill="url(#sky)"/>
+
+  <!-- 月光：柔和不刺眼，明确"这是一夜的天光"，而非某个机械物件 -->
+  <ellipse cx="470" cy="235" rx="300" ry="260" fill="url(#moon)" filter="url(#cl2)"/>
+  <ellipse cx="470" cy="235" rx="120" ry="104" fill="url(#moon)" filter="url(#cl)"/>
+
+  <!-- 薄云：缓慢横渡的条带 -->
+  <g id="clouds"></g>
+
+  <!-- 远景地平线剪影 -->
+  <path d="M0 1120 Q160 1060 320 1110 T704 1090 L704 1280 L0 1280 Z" fill="#01030a" opacity=".9"/>
+
+  <!-- 星点 -->
+  <g id="stars"></g>
+</svg>
+</div>
+<script>
+(function(){
+  const r=(s)=>()=>{s=(s*1664525+1013904221)>>>0;return s/4294967296;};
+  const R=r(410);
+
+  // 薄云条带
+  let c='';
+  const bands=[[150,300,420,26,.10,12],[380,470,520,22,.09,20],[240,180,340,20,.07,-16],[520,700,300,18,.06,26]];
+  for(const [cx,cy,rx,ry,o,deg] of bands){
+    c+=`<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="#9fb4d8" opacity="${o}"
+         transform="rotate(${deg} ${cx} ${cy})" filter="url(#cl)"/>`;
+    c+=`<ellipse cx="${cx+18}" cy="${cy-10}" rx="${rx*0.55}" ry="${ry*0.5}" fill="#c3d2ee" opacity="${o*0.7}"
+         transform="rotate(${deg} ${cx} ${cy})" filter="url(#cl)"/>`;
+  }
+  document.getElementById('clouds').innerHTML=c;
+
+  // 星点：少而暗
+  let s='';
+  for(let i=0;i<48;i++){
+    const x=(10+R()*684).toFixed(0), y=(24+R()*760).toFixed(0);
+    const rr=(0.6+R()*1.3).toFixed(1), o=(0.10+R()*0.35).toFixed(2);
+    s+=`<circle cx="${x}" cy="${y}" r="${rr}" fill="#dce8ff" opacity="${o}"/>`;
+  }
+  document.getElementById('stars').innerHTML=s;
+})();
+</script></body></html>

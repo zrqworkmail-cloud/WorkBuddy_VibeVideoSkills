@@ -1,0 +1,72 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#000;overflow:hidden}
+.c{position:relative;width:704px;height:1280px;overflow:hidden;background:#04070c}
+svg{position:absolute;left:0;top:0}
+</style></head><body>
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <linearGradient id="liq" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8ff0ff"/><stop offset="1" stop-color="#2a9fd0"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity=".22"/>
+      <stop offset=".18" stop-color="#ffffff" stop-opacity=".05"/>
+      <stop offset=".82" stop-color="#ffffff" stop-opacity=".05"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity=".18"/>
+    </linearGradient>
+    <radialGradient id="spill" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#8ff0ff" stop-opacity=".5"/>
+      <stop offset="1" stop-color="#8ff0ff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="ff"><feGaussianBlur stdDeviation="18"/></filter>
+    <filter id="f2"><feGaussianBlur stdDeviation="2"/></filter>
+  </defs>
+
+  <rect width="704" height="1280" fill="#04070c"/>
+  <ellipse cx="352" cy="640" rx="400" ry="620" fill="url(#spill)" opacity=".3"/>
+  <!-- 背光 -->
+  <rect x="0" y="180" width="704" height="8" fill="#8ff0ff" opacity=".5" filter="url(#ff)"/>
+
+  <!-- 三根玻璃管：液位递减 -->
+  <g id="tubes"></g>
+  <!-- 溢出的流光 -->
+  <g id="streams"></g>
+</svg>
+</div>
+<script>
+(function(){
+  const r=(s)=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+  let t='';const R=r(41);
+  const spec=[{x:150,top:300,bot:900,fill:.30},{x:300,top:340,bot:900,fill:.55},{x:450,top:260,bot:900,fill:.12}];
+  spec.forEach((s,i)=>{
+    const w=86, h=s.bot-s.top;
+    // 玻璃管
+    t+=`<rect x="${s.x}" y="${s.top}" width="${w}" height="${h}" rx="10" fill="url(#glass)" stroke="#9fd8e8" stroke-width="1.5" opacity=".9"/>`;
+    // 液体
+    const lh=h*s.fill, ly=s.bot-lh;
+    t+=`<clipPath id="cp${i}"><rect x="${s.x}" y="${s.top}" width="${w}" height="${h}" rx="10"/></clipPath>`;
+    t+=`<g clip-path="url(#cp${i})">
+          <rect x="${s.x}" y="${ly.toFixed(0)}" width="${w}" height="${lh.toFixed(0)}" fill="url(#liq)" opacity=".9"/>
+          <ellipse cx="${s.x+w/2}" cy="${ly.toFixed(0)}" rx="${w/2}" ry="10" fill="#c8f8ff" opacity=".9" filter="url(#f2)"/>
+          <ellipse cx="${s.x+w/2}" cy="${(s.bot-lh*0.5).toFixed(0)}" rx="26" ry="52" fill="#c8f8ff" opacity=".18" filter="url(#ff)"/>
+        </g>`;
+    // 刻度
+    for(let k=0;k<6;k++){
+      const y=s.top+h*(k/5);
+      t+=`<line x1="${s.x+w+8}" y1="${y.toFixed(0)}" x2="${s.x+w+20}" y2="${y.toFixed(0)}" stroke="#5f8ea0" stroke-width="2" opacity=".55"/>`;
+    }
+  });
+  document.getElementById('tubes').innerHTML=t;
+
+  let st='';const R2=r(88);
+  for(let i=0;i<40;i++){
+    const x=140+R2()*380, y=910+R2()*220;
+    st+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${(1+R2()*3).toFixed(1)}"
+        fill="#8ff0ff" opacity="${(0.15+R2()*0.55).toFixed(2)}"/>`;
+  }
+  // 液面反光带
+  st+=`<rect x="130" y="880" width="440" height="4" rx="2" fill="#8ff0ff" opacity=".25" filter="url(#ff)"/>`;
+  document.getElementById('streams').innerHTML=st;
+})();
+</script></body></html>

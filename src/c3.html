@@ -1,0 +1,110 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#000;overflow:hidden}
+.c{position:relative;width:704px;height:1280px;overflow:hidden;background:#0a0706}
+svg{position:absolute;left:0;top:0}
+</style></head><body>
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <!-- 皮肤：整帧就是一张脸的特写，无任何矩形边界 -->
+    <radialGradient id="skin" cx="42%" cy="44%" r="78%">
+      <stop offset="0" stop-color="#6b4c3d"/>
+      <stop offset=".38" stop-color="#4a3229"/>
+      <stop offset=".72" stop-color="#241814"/>
+      <stop offset="1" stop-color="#0a0706"/>
+    </radialGradient>
+    <linearGradient id="sclera" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b9c2c9"/>
+      <stop offset=".5" stop-color="#dde3e8"/>
+      <stop offset="1" stop-color="#8d979f"/>
+    </linearGradient>
+    <radialGradient id="iris" cx="44%" cy="40%" r="62%">
+      <stop offset="0" stop-color="#7d9fbe"/>
+      <stop offset=".38" stop-color="#466a8c"/>
+      <stop offset=".78" stop-color="#1e3a4e"/>
+      <stop offset="1" stop-color="#0a141d"/>
+    </radialGradient>
+    <filter id="b4"><feGaussianBlur stdDeviation="4"/></filter>
+    <filter id="b10"><feGaussianBlur stdDeviation="10"/></filter>
+    <filter id="b30"><feGaussianBlur stdDeviation="30"/></filter>
+    <filter id="b60"><feGaussianBlur stdDeviation="60"/></filter>
+    <clipPath id="eyeclip">
+      <path d="M96 638 Q352 500 608 638 Q352 776 96 638 Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="704" height="1280" fill="url(#skin)"/>
+
+  <!-- 左侧冷光（柔和渐变，无硬边） -->
+  <rect x="0" y="0" width="300" height="1280" fill="#9fc4e8" opacity=".10" filter="url(#b60)"/>
+  <ellipse cx="150" cy="600" rx="200" ry="330" fill="#a8ccef" opacity=".10" filter="url(#b60)"/>
+
+  <!-- 眼窝阴影（柔和，营造凹陷） -->
+  <ellipse cx="352" cy="640" rx="300" ry="180" fill="#0b0605" opacity=".55" filter="url(#b30)"/>
+
+  <!-- 眼白 + 虹膜 -->
+  <g clip-path="url(#eyeclip)">
+    <rect x="60" y="480" width="600" height="320" fill="url(#sclera)"/>
+    <!-- 虹膜：径向纹理 -->
+    <circle cx="352" cy="634" r="88" fill="url(#iris)"/>
+    <g stroke="#8fb4d4" stroke-width="1.1" opacity=".28">
+      <path d="M352 546 L352 722"/><path d="M300 560 L340 712"/><path d="M404 560 L364 712"/>
+      <path d="M262 590 L330 700"/><path d="M442 590 L374 700"/>
+      <path d="M240 634 L322 690"/><path d="M464 634 L382 690"/>
+    </g>
+    <circle cx="352" cy="634" r="88" fill="none" stroke="#050c12" stroke-width="8" opacity=".9"/>
+    <circle cx="352" cy="634" r="35" fill="#03060a"/>
+    <!-- 角膜高光 -->
+    <ellipse cx="314" cy="596" rx="27" ry="18" fill="#ffffff" opacity=".82" filter="url(#b4)"/>
+    <ellipse cx="396" cy="674" rx="13" ry="8" fill="#ffffff" opacity=".20" filter="url(#b4)"/>
+    <!-- 眼白血管 -->
+    <g stroke="#b06a6a" stroke-width="1.2" opacity=".20">
+      <path d="M132 612 Q196 626 246 646"/><path d="M566 660 Q508 672 466 652"/>
+      <path d="M150 664 Q210 676 258 660"/>
+    </g>
+    <!-- 上眼睑投在眼球上的阴影 -->
+    <path d="M96 638 Q352 500 608 638 L608 560 L96 560 Z" fill="#0b0706" opacity=".45" filter="url(#b10)"/>
+  </g>
+
+  <!-- 上睫毛线（半睁的沉重感） -->
+  <path d="M96 638 Q352 500 608 638" fill="none" stroke="#140d0b" stroke-width="11" opacity=".92"/>
+  <path d="M104 630 Q352 494 600 630" fill="none" stroke="#7a5646" stroke-width="2.6" opacity=".45"/>
+  <!-- 双眼皮褶 -->
+  <path d="M120 556 Q352 436 590 556" fill="none" stroke="#170f0c" stroke-width="5" opacity=".5" filter="url(#b4)"/>
+
+  <!-- 下眼睑 -->
+  <path d="M96 638 Q352 776 608 638" fill="none" stroke="#241713" stroke-width="8" opacity=".8"/>
+  <path d="M112 652 Q352 770 594 652" fill="none" stroke="#8a6350" stroke-width="2.2" opacity=".35"/>
+
+  <!-- 睫毛：从睫毛线向上发散 -->
+  <g stroke="#0b0807" stroke-width="3.2" stroke-linecap="round" fill="none" opacity=".92">
+    <path d="M158 606 Q144 578 136 556"/><path d="M198 584 Q184 552 178 530"/>
+    <path d="M242 566 Q230 534 226 512"/><path d="M288 552 Q280 520 278 498"/>
+    <path d="M336 544 Q332 512 332 490"/><path d="M384 544 Q388 512 390 490"/>
+    <path d="M432 552 Q440 520 444 498"/><path d="M478 566 Q490 534 494 512"/>
+    <path d="M522 584 Q536 552 542 530"/><path d="M562 606 Q576 578 584 556"/>
+  </g>
+
+  <!-- 皮肤纹理（极淡） -->
+  <g id="pores"></g>
+  <!-- 空气颗粒 -->
+  <g id="dust"></g>
+</svg>
+</div>
+<script>
+(function(){
+  const r=(s)=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+  let p='';const R1=r(91);
+  for(let i=0;i<260;i++){
+    p+=`<circle cx="${(20+R1()*664).toFixed(0)}" cy="${(60+R1()*1160).toFixed(0)}"
+        r="${(0.5+R1()*1.1).toFixed(1)}" fill="#0d0806" opacity="${(0.05+R1()*0.10).toFixed(2)}"/>`;
+  }
+  document.getElementById('pores').innerHTML=p;
+  let h='';const R2=r(57);
+  for(let i=0;i<18;i++){
+    h+=`<circle cx="${(20+R2()*664).toFixed(0)}" cy="${(180+R2()*900).toFixed(0)}"
+        r="${(0.7+R2()*1.6).toFixed(1)}" fill="#bcd4ea" opacity="${(0.04+R2()*0.10).toFixed(2)}"/>`;
+  }
+  document.getElementById('dust').innerHTML=h;
+})();
+</script></body></html>

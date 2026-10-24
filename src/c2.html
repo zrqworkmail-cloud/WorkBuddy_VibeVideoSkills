@@ -1,0 +1,90 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#000;overflow:hidden}
+.c{position:relative;width:704px;height:1280px;overflow:hidden;background:#03060c}
+svg{position:absolute;left:0;top:0}
+</style></head><body>
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#6fa8ff" stop-opacity=".55"/>
+      <stop offset=".45" stop-color="#2b5fa8" stop-opacity=".22"/>
+      <stop offset="1" stop-color="#03060c" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="table" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c111c" stop-opacity="0"/>
+      <stop offset=".35" stop-color="#0a0f18"/>
+      <stop offset="1" stop-color="#05080e"/>
+    </linearGradient>
+    <linearGradient id="scr" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#a8ccff"/>
+      <stop offset=".6" stop-color="#5f9bf0"/>
+      <stop offset="1" stop-color="#2f6cc4"/>
+    </linearGradient>
+    <linearGradient id="scrEdge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#cfe4ff" stop-opacity=".85"/>
+      <stop offset="1" stop-color="#2f6cc4" stop-opacity=".2"/>
+    </linearGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="9"/></filter>
+    <filter id="soft2"><feGaussianBlur stdDeviation="26"/></filter>
+  </defs>
+
+  <rect width="704" height="1280" fill="#03060c"/>
+  <!-- 冷蓝环境光晕 -->
+  <ellipse cx="352" cy="960" rx="470" ry="520" fill="url(#glow)" opacity=".75"/>
+  <ellipse cx="352" cy="980" rx="300" ry="330" fill="url(#glow)" opacity=".55" filter="url(#soft2)"/>
+
+  <!-- 床头柜台面 -->
+  <rect x="0" y="962" width="704" height="318" fill="url(#table)"/>
+  <rect x="0" y="962" width="704" height="2" fill="#3b5f96" opacity=".22"/>
+
+  <!-- 手机（平放、微倾，无手） -->
+  <g transform="translate(352 905) rotate(-6)">
+    <rect x="-112" y="-232" width="224" height="464" rx="30" fill="#070b13" stroke="#2b4162" stroke-width="3"/>
+    <rect x="-99" y="-219" width="198" height="438" rx="22" fill="url(#scr)"/>
+    <rect x="-99" y="-219" width="198" height="438" rx="22" fill="url(#scrEdge)" opacity=".5"/>
+    <!-- 屏幕内容剪影 -->
+    <g fill="#173a66" opacity=".38">
+      <rect x="-72" y="-185" width="120" height="14" rx="5"/>
+      <rect x="-72" y="-150" width="86" height="11" rx="4"/>
+      <rect x="-72" y="-120" width="104" height="11" rx="4"/>
+      <rect x="-60" y="-72" width="66" height="52" rx="9"/>
+      <rect x="-72" y="132" width="104" height="11" rx="4"/>
+      <rect x="-72" y="164" width="72" height="11" rx="4"/>
+    </g>
+    <ellipse cx="0" cy="0" rx="99" ry="219" fill="#bcd8ff" opacity=".18" filter="url(#soft)"/>
+  </g>
+  <!-- 屏幕在台面的反光 -->
+  <ellipse cx="352" cy="1010" rx="230" ry="46" fill="#7fb0ff" opacity=".14" filter="url(#soft)"/>
+
+  <!-- 上浮的通知气泡 -->
+  <g id="bub"></g>
+  <!-- 冷尘 -->
+  <g id="d"></g>
+</svg>
+</div>
+<script>
+(function(){
+  // 通知气泡：自下而上飘，越上越淡越小
+  let b='';
+  const items=[[352,760,54,20,.55],[300,640,42,15,.42],[396,560,46,15,.32],[318,440,36,13,.22],[404,340,40,13,.15]];
+  for(const [x,y,w,h,o] of items){
+    b+=`<g opacity="${o}">
+      <rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="${h/2}" fill="#9fc4ff" opacity=".9"/>
+      <rect x="${x-w/2}" y="${y-h/2}" width="${w}" height="${h}" rx="${h/2}" fill="#e2efff" opacity=".55"/>
+      <rect x="${x-w/2+8}" y="${y-2}" width="${w-22}" height="4" rx="2" fill="#3f74bd" opacity=".5"/>
+    </g>`;
+  }
+  // 气泡柔光
+  b+=`<ellipse cx="352" cy="700" rx="150" ry="300" fill="#5f9bf0" opacity=".10" filter="url(#soft2)"/>`;
+  document.getElementById('bub').innerHTML=b;
+
+  const r=(s)=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+  let d='';const R=r(2026);
+  for(let i=0;i<48;i++){
+    d+=`<circle cx="${(40+R()*624).toFixed(0)}" cy="${(220+R()*820).toFixed(0)}" r="${(0.9+R()*2.4).toFixed(1)}"
+        fill="#aecdf5" opacity="${(0.05+R()*0.22).toFixed(2)}"/>`;
+  }
+  document.getElementById('d').innerHTML=d;
+})();
+</script></body></html>

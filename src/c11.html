@@ -1,0 +1,78 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#000;overflow:hidden}
+.c{position:relative;width:704px;height:1280px;overflow:hidden;background:#05070a}
+svg{position:absolute;left:0;top:0}
+</style></head><body>
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <linearGradient id="bgn" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#101823"/>
+      <stop offset=".55" stop-color="#070b10"/>
+      <stop offset="1" stop-color="#030405"/>
+    </linearGradient>
+    <linearGradient id="silo" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#020304"/>
+      <stop offset=".7" stop-color="#06090d"/>
+      <stop offset="1" stop-color="#131c26"/>
+    </linearGradient>
+    <radialGradient id="glowN" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#d8ab90" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#05070a" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="p6"><feGaussianBlur stdDeviation="6"/></filter>
+    <filter id="p24"><feGaussianBlur stdDeviation="24"/></filter>
+    <filter id="p60"><feGaussianBlur stdDeviation="60"/></filter>
+  </defs>
+
+  <rect width="704" height="1280" fill="url(#bgn)"/>
+  <!-- 右后方冷光 -->
+  <ellipse cx="620" cy="520" rx="280" ry="440" fill="#9dc0e4" opacity=".16" filter="url(#p60)"/>
+
+  <!-- 侧脸剪影（面朝左） -->
+  <path d="M704 1280 L704 800
+           Q648 726 566 686
+           Q486 646 448 566
+           Q430 500 442 430
+           Q456 330 392 288
+           Q316 240 276 330
+           Q256 374 264 402
+           Q250 418 238 452
+           Q252 462 258 480
+           Q246 492 252 510
+           Q266 528 270 552
+           Q296 586 326 612
+           Q344 656 348 716
+           Q334 774 286 812
+           Q226 862 214 1280 Z"
+        fill="url(#silo)"/>
+
+  <!-- 轮廓边缘冷光（面部与颈前缘） -->
+  <g fill="none" stroke="#a8ccef" stroke-linecap="round">
+    <path d="M276 330 Q256 374 264 402" stroke-width="3" opacity=".5"/>
+    <path d="M264 402 Q250 418 238 452" stroke-width="3" opacity=".55"/>
+    <path d="M238 452 Q252 462 258 480" stroke-width="2.6" opacity=".5"/>
+    <path d="M258 480 Q246 492 252 510" stroke-width="2.6" opacity=".45"/>
+    <path d="M252 510 Q266 528 270 552" stroke-width="2.6" opacity=".45"/>
+    <path d="M270 552 Q296 586 326 612" stroke-width="3" opacity=".5"/>
+    <path d="M326 612 Q344 656 348 716" stroke-width="3.4" opacity=".55"/>
+  </g>
+
+  <!-- 颈侧动脉处的柔光（随心跳明暗起伏） -->
+  <ellipse cx="330" cy="660" rx="46" ry="96" fill="url(#glowN)" filter="url(#p24)"/>
+  <ellipse cx="332" cy="668" rx="14" ry="52" fill="#e8c3ac" opacity=".22" filter="url(#p6)"/>
+
+  <g id="dust"></g>
+</svg>
+</div>
+<script>
+(function(){
+  const r=(s)=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+  let h='';const R=r(107);
+  for(let i=0;i<20;i++){
+    h+=`<circle cx="${(30+R()*640).toFixed(0)}" cy="${(140+R()*820).toFixed(0)}"
+        r="${(0.7+R()*1.5).toFixed(1)}" fill="#a8c8e8" opacity="${(0.04+R()*0.12).toFixed(2)}"/>`;
+  }
+  document.getElementById('dust').innerHTML=h;
+})();
+</script></body></html>

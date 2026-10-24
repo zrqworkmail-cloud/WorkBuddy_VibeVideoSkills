@@ -1,0 +1,67 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#000;overflow:hidden}
+.c{position:relative;width:704px;height:1280px;overflow:hidden;background:#020409}
+svg{position:absolute;left:0;top:0}
+</style></head><body>
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#020409"/>
+      <stop offset=".55" stop-color="#04060e"/>
+      <stop offset="1" stop-color="#010206"/>
+    </linearGradient>
+    <linearGradient id="skin" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0a0f1a"/>
+      <stop offset=".72" stop-color="#0d1420"/>
+      <stop offset="1" stop-color="#2a3550"/>
+    </linearGradient>
+    <linearGradient id="rim" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#9fd8ff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#b8e4ff" stop-opacity=".85"/>
+    </linearGradient>
+    <radialGradient id="pulse" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ff8a6a" stop-opacity=".85"/>
+      <stop offset=".45" stop-color="#ff5a3c" stop-opacity=".35"/>
+      <stop offset="1" stop-color="#ff5a3c" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-80%" y="-80%" width="260%" height="260%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+  </defs>
+
+  <rect width="704" height="1280" fill="url(#bg)"/>
+
+  <!-- 主体只放在下半部：头 + 颈 + 肩（y 700 起），上半留给文字 -->
+  <g>
+    <!-- 肩与躯干 -->
+    <path d="M120,1280 C130,1160 190,1090 300,1058 L404,1058 C520,1092 578,1160 588,1280 Z"
+          fill="url(#skin)"/>
+    <!-- 颈 -->
+    <path d="M300,900 L404,900 L420,1060 L286,1060 Z" fill="url(#skin)"/>
+    <!-- 头（侧脸轮廓，朝左） -->
+    <path d="M300,700 C300,624 350,566 410,566 C470,566 512,624 512,700
+             C512,742 504,776 490,800 L508,830 C516,840 514,852 502,854
+             L470,858 L478,884 C482,896 476,906 464,908 L466,930
+             C468,962 440,984 400,986 C356,988 320,962 312,924
+             C306,896 308,866 312,842 C292,824 280,796 284,764
+             C288,730 296,712 300,700 Z"
+          fill="url(#skin)"/>
+    <!-- 轮廓冷光 -->
+    <path d="M300,700 C300,624 350,566 410,566 C470,566 512,624 512,700
+             C512,742 504,776 490,800 L508,830 C516,840 514,852 502,854
+             L470,858 L478,884 C482,896 476,906 464,908"
+          fill="none" stroke="url(#rim)" stroke-width="4" opacity=".9"/>
+    <!-- 颈侧脉搏（颈动脉） -->
+    <ellipse cx="330" cy="960" rx="52" ry="26" fill="url(#pulse)" filter="url(#soft)"/>
+    <ellipse cx="330" cy="960" rx="20" ry="10" fill="#ff9a7a" opacity=".55"/>
+    <!-- 下颌到颈的紧绷线 -->
+    <path d="M312,924 C330,944 360,952 392,946" fill="none"
+          stroke="rgba(255,190,170,.30)" stroke-width="2.5"/>
+  </g>
+
+  <!-- 极淡的环境冷光 -->
+  <ellipse cx="560" cy="880" rx="220" ry="180" fill="#1a2a4a" opacity=".16" filter="url(#soft)"/>
+</svg>
+</div>
+</body></html>

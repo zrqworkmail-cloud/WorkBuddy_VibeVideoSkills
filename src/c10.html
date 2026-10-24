@@ -1,0 +1,89 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#000;overflow:hidden}
+.c{position:relative;width:704px;height:1280px;overflow:hidden;background:#0a0706}
+svg{position:absolute;left:0;top:0}
+</style></head><body>
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <radialGradient id="skin" cx="42%" cy="44%" r="78%">
+      <stop offset="0" stop-color="#6b4c3d"/>
+      <stop offset=".38" stop-color="#4a3229"/>
+      <stop offset=".72" stop-color="#241814"/>
+      <stop offset="1" stop-color="#0a0706"/>
+    </radialGradient>
+    <linearGradient id="sclera" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b9c2c9"/>
+      <stop offset=".5" stop-color="#dde3e8"/>
+      <stop offset="1" stop-color="#8d979f"/>
+    </linearGradient>
+    <radialGradient id="iris" cx="44%" cy="40%" r="62%">
+      <stop offset="0" stop-color="#7d9fbe"/>
+      <stop offset=".38" stop-color="#466a8c"/>
+      <stop offset=".78" stop-color="#1e3a4e"/>
+      <stop offset="1" stop-color="#0a141d"/>
+    </radialGradient>
+    <filter id="b4"><feGaussianBlur stdDeviation="4"/></filter>
+    <filter id="b10"><feGaussianBlur stdDeviation="10"/></filter>
+    <filter id="b30"><feGaussianBlur stdDeviation="30"/></filter>
+    <filter id="b60"><feGaussianBlur stdDeviation="60"/></filter>
+    <clipPath id="eyeclip">
+      <path d="M96 640 Q352 424 608 640 Q352 800 96 640 Z"/>
+    </clipPath>
+  </defs>
+
+  <rect width="704" height="1280" fill="url(#skin)"/>
+  <rect x="0" y="0" width="300" height="1280" fill="#9fc4e8" opacity=".10" filter="url(#b60)"/>
+  <ellipse cx="150" cy="600" rx="200" ry="330" fill="#a8ccef" opacity=".10" filter="url(#b60)"/>
+  <ellipse cx="352" cy="642" rx="300" ry="190" fill="#0b0605" opacity=".55" filter="url(#b30)"/>
+
+  <!-- 眼白 + 虹膜（比 s3 张得更开） -->
+  <g clip-path="url(#eyeclip)">
+    <rect x="60" y="400" width="600" height="420" fill="url(#sclera)"/>
+    <circle cx="352" cy="636" r="92" fill="url(#iris)"/>
+    <g stroke="#8fb4d4" stroke-width="1.1" opacity=".26">
+      <path d="M352 544 L352 728"/><path d="M296 558 L338 716"/><path d="M408 558 L366 716"/>
+      <path d="M254 592 L326 704"/><path d="M450 592 L378 704"/>
+    </g>
+    <circle cx="352" cy="636" r="92" fill="none" stroke="#050c12" stroke-width="8" opacity=".9"/>
+    <circle cx="352" cy="636" r="36" fill="#03060a"/>
+    <ellipse cx="312" cy="596" rx="28" ry="19" fill="#ffffff" opacity=".84" filter="url(#b4)"/>
+    <ellipse cx="398" cy="678" rx="13" ry="8" fill="#ffffff" opacity=".20" filter="url(#b4)"/>
+    <g stroke="#b06a6a" stroke-width="1.2" opacity=".18">
+      <path d="M128 610 Q196 626 248 648"/><path d="M572 662 Q508 676 464 654"/>
+    </g>
+    <path d="M96 640 Q352 424 608 640 L608 520 L96 520 Z" fill="#0b0706" opacity=".40" filter="url(#b10)"/>
+  </g>
+
+  <!-- 上睫毛线（张得更开） -->
+  <path d="M96 640 Q352 424 608 640" fill="none" stroke="#140d0b" stroke-width="11" opacity=".92"/>
+  <path d="M104 632 Q352 418 600 632" fill="none" stroke="#7a5646" stroke-width="2.6" opacity=".45"/>
+  <path d="M120 540 Q352 356 590 540" fill="none" stroke="#170f0c" stroke-width="5" opacity=".45" filter="url(#b4)"/>
+
+  <!-- 下眼睑 -->
+  <path d="M96 640 Q352 800 608 640" fill="none" stroke="#241713" stroke-width="8" opacity=".8"/>
+  <path d="M112 654 Q352 794 594 654" fill="none" stroke="#8a6350" stroke-width="2.2" opacity=".35"/>
+
+  <!-- 睫毛 -->
+  <g stroke="#0b0807" stroke-width="3.2" stroke-linecap="round" fill="none" opacity=".92">
+    <path d="M158 600 Q142 566 134 540"/><path d="M198 570 Q182 532 176 506"/>
+    <path d="M242 544 Q228 506 224 480"/><path d="M288 524 Q278 486 276 460"/>
+    <path d="M336 512 Q330 474 330 448"/><path d="M384 512 Q390 474 392 448"/>
+    <path d="M432 524 Q442 486 446 460"/><path d="M478 544 Q492 506 496 480"/>
+    <path d="M522 570 Q538 532 544 506"/><path d="M562 600 Q578 566 586 540"/>
+  </g>
+
+  <g id="pores"></g>
+</svg>
+</div>
+<script>
+(function(){
+  const r=(s)=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+  let p='';const R=r(97);
+  for(let i=0;i<240;i++){
+    p+=`<circle cx="${(20+R()*664).toFixed(0)}" cy="${(60+R()*1160).toFixed(0)}"
+        r="${(0.5+R()*1.1).toFixed(1)}" fill="#0d0806" opacity="${(0.05+R()*0.10).toFixed(2)}"/>`;
+  }
+  document.getElementById('pores').innerHTML=p;
+})();
+</script></body></html>

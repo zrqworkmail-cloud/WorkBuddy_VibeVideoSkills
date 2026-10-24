@@ -1,0 +1,83 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#000;overflow:hidden}
+.c{position:relative;width:704px;height:1280px;overflow:hidden;background:#0d0a08}
+svg{position:absolute;left:0;top:0}
+</style></head><body>
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffd9a0"/><stop offset=".45" stop-color="#ff9e5e"/>
+      <stop offset="1" stop-color="#7a3a20"/>
+    </linearGradient>
+    <linearGradient id="curt" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffe4b8" stop-opacity=".95"/>
+      <stop offset="1" stop-color="#c98a4e" stop-opacity=".55"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#fff3d0" stop-opacity="1"/>
+      <stop offset=".35" stop-color="#ffcf8a" stop-opacity=".6"/>
+      <stop offset="1" stop-color="#ff9e5e" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="sm"><feGaussianBlur stdDeviation="9"/></filter>
+    <filter id="sm2"><feGaussianBlur stdDeviation="22"/></filter>
+  </defs>
+
+  <!-- 窗户 -->
+  <rect x="70" y="90" width="564" height="900" rx="26" fill="url(#sky)"/>
+  <!-- 太阳 -->
+  <circle cx="352" cy="430" r="240" fill="url(#sun)"/>
+  <circle cx="352" cy="430" r="86" fill="#fff6dc" opacity=".9" filter="url(#sm)"/>
+  <!-- 远处城市剪影 -->
+  <g id="city" fill="#4a2410" opacity=".55"></g>
+  <!-- 窗帘：竖向褶皱、半透 -->
+  <g id="curtain"></g>
+  <!-- 窗框 -->
+  <rect x="70" y="90" width="564" height="900" rx="26" fill="none" stroke="#3a2010" stroke-width="8" opacity=".7"/>
+  <line x1="352" y1="90" x2="352" y2="990" stroke="#3a2010" stroke-width="7" opacity=".55"/>
+  <line x1="70" y1="540" x2="634" y2="540" stroke="#3a2010" stroke-width="6" opacity=".45"/>
+
+  <!-- 室内暗部 -->
+  <rect x="0" y="990" width="704" height="290" fill="#1a1008"/>
+  <ellipse cx="352" cy="1000" rx="420" ry="160" fill="#3a2010" opacity=".8"/>
+  <!-- 床头：手机反扣 -->
+  <g>
+    <ellipse cx="352" cy="1092" rx="176" ry="34" fill="#120c06"/>
+    <rect x="296" y="1050" width="112" height="42" rx="10" fill="#1c1208" stroke="#4a2c14" stroke-width="2"/>
+  </g>
+  <!-- 空气中的浮尘 -->
+  <g id="dust"></g>
+</svg>
+</div>
+<script>
+(function(){
+  const r=(s)=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+  // 城市天际线
+  let c='';const R=r(13);
+  let x=70;
+  while(x<634){
+    const w=22+R()*54, h=70+R()*220;
+    c+=`<rect x="${x.toFixed(0)}" y="${(990-h).toFixed(0)}" width="${w.toFixed(0)}" height="${h.toFixed(0)}"/>`;
+    x+=w+4+R()*10;
+  }
+  document.getElementById('city').innerHTML=c;
+
+  // 窗帘
+  let cu='';const R2=r(29);
+  for(let i=0;i<16;i++){
+    const x=70+i*36;
+    cu+=`<path d="M${x} 90 L${x+18} 90 L${x+14} 990 L${x-4} 990 Z" fill="url(#curt)" opacity="${(0.3+R2()*0.45).toFixed(2)}"/>`;
+  }
+  // 两侧垂坠
+  cu+=`<path d="M40 60 Q110 500 60 1220 L190 1220 Q230 520 160 60 Z" fill="url(#curt)" opacity=".55"/>`;
+  cu+=`<path d="M664 60 Q594 500 644 1220 L514 1220 Q474 520 544 60 Z" fill="url(#curt)" opacity=".55"/>`;
+  document.getElementById('curtain').innerHTML=cu;
+
+  let d='';const R3=r(59);
+  for(let i=0;i<110;i++){
+    d+=`<circle cx="${(70+R3()*564).toFixed(0)}" cy="${(90+R3()*900).toFixed(0)}" r="${(0.8+R3()*3.4).toFixed(1)}"
+        fill="#fff0d0" opacity="${(0.05+R3()*0.45).toFixed(2)}"/>`;
+  }
+  document.getElementById('dust').innerHTML=d;
+})();
+</script></body></html>

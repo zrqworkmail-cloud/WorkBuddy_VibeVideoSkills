@@ -1,0 +1,86 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#000;overflow:hidden}
+.c{position:relative;width:704px;height:1280px;overflow:hidden;background:#04060b}
+svg{position:absolute;left:0;top:0}
+</style></head><body>
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <radialGradient id="pg" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#9fc4ff" stop-opacity=".9"/>
+      <stop offset=".45" stop-color="#3f6fd0" stop-opacity=".42"/>
+      <stop offset="1" stop-color="#0a1226" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#070a12"/><stop offset="1" stop-color="#0d1421"/>
+    </linearGradient>
+    <linearGradient id="bed" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#111a2b"/><stop offset="1" stop-color="#05080f"/>
+    </linearGradient>
+    <radialGradient id="win" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#2b4a7d" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#0a1222" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft"><feGaussianBlur stdDeviation="9"/></filter>
+    <filter id="soft2"><feGaussianBlur stdDeviation="26"/></filter>
+  </defs>
+
+  <rect width="704" height="1280" fill="url(#wall)"/>
+
+  <!-- 窗户与远处城市光斑 -->
+  <rect x="60" y="150" width="250" height="380" rx="6" fill="url(#win)"/>
+  <rect x="60" y="150" width="250" height="380" rx="6" fill="none" stroke="#16233a" stroke-width="3"/>
+  <line x1="185" y1="150" x2="185" y2="530" stroke="#16233a" stroke-width="3"/>
+  <g id="bok"></g>
+
+  <!-- 天花板暗角 -->
+  <path d="M0 0 L704 0 L704 180 L0 240 Z" fill="#03050a" opacity=".85"/>
+
+  <!-- 床 -->
+  <path d="M-20 1080 L724 1000 L724 1280 L-20 1280 Z" fill="url(#bed)"/>
+  <path d="M-20 1080 L724 1000" stroke="#1b2a44" stroke-width="2" opacity=".7"/>
+  <!-- 被子褶皱 -->
+  <g stroke="#16233a" stroke-width="6" opacity=".5" fill="none">
+    <path d="M40 1130 Q160 1100 300 1122"/><path d="M340 1116 Q470 1098 620 1124"/>
+    <path d="M10 1200 Q180 1176 350 1190"/><path d="M380 1186 Q520 1170 700 1186"/>
+  </g>
+  <!-- 枕头 -->
+  <ellipse cx="150" cy="1075" rx="130" ry="46" fill="#182742" opacity=".9"/>
+  <ellipse cx="150" cy="1068" rx="112" ry="36" fill="#1e2d4d" opacity=".75"/>
+
+  <!-- 床头柜 -->
+  <rect x="470" y="930" width="230" height="180" rx="8" fill="#0b1220"/>
+  <rect x="470" y="930" width="230" height="180" rx="8" fill="none" stroke="#1a2842" stroke-width="2"/>
+
+  <!-- 手机 -->
+  <g>
+    <rect x="530" y="868" width="96" height="62" rx="9" fill="#0e1626" stroke="#2b4266" stroke-width="2"/>
+    <rect x="536" y="874" width="84" height="50" rx="5" fill="#bcd4ff"/>
+  </g>
+  <ellipse cx="578" cy="899" rx="300" ry="330" fill="url(#pg)" opacity=".95"/>
+  <!-- 手机光束 -->
+  <path d="M578 899 L860 640 L880 1010 Z" fill="#9fc4ff" opacity=".05" filter="url(#soft2)"/>
+
+  <!-- 悬浮尘埃 -->
+  <g id="dust"></g>
+</svg>
+</div>
+<script>
+(function(){
+  const r=(s)=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+  // 城市散景
+  let b='';const R=r(11);
+  for(let i=0;i<16;i++){
+    const x=66+R()*238,y=160+R()*356,r2=4+R()*13,o=.18+R()*.5;
+    b+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${r2.toFixed(1)}" fill="#7fa8e8" opacity="${o.toFixed(2)}" filter="url(#soft)"/>`;
+  }
+  document.getElementById('bok').innerHTML=b;
+  // 尘埃
+  let d='';const R2=r(29);
+  for(let i=0;i<70;i++){
+    const x=90+R2()*540,y=380+R2()*680,r2=.8+R2()*2.6,o=.06+R2()*.32;
+    d+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${r2.toFixed(1)}" fill="#cfe0ff" opacity="${o.toFixed(2)}"/>`;
+  }
+  document.getElementById('dust').innerHTML=d;
+})();
+</script></body></html>

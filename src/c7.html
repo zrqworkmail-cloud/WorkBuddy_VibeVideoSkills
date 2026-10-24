@@ -1,0 +1,76 @@
+<!DOCTYPE html><html><head><meta charset="utf-8"><style>
+html,body{margin:0;background:#000;overflow:hidden}
+.c{position:relative;width:704px;height:1280px;overflow:hidden;background:#040507}
+svg{position:absolute;left:0;top:0}
+</style></head><body>
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <linearGradient id="room" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0a0c11"/>
+      <stop offset=".62" stop-color="#05070a"/>
+      <stop offset="1" stop-color="#020304"/>
+    </linearGradient>
+    <linearGradient id="fig" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06080b"/>
+      <stop offset=".7" stop-color="#0b0f14"/>
+      <stop offset="1" stop-color="#161f29"/>
+    </linearGradient>
+    <radialGradient id="lamp" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#8fb6dd" stop-opacity=".38"/>
+      <stop offset="1" stop-color="#040507" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="b12"><feGaussianBlur stdDeviation="12"/></filter>
+    <filter id="b40"><feGaussianBlur stdDeviation="40"/></filter>
+    <filter id="b80"><feGaussianBlur stdDeviation="80"/></filter>
+  </defs>
+
+  <rect width="704" height="1280" fill="url(#room)"/>
+
+  <!-- 左侧冷光 -->
+  <ellipse cx="150" cy="520" rx="300" ry="420" fill="url(#lamp)" filter="url(#b80)"/>
+  <rect x="0" y="0" width="180" height="1280" fill="#8fb6dd" opacity=".05" filter="url(#b40)"/>
+
+  <!-- 桌面 -->
+  <rect x="0" y="1006" width="704" height="24" fill="#0a0e13"/>
+  <rect x="0" y="1030" width="704" height="250" fill="#030405"/>
+
+  <!-- 人物侧影：低头伏案（面朝右） -->
+  <g fill="url(#fig)">
+    <!-- 头（前倾低头） -->
+    <ellipse cx="330" cy="470" rx="86" ry="90" transform="rotate(16 330 470)"/>
+    <!-- 颈 -->
+    <path d="M300 540 L368 528 L392 604 L312 618 Z"/>
+    <!-- 躯干（前倾） -->
+    <path d="M150 1280 L150 700 Q176 610 276 592 Q352 580 400 640 Q452 706 458 812 L470 1280 Z"/>
+    <!-- 手臂撑在桌面 -->
+    <path d="M392 700 Q470 736 520 792 Q556 834 540 880 L470 866 Q430 826 386 800 Z"/>
+  </g>
+
+  <!-- 桌面上一片纸/屏幕的微光 -->
+  <g>
+    <rect x="470" y="948" width="180" height="58" rx="4" fill="#1a2735" opacity=".9"/>
+    <rect x="470" y="948" width="180" height="58" rx="4" fill="#7fa6cc" opacity=".10"/>
+    <ellipse cx="560" cy="946" rx="130" ry="60" fill="#9dc0e4" opacity=".10" filter="url(#b40)"/>
+  </g>
+
+  <!-- 逆光轮廓 -->
+  <g fill="none" stroke="#9dc0e4" opacity=".45">
+    <path d="M404 452 Q418 500 402 536" stroke-width="3"/>
+    <path d="M414 618 Q470 690 480 790" stroke-width="3.4"/>
+  </g>
+
+  <g id="dust"></g>
+</svg>
+</div>
+<script>
+(function(){
+  const r=(s)=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+  let h='';const R=r(83);
+  for(let i=0;i<22;i++){
+    h+=`<circle cx="${(30+R()*640).toFixed(0)}" cy="${(140+R()*820).toFixed(0)}"
+        r="${(0.7+R()*1.6).toFixed(1)}" fill="#a8c8e8" opacity="${(0.04+R()*0.12).toFixed(2)}"/>`;
+  }
+  document.getElementById('dust').innerHTML=h;
+})();
+</script></body></html>

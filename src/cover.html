@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>封面</title>
+<style>
+@font-face{font-family:'NSC';src:url('file:///C:/Windows/Fonts/NotoSansSC-VF.ttf') format('truetype');font-weight:100 900;font-display:block}
+:root{--ink:#EDF1F7;--dim:#78829A;--lime:#C9FF4E;--red:#FF5A3C}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1440px;overflow:hidden;background:#07080C}
+body{font-family:'NSC','Microsoft YaHei',sans-serif;-webkit-font-smoothing:antialiased}
+#stage{position:relative;width:1080px;height:1440px;overflow:hidden;background:#07080C}
+.bg{position:absolute;inset:0}
+html.ov, html.ov body{background:transparent}
+body.ov .bg{display:none}
+.ov-scrim{display:none;position:absolute;inset:0;pointer-events:none;
+  background:
+    linear-gradient(to top, rgba(3,5,9,.94) 0%, rgba(3,5,9,.86) 26%,
+      rgba(3,5,9,.52) 46%, rgba(3,5,9,.10) 66%, rgba(3,5,9,0) 78%),
+    linear-gradient(to bottom, rgba(3,5,9,.70) 0%, rgba(3,5,9,0) 22%),
+    rgba(5,7,12,.26);}
+body.ov .ov-scrim{display:block}
+.bg-grid{
+  background-image:
+    linear-gradient(rgba(255,255,255,.030) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.030) 1px,transparent 1px);
+  background-size:90px 90px;
+}
+.bg-glow{background:
+  radial-gradient(700px 700px at 52% 30%, rgba(201,255,78,.09), transparent 62%),
+  radial-gradient(820px 560px at 80% 92%, rgba(87,223,255,.05), transparent 66%);}
+.bg-vig{background:radial-gradient(ellipse 80% 64% at 50% 40%, transparent 40%, #05060A 84%)}
+
+.top{position:absolute;left:88px;top:120px;display:flex;align-items:center;gap:18px;
+  font-size:26px;font-weight:700;letter-spacing:.22em;color:#A9B4C8;
+  -webkit-text-stroke:.5px rgba(6,8,14,.5);text-shadow:0 2px 14px rgba(0,0,0,.7)}
+.top::before{content:'';width:46px;height:2px;background:var(--lime)}
+
+.clock{position:absolute;left:290px;top:230px;width:500px;height:500px}
+.time{position:absolute;left:0;top:0;width:500px;height:500px;display:flex;align-items:center;
+  justify-content:center;font-size:150px;font-weight:600;letter-spacing:.02em;color:var(--ink);
+  -webkit-text-stroke:1px rgba(6,8,14,.5);text-shadow:0 3px 22px rgba(0,0,0,.7)}
+
+.title{position:absolute;left:88px;bottom:520px;width:904px}
+h1{font-size:136px;font-weight:900;line-height:1.12;letter-spacing:-.035em;color:var(--ink);
+  -webkit-text-stroke:1px rgba(6,8,14,.55);
+  text-shadow:0 4px 26px rgba(0,0,0,.72),0 1px 5px rgba(0,0,0,.6)}
+h1 em{font-style:normal;color:var(--lime)}
+.sub{position:absolute;left:88px;bottom:410px;width:904px;
+  font-size:34px;font-weight:500;line-height:1.6;color:#C2CCDE;
+  -webkit-text-stroke:.5px rgba(6,8,14,.45);text-shadow:0 2px 16px rgba(0,0,0,.72)}
+.sub b{color:var(--ink);font-weight:700}
+
+.meta{position:absolute;left:88px;bottom:300px;width:904px;display:flex;justify-content:space-between;
+  font-size:24px;color:#78829A;letter-spacing:.16em;text-shadow:0 2px 12px rgba(0,0,0,.7)}
+.bar{position:absolute;left:88px;bottom:250px;width:904px;height:3px;background:rgba(255,255,255,.10)}
+.bar i{display:block;height:100%;width:38%;background:var(--lime);box-shadow:0 0 14px rgba(201,255,78,.7)}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="bg bg-grid"></div>
+  <div class="bg bg-glow"></div>
+  <div class="bg bg-vig"></div>
+  <div class="ov-scrim"></div>
+
+  <div class="top">反常识科普</div>
+
+  <div class="clock">
+    <svg width="500" height="500" viewBox="0 0 500 500">
+      <g transform="translate(250,250)" id="ticks"></g>
+      <circle cx="250" cy="250" r="180" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="2"/>
+      <path d="M 250 70 A 180 180 0 1 1 149.2 377.4" fill="none" stroke="#C9FF4E" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="149.2" cy="377.4" r="8" fill="#C9FF4E"/>
+    </svg>
+    <div class="time num" style="font-family:'Bahnschrift','Consolas',sans-serif;font-variant-numeric:tabular-nums">02:47</div>
+  </div>
+
+  <div class="title">
+    <h1>为什么越熬夜<br><span style="color:#EDF1F7">越</span><em>精神</em>？</h1>
+  </div>
+  <div class="sub">不是回血，是身体在向你借<b>明天的清醒</b>。</div>
+
+  <div class="meta"><span>4 个机制 · 1 个代价</span><span>100 秒科普</span></div>
+  <div class="bar"><i></i></div>
+</div>
+<script>
+(function(){
+  if (/[?&]ov=1/.test(location.search)) {
+    document.documentElement.classList.add('ov');
+    document.body.classList.add('ov');
+  }
+  const g=document.getElementById('ticks');
+  let h='';
+  for(let i=0;i<60;i++){
+    const a=(i/60)*Math.PI*2-Math.PI/2;
+    const major=i%5===0;
+    const r1=major?152:160, r2=178;
+    h+=`<line x1="${(Math.cos(a)*r1).toFixed(1)}" y1="${(Math.sin(a)*r1).toFixed(1)}"
+      x2="${(Math.cos(a)*r2).toFixed(1)}" y2="${(Math.sin(a)*r2).toFixed(1)}"
+      stroke="${major?'rgba(255,255,255,.42)':'rgba(255,255,255,.15)'}" stroke-width="${major?3:1.5}" stroke-linecap="round"/>`;
+  }
+  g.innerHTML=h;
+})();
+</script>
+</body>
+</html>

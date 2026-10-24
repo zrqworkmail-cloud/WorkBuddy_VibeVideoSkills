@@ -13,7 +13,7 @@ agent_created: true
 - 排查这类管线的问题：文字消失、慢放掉帧、音画错位、生成 OOM、成片"卡住"。
 - 不适用：真人口播、纯剪辑（非代码渲染）、复杂三维。
 
-> 完整方法论（七参数决策表、迁移清单、判据来源）见仓库 `WorkbuddyWorkflow/视频制作通用流程.md`；
+> 完整方法论（七参数决策表、迁移清单、判据来源）见仓库 `WorkBuddyWorkflow/视频制作通用流程.md`；
 > 本文是给执行用的浓缩版，判据与硬规则优先。
 
 ## 核心思想
@@ -42,7 +42,7 @@ agent_created: true
 
 ## 八步流程
 
-> 命令与路径是**参考实现**（仓库 `WorkbuddyWorkflow/src|scripts`）的写法。换项目/换画幅时替换成你的路径，
+> 命令与路径是**参考实现**（仓库 `WorkBuddyWorkflow/src|scripts`）的写法。换项目/换画幅时替换成你的路径，
 > 步骤顺序与判据不变。
 
 1. **定节奏**：改 `src/timeline.json` → `python scripts/build_timeline.py`，核对总拍数与每镜时长。
@@ -89,7 +89,7 @@ agent_created: true
 
 ## 资源
 
-- **`WorkbuddyWorkflow/视频制作通用流程.md`（仓库内）**：完整方法论——七参数决策表、通用八步、迁移清单、判据出处。做新题材先读这份。
+- **`WorkBuddyWorkflow/视频制作通用流程.md`（仓库内）**：完整方法论——七参数决策表、通用八步、迁移清单、判据出处。做新题材先读这份。
 - `references/workflow-sop.md`：完整 SOP（文件地图、更详细的步骤与自检项）。
 - `references/qc_rhythm.py`：节奏体检参考实现（拷进项目 scripts/ 并改路径即可用）。
 - `references/narration-guidance.md`：口播文案 13 条写作原则（出处 anything2explainer，★2.7k）。

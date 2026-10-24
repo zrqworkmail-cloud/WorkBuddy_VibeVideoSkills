@@ -1,4 +1,4 @@
-# WorkbuddyWorkflow
+# WorkBuddyWorkflow
 
 这里沉淀**用 Workbuddy 跑通、可复用的工作流**。每条工作流都包含三部分：
 
@@ -11,7 +11,7 @@
 ## 目录
 
 ```
-WorkbuddyWorkflow/
+WorkBuddyWorkflow/
 ├── 视频制作通用流程.md        ← 通用 SOP（先读这个）
 ├── 视频制作流程演进记录.md     ← 决策记录：为什么这么改
 ├── src/                      ← 参考实现：时间轴、覆盖层、概念帧

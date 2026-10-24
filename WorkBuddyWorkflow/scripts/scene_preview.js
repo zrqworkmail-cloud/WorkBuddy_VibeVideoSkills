@@ -30,7 +30,10 @@ function ff(args){return new Promise((res,rej)=>{const p=spawn(FF,['-hide_banner
   await page.waitForFunction('window.__ready === true',{timeout:20000});
   const sc=await page.evaluate(id=>window.TIMELINE.scenes.find(s=>s.id===id),sid);
   if(!sc){console.error('timeline 里找不到分镜',sid);process.exit(1);}
-  await page.evaluate(()=>{document.body.style.background='#0b0f14';});
+  // 注意：这里绝不能给 body 设不透明底色。
+  // 覆盖层必须保持透明，否则叠底板时会把 base 整帧盖掉 ——
+  // 预览就会显示成"没有底板的干净画面"，与成片完全不一致（曾因此漏掉 s8 文字压柱子的缺陷）。
+  // 纯覆盖层图（不带 --base）在图片查看器里显示为黑底，属正常。
   console.log(`[${sid}] ${sc.start.toFixed(2)}–${sc.end.toFixed(2)}s  采样 ${N} 帧  base=${useBase}`);
   for(let i=0;i<N;i++){
     const t=sc.start+(sc.end-sc.start)*((i+0.5)/N);

@@ -102,8 +102,8 @@ body.ov .ov-scrim,body.ov .ov-grain{display:block}
   opacity:var(--sc,0);
 }
 .h1{font-size:104px;font-weight:900;line-height:1.16;letter-spacing:-.03em;color:var(--ink);
-    -webkit-text-stroke:.7px rgba(6,8,14,.55);
-    text-shadow:0 3px 24px rgba(0,0,0,.66),0 1px 4px rgba(0,0,0,.6),0 0 2px rgba(0,0,0,.45)}
+    -webkit-text-stroke:1.1px rgba(6,8,14,.62);
+    text-shadow:0 3px 26px rgba(0,0,0,.78),0 2px 6px rgba(0,0,0,.7),0 0 2px rgba(0,0,0,.5)}
 .h1.lg{font-size:120px}
 .h2{font-size:72px;font-weight:800;line-height:1.28;letter-spacing:-.02em;color:var(--ink);
     -webkit-text-stroke:.6px rgba(6,8,14,.5);
@@ -333,20 +333,44 @@ em{font-style:normal;color:var(--lime);font-weight:900;
 .mini{font-family:'NSC';font-size:21px;font-weight:500;fill:var(--dim);letter-spacing:.04em}
 
 /* ---------- S8 时间尺 + 额度条 ---------- */
-#s8 .rulerlbl{position:absolute;left:90px;top:428px;width:900px;display:flex;justify-content:space-between;
+#s8 .rulerlbl{position:absolute;left:90px;top:298px;width:900px;display:flex;justify-content:space-between;
   font-size:23px;color:var(--dim);letter-spacing:.14em}
-#s8 .ruler{position:absolute;left:90px;top:466px;width:900px;height:72px;display:flex;gap:4px;align-items:flex-end}
+#s8 .ruler{position:absolute;left:90px;top:336px;width:900px;height:72px;display:flex;gap:4px;align-items:flex-end}
 #s8 .ruler i{display:block;width:40px;height:44px;border-radius:3px;background:rgba(255,255,255,.20)}
 #s8 .ruler i.hot{background:var(--red);opacity:.9}
-#s8 .pct{position:absolute;left:88px;top:622px;font-size:180px;font-weight:600;
+#s8 .pct{position:absolute;left:88px;top:492px;font-size:180px;font-weight:600;
   color:var(--red);line-height:1;letter-spacing:-.02em}
-#s8 .gauge{position:absolute;left:90px;top:828px;width:900px}
+#s8 .gauge{position:absolute;left:90px;top:698px;width:900px}
+/* 文字块单独下移：给额度条下方的说明标签留出呼吸空间，避免与标题首行贴死 */
+#s8 .txt{bottom:396px}
+/* s8 底板是三个浅色液体柱，白色标题压上去对比度不足 —— 这一镜的文字底衬加深加实。
+   柱子仍透出轮廓（保留"额度被抽干"的视觉隐喻），但不再干扰阅读。 */
+#s8 .txt::before{
+  background:radial-gradient(122% 112% at 18% 100%,
+    rgba(4,6,11,.95) 0%, rgba(4,6,11,.90) 48%, rgba(4,6,11,.62) 74%, rgba(4,6,11,0) 100%);
+  filter:blur(11px);
+}
+#s8 .h1{-webkit-text-stroke:1.6px rgba(4,6,10,.8);
+  text-shadow:0 4px 30px rgba(0,0,0,.9),0 2px 8px rgba(0,0,0,.8),0 0 3px rgba(0,0,0,.7)}
 #s8 .gbar{position:relative;width:900px;height:100px;border:2px solid rgba(255,255,255,.16);
   border-radius:8px;overflow:hidden;background:rgba(255,255,255,.03)}
 #s8 .gfill{position:absolute;left:0;top:0;height:100%;width:100%;
   background:linear-gradient(90deg,var(--red),#FF9B3C);transform-origin:left center}
 #s8 .gcap{position:absolute;left:0;top:118px;width:900px;display:flex;justify-content:space-between;
   font-size:24px;color:var(--dim);letter-spacing:.12em}
+
+/* ---------- 呼吸光层 ----------
+   长镜头里的大面积缓慢明暗，是"画面还活着"的主要来源。
+   小光点对帧间差异贡献极小（判据几乎测不到），大面积低幅度变化才既自然又有效。 */
+.breathe{position:absolute;inset:0;pointer-events:none;opacity:0;will-change:opacity}
+
+/* ---------- S9 晨光读数 ----------
+   背景是亮粉色窗帘，浅色数字直接压上去对比度不足；
+   描边放在填充下面（paint-order:stroke），字身不被吃掉。 */
+#s9-time{stroke:rgba(14,8,12,.62);stroke-width:8px;paint-order:stroke;
+  filter:drop-shadow(0 3px 18px rgba(0,0,0,.85))}
+#s9 .s3num{stroke:rgba(14,8,12,.55);stroke-width:6px;paint-order:stroke;
+  filter:drop-shadow(0 2px 12px rgba(0,0,0,.8))}
 </style>
 </head>
 <body>
@@ -578,6 +602,7 @@ em{font-style:normal;color:var(--lime);font-weight:900;
 
   <!-- ============ S13 生物钟 · 假清醒 / 觉醒维持区（承接 s4，接新生成的月光房视频） ============ -->
   <section class="scene has-terms" id="s13">
+    <div class="breathe" style="background:radial-gradient(58% 42% at 50% 42%, rgba(201,255,78,.09), transparent 72%)"></div>
     <div class="tag" data-t="0.15" data-anim="fade" data-d="0.5">02 / 回光返照</div>
     <svg class="plot" viewBox="0 0 900 700">
       <g stroke="rgba(255,255,255,.055)" stroke-width="1">
@@ -599,6 +624,8 @@ em{font-style:normal;color:var(--lime);font-weight:900;
 
       <!-- 假清醒峰值 -->
       <circle id="s13-peak" cx="255" cy="0" r="10" fill="#C9FF4E" opacity="0"/>
+      <!-- 沿曲线流动的信号光点：让"信号在衰减"这件事持续可见 -->
+      <circle id="s13-flow" cx="70" cy="330" r="7" fill="#EAFFB8" opacity="0"/>
       <text class="mini" x="300" y="150" fill="#C9FF4E" data-t="2.2" data-anim="up" data-d="0.5">假清醒</text>
 
       <!-- 此刻 02:47：清醒信号已见底 -->
@@ -623,6 +650,7 @@ em{font-style:normal;color:var(--lime);font-weight:900;
 
   <!-- ============ S5 应激 ============ -->
   <section class="scene has-terms" id="s5">
+    <div class="breathe" style="background:radial-gradient(62% 46% at 52% 44%, rgba(255,190,120,.10), transparent 72%)"></div>
     <div class="tag" data-t="0.15" data-anim="fade" data-d="0.5">03 / 应急</div>
     <!-- HPA 轴：下丘脑 →CRH→ 垂体 →ACTH→ 肾上腺皮质 → 皮质醇 → 负反馈 -->
     <svg class="plot" viewBox="0 0 900 700">
@@ -713,6 +741,7 @@ em{font-style:normal;color:var(--lime);font-weight:900;
 
   <!-- ============ S6 多巴胺 ============ -->
   <section class="scene has-terms" id="s6">
+    <div class="breathe" style="background:radial-gradient(60% 44% at 50% 46%, rgba(201,255,78,.10), transparent 72%)"></div>
     <div class="brainmap sm" style="right:22px;top:118px" data-t="4.6" data-anim="fade" data-d="0.9" data-region="midbrain" data-name="中脑 · 多巴胺" data-place="想要 → 再来一次（循环）"></div>
     <div class="tag" data-t="0.15" data-anim="fade" data-d="0.5">04 / 奖励</div>
     <!-- 奖赏回路：中脑 → 伏隔核 → 前额叶 → 中脑（一圈一圈加速） -->
@@ -763,8 +792,12 @@ em{font-style:normal;color:var(--lime);font-weight:900;
       <text id="dop-sub" x="450" y="396" text-anchor="middle" fill="rgba(244,255,210,.6)"
             font-size="25" opacity="0">not pleasure — wanting</text>
 
-      <!-- 循环光点 -->
-      <circle id="dop-dot" cx="450" cy="180" r="8" fill="#EAFFB8" opacity="0"/>
+      <!-- 循环光点 + 尾迹：位置全部由相位推导（确定性），不用随机 -->
+      <circle id="dop-t4" cx="450" cy="180" r="4" fill="#EAFFB8" opacity="0"/>
+      <circle id="dop-t3" cx="450" cy="180" r="5" fill="#EAFFB8" opacity="0"/>
+      <circle id="dop-t2" cx="450" cy="180" r="6" fill="#EAFFB8" opacity="0"/>
+      <circle id="dop-t1" cx="450" cy="180" r="7" fill="#EAFFB8" opacity="0"/>
+      <circle id="dop-dot" cx="450" cy="180" r="11" fill="#EAFFB8" opacity="0"/>
 
       <!-- 圈数 -->
       <text id="dop-count" x="450" y="562" text-anchor="middle" fill="#C9FF4E"
@@ -776,6 +809,11 @@ em{font-style:normal;color:var(--lime);font-weight:900;
          data-t="12.6" data-anim="up" data-d="0.7">
       <span>想要</span><i>↓</i><span>得到</span><i>↓</i><span>更想要</span><i class="cyc">↻</i>
     </div>
+    <!-- 下半屏神经递质流：填掉大片死黑，同时给这镜提供持续可感运动 -->
+    <svg id="dop-flow" viewBox="0 0 1080 660"
+         style="position:absolute;left:0;bottom:180px;width:1080px;height:660px;pointer-events:none">
+      <g id="dop-parts"></g>
+    </svg>
     <div class="txt">
       <div class="h1" style="font-size:96px">
         <span class="ln"><i data-t="4.4" data-anim="mask" data-d="0.8">大脑还顺手</i></span>
@@ -824,6 +862,7 @@ em{font-style:normal;color:var(--lime);font-weight:900;
 
   <!-- ============ S8 额度 ============ -->
   <section class="scene" id="s8">
+    <div class="breathe" style="background:radial-gradient(58% 40% at 48% 40%, rgba(120,220,255,.09), transparent 72%)"></div>
     <div class="tag" data-t="0.15" data-anim="fade" data-d="0.5">06 / 真相</div>
     <div class="rulerlbl" data-t="0.15" data-anim="fade" data-d="0.5"><span>已清醒</span><span>19 小时</span></div>
     <div class="ruler" data-t="0.35" data-anim="up" data-d="0.7">
@@ -1296,10 +1335,19 @@ const scenes = T.scenes.map(s=>{
 });
 
 const FNS = {
+  // 呼吸光层驱动：长镜头里的大面积缓慢明暗 + 极缓漂移。
+  // 幅度刻意压低（峰值 alpha ≈0.05），目的是"画面有呼吸"，不是发光特效。
+  breathe:(el,lt)=>{
+    const br=el.querySelector('.breathe'); if(!br) return;
+    br.style.opacity=(0.30+0.26*Math.sin(lt*1.55)).toFixed(3);
+    br.style.transform='translate('+(Math.sin(lt*0.62)*26).toFixed(1)+'px,'
+      +(Math.cos(lt*0.51)*18).toFixed(1)+'px)';
+  },
   // S13：假清醒 —— 觉醒维持区高亮淡入、21 点峰值脉冲、"此刻已见底"标记延迟浮现
   s13:(lt,t,el)=>{
+    FNS.breathe(el,lt);
     const wmz=el.querySelector('#s13-wmz');
-    if(wmz) wmz.setAttribute('opacity',(0.9*clamp((lt-0.3)/0.8)).toFixed(3));
+    if(wmz) wmz.setAttribute('opacity',(0.9*clamp((lt-0.3)/0.8)*(0.78+0.22*Math.sin(lt*2.1))).toFixed(3));
     const peak=el.querySelector('#s13-peak');
     if(peak){
       const p=0.5+0.5*Math.sin(lt*3.0);
@@ -1308,6 +1356,23 @@ const FNS = {
     }
     const now=el.querySelector('#s13-now');
     if(now) now.setAttribute('opacity',clamp((lt-4.6)/0.7).toFixed(3));
+
+    // 信号光点沿曲线流动（getPointAtLength 是纯函数，任意时刻位置可复现）
+    const alert=el.querySelector('#s13-alert');
+    const flow=el.querySelector('#s13-flow');
+    if(alert && flow && lt>2.4){
+      try{
+        const L=alert.getTotalLength();
+        if(L>0){
+          const p=((lt-2.4)*0.33)%1;
+          const pt=alert.getPointAtLength(L*p);
+          flow.setAttribute('cx',pt.x.toFixed(1));
+          flow.setAttribute('cy',pt.y.toFixed(1));
+          // 越接近"见底"越暗，暗示清醒信号一路走低
+          flow.setAttribute('opacity',(0.9-0.45*p).toFixed(2));
+        }
+      }catch(e){}
+    }
   },
   // S3：存款 = 眼皮"沉度"的积分。把真实闭眼高度当涨速，累加后归一化到 [0,1]：
   // 起点 0%、终点 100%、全程单调；眼皮沉得快涨得快、睁开时涨得慢 —— 即"随视频节奏慢慢攒"，
@@ -1466,6 +1531,7 @@ const FNS = {
   // S5 皮质醇：呼吸读数 12→22 平滑爬升（设计值），「数字辉光」由胸口真实起伏驱动 ——
   // 数字随画面里那口气一起呼吸；心电图滚动速度也随呼吸进度加快（文字与画面同一节奏）。
   s5:(lt,t,el)=>{
+    FNS.breathe(el,lt);
     /* HPA 轴：下丘脑 →CRH→ 垂体 →ACTH→ 肾上腺皮质 → 皮质醇 → 负反馈
        节奏：0.8/2.2/3.6 三个节点依次亮；1.3/2.7/4.2 三个光点逐段传递；
        5.0 皮质醇喷出；8.5 负反馈画出；14.5 负反馈断裂 → "刹不住"。 */
@@ -1489,13 +1555,21 @@ const FNS = {
     show('#hpa-n3', 3.6);
     show('#hpa-cort', 5.0);
 
-    // 传递光点
+    // 传递光点：首次三跳 1.3/2.7/4.2 交代路径，之后持续循环（HPA 轴一直在放电，
+    // 不是只放一次）—— 这是本镜后半段的主要运动来源
     const dot=el.querySelector('#hpa-dot');
     if(dot){
       let x=300,y=176,op=0;
       if(lt>=1.3 && lt<2.3){ const q=(lt-1.3); y=176+86*q; op=1; }
       else if(lt>=2.7 && lt<3.7){ const q=(lt-2.7); y=346+86*q; op=1; }
       else if(lt>=4.2 && lt<5.2){ const q=(lt-4.2); x=300+400*q; y=470; op=1; }
+      else if(lt>=5.6){
+        const cyc=2.6, p=((lt-5.6)%cyc)/cyc;
+        if(p<1/3){ const q=p*3; x=300; y=176+86*q; }
+        else if(p<2/3){ const q=(p-1/3)*3; x=300; y=346+86*q; }
+        else { const q=(p-2/3)*3; x=300+400*q; y=470; }
+        op=1;
+      }
       dot.setAttribute('cx',x.toFixed(1));
       dot.setAttribute('cy',y.toFixed(1));
       dot.setAttribute('opacity',op.toFixed(2));
@@ -1518,7 +1592,10 @@ const FNS = {
         const rr=26+(k%4)*11 + 58*q;
         c.setAttribute('cx',(700+Math.cos(ang)*rr).toFixed(1));
         c.setAttribute('cy',(470+Math.sin(ang)*rr).toFixed(1));
-        c.setAttribute('opacity',(lt>5.0 ? (0.85*(1-q*0.55)) : 0).toFixed(2));
+        // 扩散结束后不静止：保留呼吸脉动，让皮质醇浓度"一直在涨"
+        const base = lt>5.0 ? (0.85*(1-q*0.55)) : 0;
+        const pulse = 0.62 + 0.38*Math.sin(lt*2.1 + k*0.8);
+        c.setAttribute('opacity',(base*pulse).toFixed(2));
       });
     }
 
@@ -1544,6 +1621,7 @@ const FNS = {
   },
   // S6 多巴胺：受体点阵的「活跃度」由真实手机屏幕亮度驱动 —— 屏幕越亮（刷得越凶），受体越躁动。
   s6:(lt,t,el)=>{
+    FNS.breathe(el,lt);
     /* 奖赏回路：中脑 → 伏隔核 → 前额叶 → 中脑。
        光点一圈一圈跑，**每圈都比上一圈快**（速度随时间线性增长），
        圈数到 4 次后变红并闪"停不下来"——这就是多巴胺的功能：
@@ -1569,20 +1647,47 @@ const FNS = {
     const phase = 0.28*dt + 0.0275*dt*dt;
     const laps  = Math.floor(phase);
 
+    // 相位 → 三角环上的坐标（纯函数，任意相位可复现）
+    const posAt=(ph)=>{
+      const u=((ph%1)+1)%1;
+      let d=u*TOT, k=0;
+      while(k<2 && d>L[k]){ d-=L[k]; k++; }
+      const a=P[k], b=P[(k+1)%3], r=d/L[k];
+      return [a[0]+(b[0]-a[0])*r, a[1]+(b[1]-a[1])*r];
+    };
+
     const dot=el.querySelector('#dop-dot');
+    let dx=0, dy=0;
     if(dot){
       if(lt<t0){ dot.setAttribute('opacity','0'); }
       else{
-        const u=phase-Math.floor(phase);
-        let d=u*TOT, k=0;
-        while(k<2 && d>L[k]){ d-=L[k]; k++; }
-        const a=P[k], b=P[(k+1)%3], r=d/L[k];
-        dot.setAttribute('cx',(a[0]+(b[0]-a[0])*r).toFixed(1));
-        dot.setAttribute('cy',(a[1]+(b[1]-a[1])*r).toFixed(1));
+        const p=posAt(phase); dx=p[0]; dy=p[1];
+        dot.setAttribute('cx',dx.toFixed(1));
+        dot.setAttribute('cy',dy.toFixed(1));
         dot.setAttribute('opacity','1');
         dot.setAttribute('fill', laps>=4 ? '#FF5A3C' : '#EAFFB8');
       }
     }
+
+    // 尾迹：相位略滞后的 4 个点，越远越小越淡 —— 让"在跑"这件事可见
+    for(let i=1;i<=4;i++){
+      const n=el.querySelector('#dop-t'+i); if(!n) continue;
+      if(lt<t0){ n.setAttribute('opacity','0'); continue; }
+      const p=posAt(phase - i*0.05);
+      n.setAttribute('cx',p[0].toFixed(1));
+      n.setAttribute('cy',p[1].toFixed(1));
+      n.setAttribute('opacity',(0.52 - i*0.10).toFixed(2));
+      n.setAttribute('fill', laps>=4 ? '#FF5A3C' : '#EAFFB8');
+    }
+
+    // 节点脉冲：光点靠近时节点放大，强化"经过"的事件感
+    [[450,180,'#dop-n1'],[640,460,'#dop-n2'],[260,460,'#dop-n3']].forEach(([nx,ny,sel])=>{
+      const n=el.querySelector(sel); if(!n) return;
+      const dist=Math.hypot(dx-nx, dy-ny);
+      const k=lt<t0 ? 0 : Math.max(0, 1-dist/110);
+      const s=(1+0.22*k).toFixed(3);
+      n.setAttribute('transform','translate('+nx+','+ny+') scale('+s+') translate('+(-nx)+','+(-ny)+')');
+    });
 
     const cnt=el.querySelector('#dop-count');
     if(cnt){
@@ -1593,6 +1698,31 @@ const FNS = {
     const warn=el.querySelector('#dop-warn');
     if(warn){
       warn.setAttribute('opacity', laps>=4 ? (0.55+0.45*Math.abs(Math.sin(lt*6))).toFixed(2) : '0');
+    }
+
+    // 下半屏粒子流：位置 = f(lt)，确定性；只创建一次后复用（不每帧重建 DOM）
+    if(!el.__parts){
+      const g=el.querySelector('#dop-parts');
+      if(g){
+        const arr=[];
+        for(let i=0;i<16;i++){
+          const c=document.createElementNS('http://www.w3.org/2000/svg','circle');
+          c.setAttribute('r',(1.8+(i%3)*1.1).toFixed(1));
+          c.setAttribute('fill','#C9FF4E');
+          g.appendChild(c); arr.push(c);
+        }
+        el.__parts=arr;
+      }
+    }
+    if(el.__parts){
+      el.__parts.forEach((c,i)=>{
+        const sp=0.055+(i%5)*0.011;
+        const x=((lt*sp*1080 + i*151) % 1180) - 50;
+        const y=130 + (i%5)*108 + Math.sin(lt*1.35+i*1.7)*52;
+        c.setAttribute('cx',x.toFixed(1));
+        c.setAttribute('cy',y.toFixed(1));
+        c.setAttribute('opacity',(0.10+0.16*Math.abs(Math.sin(lt*1.1+i*0.9))).toFixed(2));
+      });
     }
   },
   // S7：判断力由「画面运动量」驱动 —— 越静止（人越呆滞）判断力越低；
@@ -1617,6 +1747,7 @@ const FNS = {
     if(bar) bar.style.transform=`scaleX(${Math.max(0.02,v).toFixed(3)})`;
   },
   s8:(lt,t,el)=>{
+    FNS.breathe(el,lt);
     const p=clamp((lt-0.5)/4.6);
     const val=100-88*eo2(p);
     el.querySelector('#s8-fill').style.transform=`scaleX(${(val/100).toFixed(4)})`;

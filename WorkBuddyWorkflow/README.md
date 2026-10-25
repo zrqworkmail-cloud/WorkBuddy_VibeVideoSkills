@@ -77,6 +77,51 @@ node scripts/scene_preview.js s1 3 --base       # 单镜预览是否出图
 
 ---
 
+## 产物状态（第一支片已杀青）
+
+`out/` 在 2026-10-25 做过一次清理：**943MB → 364MB**。当前保留的东西和理由如下。
+
+### 不要删
+
+| 文件 | 说明 |
+|---|---|
+| `out/为什么越熬夜越精神.mp4` | 成片，1080×1920 / 24fps / 136.72s / 57MB |
+| `out/cover.png` | 封面 |
+| `out/分镜脚本.md`、`out/发布文案.md` | 交付文档 |
+
+### 保留的可复用资产（重建成本高）
+
+| 资产 | 为什么留 |
+|---|---|
+| `out/ai/s1–s14.mp4`（31MB） | AI 生成素材。重跑要 GPU 数十分钟，**且结果不可复现**（同 seed 也可能有差异） |
+| `out/ai/concepts/` | 概念首帧，构图基准 |
+| `out/audio/bgm_source.wav`（26MB） | BGM 原始素材，不可再生 |
+| `out/audio/bgm_final.m4a` | 成片音轨，第二支片也在复用 |
+| `out/audio/beats.json`、`grid.json` | 节拍与网格数据 |
+
+### 已清理（都能重建）
+
+| 已删 | 原体积 | 重建方式 |
+|---|---|---|
+| `out/base/` + `out/base.mp4` | 263MB | `python scripts/build_base.py`（从 `ai/` 重建，几分钟，**不需要 GPU**） |
+| `out/qc/` 质检截图 | 174MB | 不需要；复检跑 `python scripts/qc_rhythm.py` |
+| `out/stills/` 静帧 | 16MB | `node scripts/stills.js` |
+| 实验样片 / `video_only.mp4` / `_v1_backup.mp4` | 87MB | 已被最终版取代 |
+| 中间音轨 `bgm.wav`、`final_audio.wav` | 25MB | 从 `bgm_source.wav` 重新处理 |
+
+### 想重新出片时
+
+```bash
+python scripts/build_base.py      # 重建底板（几分钟）
+node scripts/composite.js 24      # 合成（约 7 分钟）
+```
+
+前提：`node_modules` 还在（32MB，已保留）。若被清过，`npm i puppeteer-core --no-save`。
+
+> 第二支片在 `films/motion-sickness/`，独立目录，不受这次清理影响。
+
+---
+
 ## 约定
 
 - **产物不入库**：`out/`（成片、素材、帧）与 `node_modules/` 已加入 `.gitignore`

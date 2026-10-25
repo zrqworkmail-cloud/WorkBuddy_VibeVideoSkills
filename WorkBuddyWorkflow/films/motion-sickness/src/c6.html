@@ -1,0 +1,144 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_c.css">
+</head><body>
+<!-- s6 结构 · 三个半规管：内耳解剖（陀螺状三环 + 前庭 + 耳石器 + 耳蜗），青色冷光 -->
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <radialGradient id="bg6" cx="50%" cy="42%" r="64%">
+      <stop offset="0"   stop-color="#0e1c2e"/>
+      <stop offset=".55" stop-color="#070d18"/>
+      <stop offset="1"   stop-color="#03050a"/>
+    </radialGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0"   stop-color="#57DFFF" stop-opacity=".26"/>
+      <stop offset=".45" stop-color="#2b6f9c" stop-opacity=".10"/>
+      <stop offset="1"   stop-color="#04060b" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="tube" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#9fe8ff"/>
+      <stop offset=".5"  stop-color="#57DFFF"/>
+      <stop offset="1"   stop-color="#2b6f9c"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="9" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="glow2"><feGaussianBlur stdDeviation="20"/></filter>
+    <filter id="soft"><feGaussianBlur stdDeviation="3"/></filter>
+  </defs>
+
+  <rect width="704" height="1280" fill="url(#bg6)"/>
+  <ellipse cx="352" cy="600" rx="400" ry="440" fill="url(#halo)"/>
+
+  <!-- 背景网格 -->
+  <g stroke="#57DFFF" stroke-width="1" opacity=".06" fill="none">
+    <path d="M0 280 H704 M0 440 H704 M0 600 H704 M0 760 H704 M0 920 H704"/>
+    <path d="M140 100 V1180 M352 60 V1220 M564 100 V1180"/>
+  </g>
+
+  <!-- ===== 三个半规管：一个水平扁环 + 两个倾斜长环（陀螺状） ===== -->
+  <g filter="url(#glow)" fill="none" stroke-linecap="round">
+    <!-- 后半规管（左倾，窄而长，明显横穿水平环） -->
+    <g transform="rotate(-58 352 466)">
+      <ellipse cx="352" cy="466" rx="86" ry="158" stroke="url(#tube)" stroke-width="15" opacity=".55"/>
+      <ellipse cx="352" cy="466" rx="86" ry="158" stroke="#bdefff" stroke-width="3" opacity=".45"/>
+    </g>
+    <!-- 前半规管（右倾，同上） -->
+    <g transform="rotate(58 352 466)">
+      <ellipse cx="352" cy="466" rx="86" ry="158" stroke="url(#tube)" stroke-width="15" opacity=".55"/>
+      <ellipse cx="352" cy="466" rx="86" ry="158" stroke="#bdefff" stroke-width="3" opacity=".45"/>
+    </g>
+    <!-- 水平半规管（扁环，最亮，主角） -->
+    <ellipse cx="352" cy="466" rx="188" ry="118" stroke="url(#tube)" stroke-width="23" opacity=".95"/>
+    <ellipse cx="352" cy="466" rx="188" ry="118" stroke="#e9fbff" stroke-width="5" opacity=".92"/>
+  </g>
+
+  <!-- 水平半规管内的淋巴液（沿管壁流动的亮弧） -->
+  <g filter="url(#glow)" fill="none" stroke="#e9fbff" stroke-linecap="round">
+    <path d="M172 452 A188 118 0 0 1 320 350" stroke-width="9" opacity=".85"/>
+    <path d="M404 356 A188 118 0 0 1 528 448" stroke-width="6" opacity=".45"/>
+    <path d="M236 552 A188 118 0 0 0 352 584" stroke-width="5" opacity=".35"/>
+  </g>
+
+  <!-- 壶腹（水平管左端的膨大，内含毛细胞） -->
+  <g filter="url(#glow)">
+    <ellipse cx="166" cy="470" rx="38" ry="31" fill="#08151f" stroke="#9fe8ff" stroke-width="5"/>
+    <ellipse cx="166" cy="470" rx="16" ry="12" fill="#e9fbff" opacity=".92"/>
+    <path d="M158 458 L158 482 M166 455 L166 485 M174 458 L174 482" stroke="#57DFFF" stroke-width="2" opacity=".8"/>
+  </g>
+
+  <!-- ===== 前庭：有机形状（不是方块） ===== -->
+  <g filter="url(#glow)">
+    <path d="M302 600 C316 578 344 570 368 580 C398 592 416 622 414 660
+             C412 700 392 726 358 730 C322 734 296 712 290 678 C286 646 290 616 302 600 Z"
+          fill="#091621" stroke="url(#tube)" stroke-width="8"/>
+  </g>
+
+  <!-- 椭圆囊 / 球囊：上下叠放（不是左右并排，避免"眼睛"错觉） -->
+  <g filter="url(#glow)">
+    <ellipse cx="352" cy="626" rx="38" ry="15" fill="#0b1c2c" stroke="#9fe8ff" stroke-width="4"/>
+    <ellipse cx="352" cy="672" rx="31" ry="13" fill="#0b1c2c" stroke="#9fe8ff" stroke-width="3.5"/>
+  </g>
+  <!-- 耳石颗粒：贴在囊底 -->
+  <g fill="#e9fbff" opacity=".9">
+    <circle cx="334" cy="632" r="3.4"/><circle cx="345" cy="634" r="2.8"/>
+    <circle cx="356" cy="633" r="3.1"/><circle cx="367" cy="631" r="2.6"/>
+    <circle cx="338" cy="677" r="2.8"/><circle cx="350" cy="678" r="2.4"/>
+    <circle cx="362" cy="676" r="2.6"/>
+  </g>
+
+  <!-- ===== 连接管 → 耳蜗 ===== -->
+  <path d="M352 730 C352 758 348 782 352 802" fill="none" stroke="#2b6f9c" stroke-width="18" opacity=".55" filter="url(#glow)"/>
+  <path d="M352 730 C352 758 348 782 352 802" fill="none" stroke="#57DFFF" stroke-width="8" opacity=".85" filter="url(#glow)"/>
+
+  <!-- 耳蜗（螺旋，JS 生成） -->
+  <g id="cochlea" filter="url(#glow)" fill="none" stroke-linecap="round"></g>
+
+  <!-- ===== 前庭神经束 → 脑干（向右下） ===== -->
+  <g filter="url(#soft)" stroke="#57DFFF" opacity=".42" fill="none" stroke-linecap="round">
+    <path d="M412 690 C478 726 512 790 528 860" stroke-width="7"/>
+    <path d="M406 712 C472 760 502 820 512 884" stroke-width="4.5"/>
+    <path d="M418 668 C492 692 534 744 548 800" stroke-width="3"/>
+  </g>
+  <g id="sparks"></g>
+
+  <!-- 引线（纯几何，无文字；必须 fill="none"，否则开放路径会被填成黑三角） -->
+  <g stroke="#57DFFF" stroke-width="2" opacity=".34" fill="none" stroke-linecap="round">
+    <path d="M166 440 L166 330 L246 330"/>
+    <path d="M540 400 L592 400 L592 316"/>
+    <path d="M414 700 L500 700 L500 760"/>
+  </g>
+
+  <!-- 四角刻度 -->
+  <g stroke="#57DFFF" stroke-width="2" opacity=".26" fill="none">
+    <path d="M40 60 h44 M40 60 v44"/><path d="M664 60 h-44 M664 60 v44"/>
+    <path d="M40 1220 h44 M40 1220 v-44"/><path d="M664 1220 h-44 M664 1220 v-44"/>
+  </g>
+</svg>
+</div>
+<script>
+(function(){
+  const r=(s)=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+
+  // 耳蜗：阿基米德螺旋
+  const cx=352, cy=880;
+  let d='', N=180;
+  for(let i=0;i<=N;i++){
+    const p=i/N, a=p*Math.PI*4.3, rad=78*(1-p*0.82);
+    const x=cx+Math.cos(a)*rad, y=cy+Math.sin(a)*rad*0.94;
+    d+=(i?' L':'M')+x.toFixed(1)+' '+y.toFixed(1);
+  }
+  document.getElementById('cochlea').innerHTML =
+    `<path d="${d}" stroke="#2b6f9c" stroke-width="22" opacity=".70"/>`+
+    `<path d="${d}" stroke="#57DFFF" stroke-width="10" opacity=".95"/>`+
+    `<path d="${d}" stroke="#e9fbff" stroke-width="3" opacity=".65"/>`;
+
+  // 神经放电点
+  let s='';const R=r(53);
+  for(let i=0;i<18;i++){
+    const t=i/18, x=414+t*126+R()*14, y=690+t*186+R()*16, rr=1.5+R()*3.0;
+    s+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${rr.toFixed(1)}" fill="#c8f4ff" opacity="${(.3+R()*.6).toFixed(2)}"/>`;
+  }
+  document.getElementById('sparks').innerHTML=s;
+})();
+</script>
+</body></html>

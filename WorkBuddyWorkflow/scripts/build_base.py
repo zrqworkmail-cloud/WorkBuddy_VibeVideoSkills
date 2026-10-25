@@ -5,7 +5,9 @@
 并给每个镜头不同的后处理（暗角/辉光/锐化/单色），避免特效单一。"""
 import json, os, shutil, subprocess, sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+import _film
+
+ROOT = _film.FILMROOT
 FF = "D:/tools/ffmpeg/bin/ffmpeg.exe"
 AI = os.path.join(ROOT, "out", "ai")
 OUT = os.path.join(ROOT, "out", "base")

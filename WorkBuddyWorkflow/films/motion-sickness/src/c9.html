@@ -1,0 +1,127 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_c.css">
+</head><body>
+<!-- s9 冲突 · 两套信号对撞：上半青色涡旋（内耳说"在转"），下半青柠直栅（眼睛说"没动"），中间断裂 -->
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <linearGradient id="bg9" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#07131c"/>
+      <stop offset=".46" stop-color="#04070c"/>
+      <stop offset=".54" stop-color="#04070c"/>
+      <stop offset="1"   stop-color="#0d1204"/>
+    </linearGradient>
+    <radialGradient id="cyanH" cx="50%" cy="36%" r="58%">
+      <stop offset="0"   stop-color="#57DFFF" stop-opacity=".30"/>
+      <stop offset=".55" stop-color="#2b6f9c" stop-opacity=".09"/>
+      <stop offset="1"   stop-color="#04060b" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="limeH" cx="50%" cy="78%" r="60%">
+      <stop offset="0"   stop-color="#C9FF4E" stop-opacity=".26"/>
+      <stop offset=".55" stop-color="#7f9c2b" stop-opacity=".08"/>
+      <stop offset="1"   stop-color="#04060b" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="g9"><feGaussianBlur stdDeviation="11" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="g9b"><feGaussianBlur stdDeviation="30"/></filter>
+    <filter id="g9c"><feGaussianBlur stdDeviation="3.4"/></filter>
+  </defs>
+
+  <rect width="704" height="1280" fill="url(#bg9)"/>
+  <ellipse cx="352" cy="340" rx="430" ry="420" fill="url(#cyanH)"/>
+  <ellipse cx="352" cy="950" rx="430" ry="420" fill="url(#limeH)"/>
+
+  <!-- ===== 上半：青色涡旋 ===== -->
+  <!-- 旋臂：同一椭圆绕中心逐级旋转，形成螺旋感 -->
+  <g filter="url(#g9)" fill="none" stroke="#57DFFF" stroke-linecap="round">
+    <ellipse cx="352" cy="452" rx="272" ry="150" transform="rotate(-14 352 452)" stroke-width="9"  opacity=".78"/>
+    <ellipse cx="352" cy="452" rx="222" ry="120" transform="rotate(6 352 452)"   stroke-width="7"  opacity=".60"/>
+    <ellipse cx="352" cy="452" rx="172" ry="92"  transform="rotate(26 352 452)"  stroke-width="5.5" opacity=".46"/>
+    <ellipse cx="352" cy="452" rx="124" ry="66"  transform="rotate(46 352 452)"  stroke-width="4"  opacity=".34"/>
+    <ellipse cx="352" cy="452" rx="78"  ry="42"  transform="rotate(66 352 452)"  stroke-width="3"  opacity=".24"/>
+  </g>
+  <!-- 主旋臂的亮头（像彗尾，指向中心） -->
+  <g filter="url(#g9)" fill="none" stroke="#e9fbff" stroke-linecap="round">
+    <path d="M100 420 A272 150 -14 0 1 246 306" stroke-width="11" opacity=".9"/>
+    <path d="M246 306 A222 120 6 0 1 352 332" stroke-width="6" opacity=".5"/>
+  </g>
+  <!-- 涡心（只留粒子，不加实心块：实心块会被模糊滤镜裁成硬边方块） -->
+  <g id="vort"></g>
+
+  <!-- ===== 下半：青柠直栅 ===== -->
+  <g filter="url(#g9c)" stroke="#C9FF4E" stroke-linecap="butt" fill="none">
+    <path d="M28 700 H676"  stroke-width="6"   opacity=".98"/>
+    <path d="M28 748 H676"  stroke-width="4.6" opacity=".80"/>
+    <path d="M28 796 H676"  stroke-width="4"   opacity=".68"/>
+    <path d="M28 844 H676"  stroke-width="3.6" opacity=".58"/>
+    <path d="M28 892 H676"  stroke-width="3.2" opacity=".50"/>
+    <path d="M28 940 H676"  stroke-width="2.8" opacity=".43"/>
+    <path d="M28 988 H676"  stroke-width="2.4" opacity=".36"/>
+    <path d="M28 1036 H676" stroke-width="2"   opacity=".30"/>
+    <path d="M28 1084 H676" stroke-width="1.8" opacity=".25"/>
+    <path d="M28 1132 H676" stroke-width="1.6" opacity=".20"/>
+    <path d="M28 1180 H676" stroke-width="1.4" opacity=".16"/>
+    <path d="M28 1228 H676" stroke-width="1.2" opacity=".12"/>
+  </g>
+  <!-- 垂直刻线：栅格的刚性 -->
+  <g stroke="#C9FF4E" stroke-width="1.6" opacity=".22" fill="none">
+    <path d="M96 700 V1252"/><path d="M224 700 V1252"/><path d="M352 700 V1252"/>
+    <path d="M480 700 V1252"/><path d="M608 700 V1252"/>
+  </g>
+
+  <!-- ===== 交界：断裂 ===== -->
+  <ellipse cx="352" cy="656" rx="340" ry="58" fill="#eaffb0" opacity=".14" filter="url(#g9b)"/>
+  <!-- 不规则裂缝（振幅不均，像断裂而非折线图） -->
+  <path id="crackPath"
+        d="M-10 650 L34 636 L62 654 L96 632 L118 660 L158 638 L186 662 L214 630
+           L246 658 L282 640 L308 664 L340 634 L372 662 L404 638 L436 666 L468 636
+           L500 660 L534 640 L566 664 L598 634 L630 658 L664 638 L692 660 L714 646"
+        fill="none" stroke="#ffffff" stroke-width="8" stroke-linecap="round" filter="url(#g9)"/>
+  <path id="crackPath2"
+        d="M-10 650 L34 636 L62 654 L96 632 L118 660 L158 638 L186 662 L214 630
+           L246 658 L282 640 L308 664 L340 634 L372 662 L404 638 L436 666 L468 636
+           L500 660 L534 640 L566 664 L598 634 L630 658 L664 638 L692 660 L714 646"
+        fill="none" stroke="#ffffff" stroke-width="2.4" opacity=".95"/>
+  <!-- 裂缝两侧的应力纹 -->
+  <g stroke="#ffffff" stroke-width="1.4" opacity=".28" fill="none">
+    <path d="M186 662 L196 700 L182 726"/>
+    <path d="M436 666 L446 704 L430 730"/>
+    <path d="M340 634 L332 600 L346 576"/>
+    <path d="M566 664 L578 700 L562 724"/>
+  </g>
+  <g id="shard"></g>
+
+  <!-- 四角刻度 -->
+  <g stroke="#78829A" stroke-width="2" opacity=".18" fill="none">
+    <path d="M40 60 h44 M40 60 v44"/><path d="M664 60 h-44 M664 60 v44"/>
+    <path d="M40 1220 h44 M40 1220 v-44"/><path d="M664 1220 h-44 M664 1220 v-44"/>
+  </g>
+</svg>
+</div>
+<script>
+(function(){
+  const r=(s)=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+
+  // 涡旋粒子：沿螺旋分布（半径与角度耦合 → 真的像在旋）
+  let v='';const R=r(71);
+  for(let i=0;i<90;i++){
+    const a=R()*Math.PI*2.4, rad=40+R()*250;
+    const x=352+Math.cos(a)*rad, y=452+Math.sin(a)*rad*0.55;
+    if(y>636) continue;
+    const rr=1.0+R()*3.2;
+    v+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${rr.toFixed(1)}" fill="#c8f4ff" opacity="${(.14+R()*.6).toFixed(2)}"/>`;
+  }
+  document.getElementById('vort').innerHTML=v;
+
+  // 碎屑
+  let s='';const R2=r(97);
+  for(let i=0;i<46;i++){
+    const x=20+R2()*664, up=R2()>.5;
+    const y=656+(up?-1:1)*(6+R2()*58);
+    const rr=.9+R2()*2.6;
+    s+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${rr.toFixed(1)}" fill="${up?'#c8f4ff':'#eaffb0'}" opacity="${(.2+R2()*.7).toFixed(2)}"/>`;
+  }
+  document.getElementById('shard').innerHTML=s;
+})();
+</script>
+</body></html>

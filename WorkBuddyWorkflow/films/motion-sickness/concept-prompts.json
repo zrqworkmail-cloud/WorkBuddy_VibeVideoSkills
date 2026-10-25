@@ -1,0 +1,71 @@
+{
+  "note": "概念帧提示词表。用法：按 id 逐张喂给图像生成，出图后用 scripts/fit_concept.py <id> <原图> 裁成 704×1280。style 字段是统一风格后缀，每张都要拼在 prompt 后面。【状态】18/18 已生成完毕，成品在 out/ai/concepts/cN.png。标记 done 的是首批 3 张定调图；s3 与 s10 首轮不合格，已用 prompt_v2 重做（原因见各自 note）。",
+  "style": "Shot on 35mm film, vertical composition, deep near-black background, cool desaturated teal and cyan palette with exactly one accent color, soft volumetric haze, fine film grain, shallow depth of field, cinematic and restrained, expensive looking. Leave the lower third relatively clean and darker for subtitle text. No text, no letters, no labels, no arrows, no watermark.",
+  "frames": {
+    "s1": {
+      "done": true,
+      "prompt": "Cinematic photograph taken from the back seat of a moving car at blue hour, looking out the side window at a winding mountain road. Outside: layered mountain silhouettes receding into haze, pine trees streaking horizontally with motion blur, pale cyan glow near the horizon. Inside: dark window pillar on the right, soft headrest silhouette in the lower left. Faint reflections sliding across the glass."
+    },
+    "s2": {
+      "prompt": "Extreme close-up of a person's face in profile in a dim car back seat, eyes half closed and about to shut, eyelashes catching a faint cool light from the side, skin texture and fine hair visible, the rest of the cabin falling into darkness behind. Slight motion blur at the frame edges suggesting the car is swaying. Quiet, uneasy mood."
+    },
+    "s3": {
+      "prompt": "First person view with eyes closed inside a moving car: the world reduced to a dark red-black field of swirling afterimages and slow rotating light streaks, as if the inner ear's signal is painting the darkness, a faint cyan glow pulsing from deep inside the head. Vertigo, disorientation, everything slightly smeared and doubled.",
+      "prompt_v2": "Extreme close-up of a closed eye seen from the side in a dark car, the eyelid skin softly backlit with a faint warm red glow revealing delicate veins beneath the surface, long eyelashes silhouetted against the light, and behind the closed lid a swirling vortex of pale cyan light bleeding through the thin skin, suggesting vertigo. Dark but clearly readable, rich skin texture, visible detail, dramatic side lighting.",
+      "note": "v1 失败：纯主观抽象描述（'眼睛闭上后看到的黑暗'）→ 模型生成近乎全黑的空画面。v2 改为给一个可拍的具体主体（闭着的眼睛特写），把眩晕感放在'眼睑透光'上，成功。教训：抽象感受必须落在一个实物上。"
+    },
+    "s4": {
+      "prompt": "Cinematic shot from the back seat looking forward at a relaxed driver in profile, one hand on the steering wheel, faint smile, calm and unbothered, dashboard glow lighting his jaw and cheek, dark cabin around him, road and windshield ahead blurred into soft streaks. The contrast between his ease and the viewer's discomfort."
+    },
+    "s5": {
+      "prompt": "Medical visualization of a human head in profile rendered as a translucent dark blue glass shell, the skull and soft tissue semi-transparent, with a concentrated point of pale cyan light deep inside the ear region, glowing through the layers of the head, fine anatomical filaments visible, a few light particles drawn toward that point. The rest of the head dissolving into darkness."
+    },
+    "s6": {
+      "done": true,
+      "prompt": "Cinematic macro medical illustration of the human inner ear vestibular system: three semicircular canals arranged like a three-axis gyroscope, the vestibule below as an organic sac containing the utricle and saccule with tiny otolith crystals, the spiral cochlea beneath connected by a short tube, vestibular nerve bundle curving to the lower right. Translucent anatomical structure with soft internal bioluminescence and subsurface scattering, dust motes in the void."
+    },
+    "s7": {
+      "prompt": "Extreme macro inside a semicircular canal of the inner ear: a translucent fluid-filled tube with a living membrane lining, a cluster of hair cells with fine stereocilia bending to one side as the fluid flows past, tiny particles drifting along the current, pale cyan bioluminescence at the base of each hair cell where the signal fires, delicate wet tissue texture, shallow depth of field."
+    },
+    "s8": {
+      "prompt": "First person view from inside a dim car looking down at a glowing smartphone held in the lap, the screen's pale blue light washing over fingers and jeans, the static seat back and door panel visible at the edges and perfectly still, while the background beyond the window is a soft horizontal blur. The stillness of everything the eyes can see."
+    },
+    "s9": {
+      "done": true,
+      "prompt": "Abstract cinematic light installation split into two opposing fields. Upper half: a slowly rotating vortex of pale cyan light, long curved streaks spiraling inward. Lower half: perfectly rigid horizontal lines of acid lime-yellow light, evenly spaced and absolutely straight. At the boundary the two fields collide and tear into a jagged fracture of white-hot light with sparks and fine debris."
+    },
+    "s10": {
+      "prompt": "Dark cinematic visualization of the human brainstem and vestibular nuclei seen from a low angle, deep in shadow, with an ancient alarm circuit igniting along the neural pathways — a warm blood-red glow spreading node by node through the tissue, pulsing, while the surrounding brain matter stays cold blue and nearly black. Primitive, unsettling, like something very old waking up.",
+      "prompt_v2": "Human brain seen from below in inferior view, showing the brainstem emerging downward and the cerebellum, rendered as dark translucent anatomical tissue, with a network of fine neural pathways igniting in warm blood-red, pulsing node by node along the brainstem and into the surrounding tissue, while the rest stays cold blue and nearly black. Dramatic rim light, deep shadow, primitive and unsettling, like something very old waking up.",
+      "accent": "warm red",
+      "note": "v1 失败：'brainstem seen from a low angle' 太模糊，生成了像岩石峡谷的纹理，认不出是器官。v2 写明解剖视角（inferior view）+ 具体部位（脑干、小脑），成功。教训：解剖类必须指定视角与部位名。"
+    },
+    "s11": {
+      "prompt": "Extreme macro of neurons firing chaotically: tangled nerve fibers in dark tissue, bright red-orange electrical impulses jumping between them in irregular bursts, some signals looping back on themselves, tiny sparks scattering, the surrounding tissue lit only by this erratic discharge. Chemical, biological, slightly feverish.",
+      "accent": "red-orange"
+    },
+    "s12": {
+      "prompt": "Cross section of a human stomach and digestive tract rendered as dark translucent tissue, the contents visibly surging upward against the natural direction, a warm red-orange pressure glow pushing from below, the muscular wall contracting in visible bands, clinical but cinematic, deep shadows around the organ.",
+      "accent": "warm red"
+    },
+    "s13": {
+      "prompt": "Cinematic close-up of a pale face in a dark car, eyes squeezed shut, a sheen of cold sweat on the forehead and upper lip, color drained from the skin leaving it almost grey-blue, jaw tight, one hand pressed against the mouth, faint red undertone of nausea beneath the skin. Intimate, uncomfortable, very human.",
+      "accent": "warm red"
+    },
+    "s14": {
+      "prompt": "A single vertical column of white-cyan light falling from above into total darkness, cut cleanly in half by a matte black slab that slides across it, the light spilling and flaring at the cut edge then dying below, fine dust suspended in the beam and stopped at the barrier. Minimal, geometric, monumental, like a James Turrell installation."
+    },
+    "s15": {
+      "prompt": "A person asleep against the car window, cheek pressed to the cold glass, face slack and peaceful, soft pale light from outside falling across the cheekbone, the cabin dark and quiet around them, faint reflections of the passing landscape sliding over the glass and over their skin. Stillness that looks like relief but is really escape."
+    },
+    "s16": {
+      "prompt": "View from inside a car looking forward through the windshield at a distant open road and the horizon line, the road converging to a bright point, early morning light with pale cyan and a hint of warm gold at the horizon, the dashboard a dark silhouette at the bottom, the sky vast and clear. Relief, orientation, alignment."
+    },
+    "s17": {
+      "prompt": "Split composition in one vertical frame: the upper half shows a driver's hands resting confidently on a steering wheel, knuckles relaxed, dashboard glow; the lower half shows the same hands but now holding a phone low in the lap, head bowed, screen light on the face. Same person, two very different states of knowing what is coming."
+    },
+    "s18": {
+      "prompt": "Wide cinematic shot of a lone car driving away down an empty mountain road toward a low sun, seen from behind and slightly above, long shadows across the asphalt, the landscape opening into a vast calm horizon, deep blue sky above with a warm band of light at the edge of the world. Quiet, resolved, a little melancholy."
+    }
+  }
+}

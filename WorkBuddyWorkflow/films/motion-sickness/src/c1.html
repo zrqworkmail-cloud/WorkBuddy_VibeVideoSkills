@@ -1,0 +1,139 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_c.css">
+</head><body>
+<!-- s1 钩子 · 山道后座：侧窗视角，窗外景物横向拉丝（速度），整体微倾（拐弯），左下头枕剪影 -->
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <linearGradient id="sky1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#0e2036"/>
+      <stop offset=".18" stop-color="#24425f"/>
+      <stop offset=".34" stop-color="#3f6588"/>
+      <stop offset=".46" stop-color="#6d93b2"/>
+      <stop offset=".54" stop-color="#96b7cd"/>
+      <stop offset=".63" stop-color="#5b7a96"/>
+      <stop offset=".78" stop-color="#22344b"/>
+      <stop offset="1"   stop-color="#0c141e"/>
+    </linearGradient>
+    <linearGradient id="hill1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#42607f"/><stop offset="1" stop-color="#1e2f45"/>
+    </linearGradient>
+    <linearGradient id="hill2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#152232"/><stop offset="1" stop-color="#080e17"/>
+    </linearGradient>
+    <linearGradient id="hill3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#070c14"/><stop offset="1" stop-color="#03060a"/>
+    </linearGradient>
+    <linearGradient id="glare" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0"   stop-color="#bcd6ff" stop-opacity="0"/>
+      <stop offset=".35" stop-color="#bcd6ff" stop-opacity=".13"/>
+      <stop offset=".52" stop-color="#e6f1ff" stop-opacity=".19"/>
+      <stop offset=".70" stop-color="#bcd6ff" stop-opacity=".07"/>
+      <stop offset="1"   stop-color="#bcd6ff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="frame" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#0a1018"/><stop offset=".5" stop-color="#05080d"/>
+      <stop offset="1" stop-color="#02040a"/>
+    </linearGradient>
+    <clipPath id="wc"><rect x="0" y="0" width="704" height="1280"/></clipPath>
+    <filter id="hb8"><feGaussianBlur stdDeviation="8"/></filter>
+    <filter id="hb20"><feGaussianBlur stdDeviation="20"/></filter>
+    <filter id="hb46"><feGaussianBlur stdDeviation="46"/></filter>
+    <filter id="hb2"><feGaussianBlur stdDeviation="2"/></filter>
+  </defs>
+
+  <rect width="704" height="1280" fill="#05080e"/>
+
+  <!-- 全部内容整体微倾，暗示车身正在转弯 -->
+  <g transform="rotate(-2.6 352 640)" clip-path="url(#wc)">
+
+    <!-- ===== 车外：天空 ===== -->
+    <rect x="-40" y="-40" width="784" height="1360" fill="url(#sky1)"/>
+
+    <!-- 远山（横向拉丝：多条模糊窄带叠加） -->
+    <path d="M-40 430 C80 392 180 420 280 396 C390 370 500 404 610 380 C690 362 740 374 744 366
+             L744 560 L-40 560 Z" fill="url(#hill1)" opacity=".85"/>
+    <g opacity=".55" filter="url(#hb20)">
+      <rect x="-40" y="404" width="784" height="16" fill="#6d8db0"/>
+      <rect x="-40" y="440" width="784" height="9" fill="#8fb0cf" opacity=".7"/>
+    </g>
+
+    <!-- 中景山壁 -->
+    <path d="M-40 520 C70 492 160 516 250 496 C350 474 440 502 540 484 C640 466 720 486 744 478
+             L744 760 L-40 760 Z" fill="url(#hill2)"/>
+    <g opacity=".45" filter="url(#hb20)">
+      <rect x="-40" y="500" width="784" height="12" fill="#4a6a8c"/>
+      <rect x="-40" y="536" width="784" height="7" fill="#5d7fa3" opacity=".7"/>
+    </g>
+
+    <!-- 近景：山壁与树影（最强拉丝） -->
+    <path d="M-40 690 C60 660 140 686 230 664 C330 640 430 672 530 650 C630 628 710 650 744 640
+             L744 1160 L-40 1160 Z" fill="url(#hill3)"/>
+
+    <!-- 树影拉丝：一组水平暗条，长短不一 -->
+    <g filter="url(#hb8)" opacity=".92">
+      <rect x="-40" y="596" width="784" height="26" fill="#020509"/>
+      <rect x="-40" y="648" width="784" height="40" fill="#03070c"/>
+      <rect x="-40" y="712" width="784" height="34" fill="#02050a"/>
+      <rect x="-40" y="770" width="784" height="56" fill="#01040a"/>
+      <rect x="-40" y="846" width="784" height="42" fill="#01030a"/>
+      <rect x="-40" y="912" width="784" height="70" fill="#000308"/>
+      <rect x="-40" y="1002" width="784" height="54" fill="#000207"/>
+    </g>
+    <!-- 亮色拉丝（被车灯/余光扫过的路面与岩壁） -->
+    <g filter="url(#hb2)">
+      <rect x="-40" y="668" width="784" height="3" fill="#9fb8d4" opacity=".28"/>
+      <rect x="-40" y="736" width="784" height="2.4" fill="#8fa8c6" opacity=".20"/>
+      <rect x="-40" y="820" width="784" height="2" fill="#7f98b6" opacity=".14"/>
+      <rect x="-40" y="878" width="784" height="1.6" fill="#6f88a6" opacity=".10"/>
+    </g>
+
+    <!-- 路面（最下方，横向流动的浅带） -->
+    <path d="M-40 1040 L744 1004 L744 1180 L-40 1220 Z" fill="#141d29" opacity=".85"/>
+    <g filter="url(#hb8)" opacity=".5">
+      <rect x="-40" y="1082" width="784" height="5" fill="#b9c9dc"/>
+      <rect x="-40" y="1116" width="784" height="4" fill="#9fb0c6"/>
+    </g>
+
+    <!-- ===== 玻璃反光：斜向光带 ===== -->
+    <path d="M-120 380 L120 120 L268 120 L-40 520 Z" fill="url(#glare)" filter="url(#hb46)"/>
+    <path d="M300 1280 L560 900 L640 900 L420 1280 Z" fill="url(#glare)" opacity=".5" filter="url(#hb46)"/>
+
+    <!-- ===== 车窗框 ===== -->
+    <!-- 上沿 -->
+    <path d="M-40 -40 H744 V96 C500 128 200 120 -40 100 Z" fill="url(#frame)"/>
+    <path d="M-40 100 C200 120 500 128 744 96" stroke="#16233a" stroke-width="3" opacity=".85"/>
+    <!-- 下沿 -->
+    <path d="M-40 1128 C200 1108 500 1116 744 1092 L744 1320 L-40 1320 Z" fill="url(#frame)"/>
+    <path d="M-40 1128 C200 1108 500 1116 744 1092" stroke="#16233a" stroke-width="3.5" opacity=".85"/>
+    <!-- 右侧 B 柱 -->
+    <path d="M628 -40 H744 V1320 H600 Z" fill="url(#frame)"/>
+    <path d="M628 -40 L600 1320" stroke="#141f30" stroke-width="2.5" opacity=".8"/>
+
+    <!-- ===== 左下：头枕 + 肩膀剪影 ===== -->
+    <path d="M-40 1160 C40 1132 130 1140 190 1170 C232 1192 250 1240 254 1320 L-40 1320 Z" fill="#02050a"/>
+    <path d="M-40 1160 C40 1132 130 1140 190 1170" stroke="#101a28" stroke-width="2.5" opacity=".7"/>
+    <!-- 头枕（更近的暗块） -->
+    <path d="M-40 940 C30 916 96 926 138 962 C166 986 178 1046 176 1120 L-40 1120 Z" fill="#010306"/>
+    <path d="M-40 940 C30 916 96 926 138 962" stroke="#0d1622" stroke-width="2" opacity=".6"/>
+
+    <!-- 车窗内的细尘 -->
+    <g id="dust"></g>
+  </g>
+
+  <!-- 画框暗角（不参与倾斜） -->
+  <rect width="704" height="1280" fill="none"/>
+</svg>
+</div>
+<script>
+(function(){
+  const r=(s)=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+  let d='';const R=r(37);
+  for(let i=0;i<46;i++){
+    const x=-20+R()*720,y=140+R()*980,r2=.7+R()*2.0,o=.04+R()*.20;
+    d+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${r2.toFixed(1)}" fill="#cfe0ff" opacity="${o.toFixed(2)}"/>`;
+  }
+  document.getElementById('dust').innerHTML=d;
+})();
+</script>
+</body></html>

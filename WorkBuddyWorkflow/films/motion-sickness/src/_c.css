@@ -1,0 +1,12 @@
+/* 概念帧公共样式（704×1280，供 Wan2.2 I2V 作首帧）
+ * 与第一支片保持同一视觉语言：深蓝黑底 + 冷光描边 + 确定性粒子。
+ * 调色板（全片语义化，勿随意改）：
+ *   底      #04060b / #0a1226
+ *   冷光    #9fc4ff  中性光
+ *   青      #57DFFF  内耳 / 前庭信号
+ *   青柠    #C9FF4E  视觉信号
+ *   红      #FF5A3C  大脑警报 / 排毒
+ */
+html, body { margin: 0; background: #000; overflow: hidden; }
+.c { position: relative; width: 704px; height: 1280px; overflow: hidden; background: #04060b; }
+svg { position: absolute; left: 0; top: 0; }

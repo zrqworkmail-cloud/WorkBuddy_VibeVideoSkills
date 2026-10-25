@@ -4,10 +4,11 @@
 import json, os, sys, time, uuid, urllib.request, urllib.error
 
 SERVER = "http://127.0.0.1:8188"
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-AI = os.path.join(ROOT, "out", "ai")
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import _film  # 多片路由：FILM 环境变量决定 films/<FILM>/ 还是参考实现根目录
 import gpu_gate  # GPU 让渡门控：只在本机 GPU 空闲时才提交，绝不抢占他人算力
+
+AI = _film.p_out("ai")
 
 UNET_HI = "wan22EnhancedLightning_v2I2VFP8HIGH.safetensors"
 UNET_LO = "wan22EnhancedLightning_v2I2VFP8LOW.safetensors"
@@ -36,7 +37,8 @@ def upload_image(path):
     return json.load(urllib.request.urlopen(req))["name"]
 
 
-def build(prompt, img_name, seed, w=704, h=1280, length=81, steps=4):
+def build(prompt, img_name, seed, w=704, h=1280, length=81, steps=4, neg=None):
+    neg_text = NEG if neg is None else neg
     g = {}
     g["1"] = {"class_type": "UNETLoader",
               "inputs": {"unet_name": UNET_HI, "weight_dtype": "default"}}
@@ -46,37 +48,62 @@ def build(prompt, img_name, seed, w=704, h=1280, length=81, steps=4):
     g["4"] = {"class_type": "VAELoader", "inputs": {"vae_name": VAE}}
     g["5"] = {"class_type": "LoadImage", "inputs": {"image": img_name}}
     g["6"] = {"class_type": "CLIPTextEncode", "inputs": {"clip": ["3", 0], "text": prompt}}
-    g["7"] = {"class_type": "CLIPTextEncode", "inputs": {"clip": ["3", 0], "text": NEG}}
+    g["7"] = {"class_type": "CLIPTextEncode", "inputs": {"clip": ["3", 0], "text": neg_text}}
     # I2V 条件（首帧 + 视觉编码）
     g["8"] = {"class_type": "WanImageToVideo",
               "inputs": {"positive": ["6", 0], "negative": ["7", 0], "vae": ["4", 0],
                          "width": w, "height": h, "length": length,
                          "batch_size": 1, "start_image": ["5", 0]}}
-    # 第一段：高噪专家（结构）
-    g["9"] = {"class_type": "KSamplerAdvanced",
-              "inputs": {"model": ["1", 0], "add_noise": "enable",
-                         "noise_seed": seed, "steps": steps, "cfg": 1.0,
-                         "sampler_name": "euler", "scheduler": "simple",
-                         "positive": ["8", 0], "negative": ["8", 1],
-                         "latent_image": ["8", 2],
-                         "start_at_step": 0, "end_at_step": steps // 2,
-                         "return_with_leftover_noise": "enable"}}
-    # 第二段：低噪专家（细节）
-    g["10"] = {"class_type": "KSamplerAdvanced",
-               "inputs": {"model": ["2", 0], "add_noise": "disable",
-                          "noise_seed": seed, "steps": steps, "cfg": 1.0,
-                          "sampler_name": "euler", "scheduler": "simple",
-                          "positive": ["8", 0], "negative": ["8", 1],
-                          "latent_image": ["9", 0],
-                          "start_at_step": steps // 2, "end_at_step": steps,
-                          "return_with_leftover_noise": "disable"}}
-    g["11"] = {"class_type": "VAEDecodeTiled",
-               "inputs": {"samples": ["10", 0], "vae": ["4", 0],
-                          "tile_size": 512, "overlap": 64,
-                          "temporal_size": 48, "temporal_overlap": 8}}
-    g["12"] = {"class_type": "CreateVideo", "inputs": {"images": ["11", 0], "fps": 16.0}}
-    g["13"] = {"class_type": "SaveVideo",
-               "inputs": {"video": ["12", 0], "filename_prefix": "wan22/" + "clip",
+    # ============ 采样链 ============
+    # steps=4 → 2 相位（HIGH 出结构 → LOW 出细节），全程 cfg=1，最快
+    # steps=8 → 3 相位，**先插一段带 CFG 的相位**，再走两段无 CFG 的加速相位
+    #
+    # 为什么 8 步要单独处理：Lightning 4 步蒸馏 LoRA 有明显"慢动作"倾向——
+    # 运动迟缓黏滞，景物只会慢慢平移而不会真的转向。WanGP 的 3 Phases - 8 Steps
+    # 配置原话是 "extend them to 8 steps in order to insert a CFG phase ...
+    # The ultimate goal is reduce the slow motion effect of these Loras Accelerators"。
+    # 本片 s1 的"转弯时风景不变角度"正是这个症状，所以保留这条升级路径。
+    if steps > 4:
+        p1 = max(1, round(steps * 0.25))        # 8 步 → 第 2 步
+        p2 = max(p1 + 1, round(steps * 0.5))    # 8 步 → 第 4 步
+        chain = [
+            (["1", 0], "enable",  3.5, 0,  p1),   # 高噪专家 + CFG：压慢动作
+            (["1", 0], "disable", 1.0, p1, p2),   # 高噪专家：出结构
+            (["2", 0], "disable", 1.0, p2, steps),  # 低噪专家：出细节
+        ]
+    else:
+        half = steps // 2
+        chain = [
+            (["1", 0], "enable",  1.0, 0,    half),
+            (["2", 0], "disable", 1.0, half, steps),
+        ]
+
+    nid = 9
+    prev = ["8", 2]
+    for i, (model, add_noise, cfg, s0, s1) in enumerate(chain):
+        last = (i == len(chain) - 1)
+        g[str(nid)] = {"class_type": "KSamplerAdvanced",
+                       "inputs": {"model": model, "add_noise": add_noise,
+                                  "noise_seed": seed, "steps": steps, "cfg": cfg,
+                                  "sampler_name": "euler", "scheduler": "simple",
+                                  "positive": ["8", 0], "negative": ["8", 1],
+                                  "latent_image": prev,
+                                  "start_at_step": s0, "end_at_step": s1,
+                                  "return_with_leftover_noise": "disable" if last else "enable"}}
+        prev = [str(nid), 0]
+        nid += 1
+
+    dec = str(nid); nid += 1
+    g[dec] = {"class_type": "VAEDecodeTiled",
+              "inputs": {"samples": prev, "vae": ["4", 0],
+                         "tile_size": 512, "overlap": 64,
+                         "temporal_size": 48, "temporal_overlap": 8}}
+    vid = str(nid)
+    g[vid] = {"class_type": "CreateVideo", "inputs": {"images": [dec, 0], "fps": 16.0}}
+    # SaveVideo 固定用 "20"，因为相位链长度会变（2 段/3 段），
+    # 下游 gen_one / gen_queue 都要按固定 id 改 filename_prefix。
+    g["20"] = {"class_type": "SaveVideo",
+               "inputs": {"video": [vid, 0], "filename_prefix": "wan22/clip",
                           "format": "auto"}}
     return {"prompt": g, "client_id": uuid.uuid4().hex}
 
@@ -334,12 +361,49 @@ SCENES = {
 # s9 黎明        晨光穿帘+尘在光柱+极缓漂移，温柔收尾；pass。
 # 差异化总核查：9 镜的主体 / 运镜 / 运动逻辑两两不同，任何镜头都不做播放-倒放复用，特效也不重复。
 
+# ============ 影片级配置（多片共用本脚本） ============
+# FILM 环境变量存在时，从 films/<FILM>/wan22-prompts.json 覆盖上面这套（旧片）提示词与负面词。
+#
+# 为什么必须分片配置负面词：旧片的 NEG 里含 "glowing skin, bioluminescence, cgi,
+# 3d render, illustration" —— 那是为了压住插画感。但本片的内耳/脑干/神经元概念帧
+# 本来就是发光半透明的医学渲染，这几个词会与首帧直接对抗，生成结果要么被拉灰，
+# 要么把结构抹掉。所以本片把负面词拆成两套：
+#   neg_base  只压瑕疵与解剖错误（两套共用）
+#   neg_photo neg_base + 反插画词（仅用于真人实景镜）
+# 解剖/抽象镜不加反插画词，否则等于自我否定。
+FILM_CFG = None
+_cfg_path = os.path.join(_film.FILMROOT, "wan22-prompts.json") if _film.FILM else ""
+if _cfg_path and os.path.exists(_cfg_path):
+    with open(_cfg_path, "r", encoding="utf-8") as _f:
+        FILM_CFG = json.load(_f)
+    SCENES = {int(k.lstrip("s")): v["prompt"] for k, v in FILM_CFG["scenes"].items()}
+    NEG_BASE = FILM_CFG["neg_base"]
+    NEG_PHOTO = NEG_BASE + FILM_CFG.get("neg_photo_extra", "")
+    NEG = NEG_BASE          # 兜底：未标注 neg 类型的镜头用基础负面词
+    DEFAULT_SEED = FILM_CFG.get("seed", 20261020)
+    DEFAULT_LENGTH = FILM_CFG.get("length", 121)
+    DEFAULT_STEPS = FILM_CFG.get("steps", 4)
+    print(f"[wan22] 载入影片配置 {_cfg_path}（{len(SCENES)} 镜）", flush=True)
+else:
+    DEFAULT_SEED = 20261020
+    DEFAULT_LENGTH = 121
+    DEFAULT_STEPS = 4
+
+
+def neg_for(sid):
+    """按镜头取负面词：photo=真人实景（反插画），其余=解剖/抽象（只用基础词）。"""
+    if not FILM_CFG:
+        return NEG
+    kind = FILM_CFG["scenes"].get(f"s{sid}", {}).get("neg", "anat")
+    return NEG_PHOTO if kind == "photo" else NEG_BASE
+
+
 if __name__ == "__main__":
     _argv = [a for a in sys.argv[1:] if not a.startswith("--")]
     USE_GATE = "--no-gate" not in sys.argv          # 默认开启 GPU 让渡门控
     ids = [int(a) for a in _argv[0].split(",")]
-    seed = int(_argv[1]) if len(_argv) > 1 else 20261020
-    length = int(_argv[2]) if len(_argv) > 2 else 121
+    seed = int(_argv[1]) if len(_argv) > 1 else DEFAULT_SEED
+    length = int(_argv[2]) if len(_argv) > 2 else DEFAULT_LENGTH
     print("[gate] GPU 让渡门控：" + (
         f"开启（每 {gpu_gate.GPU_INTERVAL}s 复查 GPU/ComfyUI 队列/外部进程，被占用则让渡等待）"
         if USE_GATE else "已用 --no-gate 关闭"), flush=True)
@@ -353,8 +417,8 @@ if __name__ == "__main__":
             if attempt:
                 time.sleep(12)
                 print(f"[{i}] 第 {attempt+1} 次尝试（并发抢占导致中断）… ", flush=True)
-            wf = build(SCENES[i], name, seed + i, length=length)
-            wf["prompt"]["13"]["inputs"]["filename_prefix"] = f"wan22/s{i}"
+            wf = build(SCENES[i], name, seed + i, length=length, neg=neg_for(i))
+            wf["prompt"]["20"]["inputs"]["filename_prefix"] = f"wan22/s{i}"
             try:
                 pid = submit(wf)
             except RuntimeError as e:

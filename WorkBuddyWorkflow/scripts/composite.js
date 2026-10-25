@@ -4,14 +4,17 @@ const path = require('path');
 const { spawn } = require('child_process');
 const puppeteer = require('puppeteer-core');
 
-const ROOT = path.resolve(__dirname, '..');
-const OUT = path.join(ROOT, 'out');
+const { FILM, SRC, OUT } = require('./_film');
 const FFMPEG = 'D:/tools/ffmpeg/bin/ffmpeg.exe';
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 
 const FPS = Number(process.argv[2] || 30);
 const DUR = process.argv[3] ? Number(process.argv[3]) : null;
-const OUTNAME = process.argv[4] || '为什么越熬夜越精神.mp4';
+// 成片名默认取 timeline.json 的 title，避免各片同名互相覆盖
+const OUTNAME = process.argv[4] || (() => {
+  try { return require(path.join(SRC, 'timeline.json')).title + '.mp4'; }
+  catch (e) { return 'output.mp4'; }
+})();
 
 (async () => {
   const browser = await puppeteer.launch({
@@ -23,7 +26,7 @@ const OUTNAME = process.argv[4] || '为什么越熬夜越精神.mp4';
   });
   const page = await browser.newPage();
   await page.setViewport({ width: 1080, height: 1920, deviceScaleFactor: 1 });
-  await page.goto('file:///' + path.join(ROOT, 'src', 'index.html').replace(/\\/g, '/') + '?ov=1',
+  await page.goto('file:///' + path.join(SRC, 'index.html').replace(/\\/g, '/') + '?ov=1',
     { waitUntil: 'load', timeout: 60000 });
   await page.evaluate(() => document.fonts.ready);
   await page.waitForFunction('window.__ready === true', { timeout: 20000 });

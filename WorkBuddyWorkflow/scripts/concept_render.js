@@ -4,9 +4,9 @@ const fs = require('fs');
 const path = require('path');
 const puppeteer = require('puppeteer-core');
 
-const ROOT = path.resolve(__dirname, '..');
-const SRC = path.join(ROOT, 'src');
-const OUTC = path.join(ROOT, 'out', 'ai', 'concepts');
+const { FILM, SRC, OUT } = require('./_film');
+
+const OUTC = path.join(OUT, 'ai', 'concepts');
 const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const W = 704, H = 1280;
 
@@ -14,6 +14,7 @@ const ids = (process.argv[2] || '').split(',').map(s => s.trim()).filter(Boolean
 
 (async () => {
   fs.mkdirSync(OUTC, { recursive: true });
+  console.log(`[${FILM || 'reference'}] 概念帧 → ${OUTC}`);
   const b = await puppeteer.launch({
     executablePath: CHROME, headless: true,
     args: ['--allow-file-access-from-files', '--force-color-profile=srgb',

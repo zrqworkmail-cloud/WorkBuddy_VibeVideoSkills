@@ -7,8 +7,7 @@
 const fs=require('fs'), path=require('path');
 const {spawn}=require('child_process');
 const puppeteer=require('puppeteer-core');
-const ROOT=path.resolve(__dirname,'..');
-const OUT=path.join(ROOT,'out');
+const { FILM, SRC, OUT } = require('./_film');
 const FF='D:/tools/ffmpeg/bin/ffmpeg.exe';
 const CHROME='C:/Program Files/Google/Chrome/Application/chrome.exe';
 const sid=process.argv[2];
@@ -25,7 +24,7 @@ function ff(args){return new Promise((res,rej)=>{const p=spawn(FF,['-hide_banner
   const page=await browser.newPage();
   await page.setViewport({width:1080,height:1920,deviceScaleFactor:1});
   const errs=[]; page.on('pageerror',e=>errs.push('PAGEERR '+e.message));
-  await page.goto('file:///'+path.join(ROOT,'src','index.html').replace(/\\/g,'/')+'?ov=1',{waitUntil:'load',timeout:60000});
+  await page.goto('file:///'+path.join(SRC,'index.html').replace(/\\/g,'/')+'?ov=1',{waitUntil:'load',timeout:60000});
   await page.evaluate(()=>document.fonts.ready);
   await page.waitForFunction('window.__ready === true',{timeout:20000});
   const sc=await page.evaluate(id=>window.TIMELINE.scenes.find(s=>s.id===id),sid);
@@ -34,7 +33,7 @@ function ff(args){return new Promise((res,rej)=>{const p=spawn(FF,['-hide_banner
   // 覆盖层必须保持透明，否则叠底板时会把 base 整帧盖掉 ——
   // 预览就会显示成"没有底板的干净画面"，与成片完全不一致（曾因此漏掉 s8 文字压柱子的缺陷）。
   // 纯覆盖层图（不带 --base）在图片查看器里显示为黑底，属正常。
-  console.log(`[${sid}] ${sc.start.toFixed(2)}–${sc.end.toFixed(2)}s  采样 ${N} 帧  base=${useBase}`);
+  console.log(`[${FILM||'reference'}] [${sid}] ${sc.start.toFixed(2)}–${sc.end.toFixed(2)}s  采样 ${N} 帧  base=${useBase}`);
   for(let i=0;i<N;i++){
     const t=sc.start+(sc.end-sc.start)*((i+0.5)/N);
     const local=(t-sc.start).toFixed(3);

@@ -20,7 +20,9 @@
 import json, os, subprocess, sys
 import numpy as np
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+import _film
+
+ROOT = _film.FILMROOT
 FF = "D:/tools/ffmpeg/bin/ffmpeg.exe"
 FPS = 24
 QUIET = 0.0012          # 帧间平均绝对差阈值（下采样 240x428 灰度 0..1），低于此视为"无变化"
@@ -48,8 +50,9 @@ def decode(path):
     p.stdout.close(); p.wait()
 
 def main():
-    vid = sys.argv[1] if len(sys.argv) > 1 else os.path.join(ROOT, "out", "为什么越熬夜越精神.mp4")
-    tl = json.load(open(os.path.join(ROOT, "src", "timeline.json"), encoding="utf-8"))
+    tl = _film.timeline()
+    default_vid = os.path.join(ROOT, "out", tl.get("title", "output") + ".mp4")
+    vid = sys.argv[1] if len(sys.argv) > 1 else default_vid
     beat = tl["beatSec"]
     t = 0.0
     scenes = []

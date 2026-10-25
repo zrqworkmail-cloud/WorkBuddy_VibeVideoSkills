@@ -1,0 +1,82 @@
+{
+  "note": "本片 I2V 提示词与负面词。概念帧（c1..c18.png）作为首帧，提示词只描述「这一镜要怎么动」，不重复描述静态画面。",
+  "seed": 20261024,
+  "length": 121,
+  "neg_base": "low quality, blurry, distorted, deformed, ugly, duplicate, watermark, text overlay, logo, subtitles, oversaturated, flickering, fast motion, morphing, strobing, jitter, duplicate frames, extra limbs, extra fingers, fused fingers, missing fingers, deformed hands, malformed limbs, distorted face, asymmetric eyes, cross-eyed, nudity, naked, topless, bare chest, no clothes, body horror, mutation, disfigured, split screen seams, collage",
+  "neg_photo_extra": ", cartoon, illustration, anime, cgi, 3d render, painting, sketch, flat shading, vector art, plastic skin, mannequin, wax figure, doll, doll-like, airbrushed, shaky camera, camera shake, handheld shake, bumpy road, violent vibration, earthquake, rolling shutter wobble, steep drop-off beside the road, road ending at a cliff, car flying off the road, aerial view",
+  "scenes": {
+    "s1": {
+      "neg": "photo",
+      "prompt": "Fixed camera mounted inside the back seat of a car, aimed straight out through the side window. The window frame and the headrest silhouette are locked in the foreground and never move relative to the camera: no shake, no drift, no push in.\n\nThe car is travelling steadily along a smooth paved mountain road and is in the middle of a long, gentle left-hand curve. The car's heading always follows the road — it stays tangent to the curve and centred in its lane.\n\nBecause the heading keeps changing through the curve, the angle at which the scenery passes the glass keeps changing as well: the guardrail does not slide past at one single fixed angle, its receding angle shifts continuously; the rock cut and the pines swing slowly across the window; the distant mountain ridges turn slowly from one side toward the other. The view is never locked at a single angle.\n\nClose to the car, a low metal guardrail runs along the bottom of the window with the asphalt road surface visible beneath it; behind the guardrail a narrow grass verge and a rock cut slope rise up; pines further back, distant ridges beyond. The ground beside the road stays level with the roadway — there is no steep drop, no cliff edge, no sense of the car leaving the road.\n\nParallax is correct: guardrail posts flash past fastest, the rock face and pines at a medium rate, the ridges slowly. The horizon tilts only slightly with the body roll of the car. Photorealistic, steady, cinematic, shallow depth of field, no text.",
+      "note": "v3 针对用户两次反馈重写。核心修正：① 转弯时窗外景物必须**变角度**而不是平移——车身方向沿道路切线变化，车窗朝向随之变化，所以护栏的后退角、远山的方位都在连续变化（v2 所有东西按同一角度滑过，像传送带）；② 修「车要飞出悬崖」——路面与护栏贴近车窗下部、地面与路面齐平、明确 no steep drop / no cliff edge；③ 窗框与车身刚性固定。v1/v2 备份为 s1_v1.mp4 / s1_v2.mp4。"
+    },
+    "s2": {
+      "neg": "photo",
+      "prompt": "Extreme close-up of a man's face in profile in a dim car back seat. His eyes are half closed and slowly, heavily closing the rest of the way, eyelashes trembling. His breathing moves his chest slightly. The road is smooth: the camera is rigidly locked to the cabin with no handheld shake and no bumps, only a faint high-frequency engine vibration. The cool light on his cheek shifts as the car passes in and out of the shade of roadside trees, and faint reflections slide across his skin. The camera holds steady with a barely perceptible drift. Photorealistic skin texture with fine pores, extremely slow motion, quiet and uneasy, no text."
+    },
+    "s3": {
+      "neg": "photo",
+      "prompt": "Extreme close-up of a closed eye in a dark car. The eyelid trembles faintly and the lashes quiver with each small eye movement beneath. A soft warm red glow pulses under the thin skin of the lid, and a pale cyan light swirls slowly behind it, brightening and dimming. The camera holds almost still with a barely perceptible drift. Photorealistic skin texture, extremely slow, unsettling, no text."
+    },
+    "s4": {
+      "neg": "photo",
+      "prompt": "Shot from the back seat looking forward at a relaxed driver in profile. His head turns slightly as he glances at the mirror, one hand making a small correction on the steering wheel. The dashboard glow breathes gently on his jaw and cheek. Beyond the windshield the road curves gently ahead and streams past in soft horizontal blur, and the horizon tilts a few degrees as the car follows the curve. The road is smooth and well paved; the camera is rigidly locked to the cabin with no handheld shake and no bumps. Photorealistic, calm and unbothered, cinematic, no text."
+    },
+    "s5": {
+      "neg": "anat",
+      "prompt": "A human head in profile rendered as a translucent dark blue glass shell, the skull and soft tissue semi-transparent. A concentrated point of pale cyan light deep inside the ear region pulses and brightens, glowing outward through the layers of the head. Fine light particles drift slowly and are drawn toward that point. The rest of the head dissolves into darkness. Very slow push in. Elegant medical visualization, cinematic, no text."
+    },
+    "s6": {
+      "neg": "anat",
+      "prompt": "Macro view of the human inner ear vestibular system: three semicircular canals arranged like a three-axis gyroscope, the vestibule and its otolith sacs below, the spiral cochlea beneath. Pale cyan bioluminescence pulses along the canals and travels through them, fluid visibly circulating in a slow current. Fine dust motes drift through the dark space. The camera makes a very slow orbit around the structure. Photorealistic 3D medical render, elegant, no text."
+    },
+    "s7": {
+      "neg": "anat",
+      "prompt": "Extreme macro inside a fluid-filled semicircular canal of the inner ear. The translucent lymph flows steadily past a cluster of hair cells, bending their fine stereocilia to one side and back in a rhythmic sway. Tiny particles stream along the current. Pale cyan light pulses at the base of each hair cell with every bend, as if the signal is firing. Delicate wet tissue texture, shallow depth of field, very slow drift, no text."
+    },
+    "s8": {
+      "neg": "photo",
+      "prompt": "First person view from inside a dim car looking down at a glowing smartphone held in the lap. A thumb scrolls slowly upward across the screen, the content sliding and the screen brightness flickering faintly. The pale blue light washes over the fingers and denim. The seat back and door panel stay perfectly still at the edges — they are the fixed reference — while the world beyond the window blurs past. The road is smooth; the camera is rigidly locked to the cabin with no shake and no bumps. Photorealistic, no text."
+    },
+    "s9": {
+      "neg": "anat",
+      "prompt": "Abstract cinematic light installation split into two opposing fields. In the upper half a vortex of pale cyan light rotates slowly, its curved streaks spiraling inward. In the lower half perfectly rigid horizontal lines of acid lime light stay absolutely still, pulsing gently in brightness. At the boundary the two fields press against each other and the jagged white fracture between them flickers, throwing off sparks and fine debris. The camera holds steady with a very slow push in. No text."
+    },
+    "s10": {
+      "neg": "anat",
+      "prompt": "The human brain seen from below in inferior view, dark translucent anatomical tissue, the brainstem descending. A warm blood-red glow ignites node by node along the neural pathways, spreading down the brainstem and creeping into the surrounding tissue, then pulsing in a slow rhythm. The rest stays cold blue and nearly black. The camera pushes in very slowly. Primitive and unsettling, cinematic medical render, no text."
+    },
+    "s11": {
+      "neg": "anat",
+      "prompt": "Extreme macro of tangled nerve fibers in dark tissue. Bright red-orange electrical impulses jump erratically between the fibers in irregular bursts, some signals looping back on themselves, tiny sparks scattering and fading. The surrounding tissue is lit only by this chaotic discharge, flickering with each burst. The camera drifts slowly through the fibers. Chemical and feverish, cinematic, no text."
+    },
+    "s12": {
+      "neg": "anat",
+      "prompt": "Cross section of a human stomach rendered as dark translucent tissue. The contents visibly surge upward against their natural direction, pushed by a warm red-orange pressure glow from below. The muscular wall contracts in visible waves that travel upward. Deep shadows around the organ, the light pulsing with each contraction. The camera pushes in very slowly. Clinical but cinematic, no text."
+    },
+    "s13": {
+      "neg": "photo",
+      "prompt": "Cinematic close-up of a pale face in a dark car, eyes squeezed shut, one hand pressed against the mouth. A bead of cold sweat slides slowly down the temple. His jaw tightens and releases as he swallows hard, breathing shallow and fast. A faint red undertone pulses beneath the grey-blue skin. The road is smooth; the camera is rigidly locked to the cabin with no shake and no bumps, holding steady. Photorealistic skin texture, intimate and uncomfortable, no text."
+    },
+    "s14": {
+      "neg": "anat",
+      "prompt": "A single vertical column of white-cyan light falls from above into total darkness and is cut cleanly by a matte black slab crossing it. The light flares and spills at the cut edge, then dies below. Fine dust drifts down through the beam and stops at the barrier, gathering there. The slab slides very slowly across, and the beam narrows as it is occluded. Minimal, monumental, static camera with a barely perceptible push, no text."
+    },
+    "s15": {
+      "neg": "photo",
+      "prompt": "A person asleep against the car window, cheek pressed to the cold glass, face slack and peaceful. Reflections of the passing landscape slide slowly across the glass and over the skin. His breathing moves the shoulder gently. The pale light from outside shifts across his cheekbone as the car moves. The road is smooth; the camera is rigidly locked to the cabin with no shake and no bumps, holding still with a very slow drift. Photorealistic, quiet, no text."
+    },
+    "s16": {
+      "neg": "photo",
+      "prompt": "View from inside a car through the windshield at a distant open road and the horizon. The road scrolls steadily toward the vanishing point as the car moves forward. The light at the horizon slowly brightens, pale cyan warming toward gold. The dashboard stays a dark silhouette at the bottom. The road is smooth and curves gently ahead; the camera is rigidly locked to the cabin with no shake and no bumps. Photorealistic, calm and orienting, no text."
+    },
+    "s17": {
+      "neg": "photo",
+      "prompt": "Split composition in one vertical frame. In the upper half a driver's hands rest on the steering wheel, knuckles relaxing and fingers making a small adjustment, dashboard glow breathing. In the lower half the same hands hold a phone low in the lap, a thumb scrolling while the screen light flickers on the bowed face. Both halves move slowly and independently. The road is smooth; the camera is rigidly locked to the cabin with no shake and no bumps. Photorealistic, cinematic, no text."
+    },
+    "s18": {
+      "neg": "photo",
+      "prompt": "Wide shot of a lone car driving away down an empty mountain road toward a low sun, seen from behind and slightly above. The car recedes steadily into the distance, long shadows stretching across the asphalt. The landscape opens into a vast calm horizon as the light slowly warms. The camera drifts slowly forward and slightly upward. Photorealistic, quiet and resolved, a little melancholy, no text."
+    }
+  }
+}

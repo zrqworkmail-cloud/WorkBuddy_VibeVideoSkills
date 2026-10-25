@@ -1,0 +1,105 @@
+<!DOCTYPE html><html><head><meta charset="utf-8">
+<link rel="stylesheet" href="_c.css">
+</head><body>
+<!-- s14 回答标题 · 关掉了唯一通道：一道竖直光柱被暗板截断，光在断口处溢出后消失 -->
+<div class="c">
+<svg width="704" height="1280" viewBox="0 0 704 1280">
+  <defs>
+    <radialGradient id="bg14" cx="50%" cy="30%" r="70%">
+      <stop offset="0"   stop-color="#0a121c"/>
+      <stop offset=".6"  stop-color="#05080e"/>
+      <stop offset="1"   stop-color="#020306"/>
+    </radialGradient>
+    <linearGradient id="col" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"    stop-color="#eaf6ff" stop-opacity=".95"/>
+      <stop offset=".34"  stop-color="#c8f4ff" stop-opacity=".85"/>
+      <stop offset=".52"  stop-color="#ffffff" stop-opacity=".55"/>
+      <stop offset=".62"  stop-color="#9fb6d8" stop-opacity=".16"/>
+      <stop offset="1"    stop-color="#9fb6d8" stop-opacity=".04"/>
+    </linearGradient>
+    <linearGradient id="plate" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0"   stop-color="#141b26"/>
+      <stop offset=".18" stop-color="#080b12"/>
+      <stop offset="1"   stop-color="#04060a"/>
+    </linearGradient>
+    <filter id="g14"><feGaussianBlur stdDeviation="14" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="g14b"><feGaussianBlur stdDeviation="42"/></filter>
+    <filter id="g14c"><feGaussianBlur stdDeviation="6"/></filter>
+  </defs>
+
+  <rect width="704" height="1280" fill="url(#bg14)"/>
+
+  <!-- 光柱外溢（大气） -->
+  <ellipse cx="352" cy="330" rx="240" ry="300" fill="#c8f4ff" opacity=".10" filter="url(#g14b)"/>
+  <ellipse cx="352" cy="1000" rx="200" ry="240" fill="#c8f4ff" opacity=".05" filter="url(#g14b)"/>
+
+  <!-- 主光柱：上段（亮） -->
+  <path d="M318 0 L386 0 L392 610 L312 610 Z" fill="url(#col)" filter="url(#g14)"/>
+  <path d="M330 0 L374 0 L378 606 L326 606 Z" fill="#ffffff" opacity=".55"/>
+  <!-- 光柱边缘散射 -->
+  <path d="M296 0 L318 0 L312 612 L280 612 Z" fill="#c8f4ff" opacity=".10" filter="url(#g14c)"/>
+  <path d="M386 0 L410 0 L424 612 L392 612 Z" fill="#c8f4ff" opacity=".10" filter="url(#g14c)"/>
+
+  <!-- 下段：被截断后残余的光（大幅衰减，且明显变短） -->
+  <path d="M322 760 L382 760 L386 1076 L318 1076 Z" fill="url(#col)" opacity=".09" filter="url(#g14)"/>
+  <path d="M338 760 L366 760 L369 1040 L335 1040 Z" fill="#9fb6d8" opacity=".05"/>
+
+  <!-- 断口：光在板上溢出的亮边 + 溢光条纹 -->
+  <ellipse cx="352" cy="674" rx="130" ry="24" fill="#ffffff" opacity=".50" filter="url(#g14)"/>
+  <ellipse cx="352" cy="676" rx="250" ry="46" fill="#c8f4ff" opacity=".16" filter="url(#g14b)"/>
+  <g stroke="#eaf6ff" stroke-width="2" opacity=".30" filter="url(#g14c)">
+    <path d="M352 674 L196 640"/><path d="M352 674 L508 640"/>
+    <path d="M352 676 L150 690"/><path d="M352 676 L556 690"/>
+  </g>
+
+  <!-- 遮挡板：从右侧伸入的暗色实体，横穿光柱 -->
+  <path d="M704 600 L704 748 L-40 812 L-40 664 Z" fill="url(#plate)"/>
+  <path d="M704 600 L-40 664" stroke="#2b3a52" stroke-width="3" opacity=".9"/>
+  <path d="M704 748 L-40 812" stroke="#101820" stroke-width="4" opacity=".9"/>
+  <!-- 板上缘被光照到的窄边 -->
+  <path d="M704 600 L-40 664" stroke="#dfeeff" stroke-width="2.4" opacity=".55" filter="url(#g14c)"/>
+
+  <!-- 光柱在板前的投影 -->
+  <path d="M312 664 L392 610 L432 700 L352 760 Z" fill="#000" opacity=".55" filter="url(#g14c)"/>
+
+  <!-- 光柱中的浮尘：到板前停住 -->
+  <g id="mot"></g>
+
+  <!-- 被切断的光粒（落在板上方，逐渐暗淡） -->
+  <g id="stuck"></g>
+
+  <!-- 四角刻度 -->
+  <g stroke="#78829A" stroke-width="2" opacity=".18" fill="none">
+    <path d="M40 60 h44 M40 60 v44"/><path d="M664 60 h-44 M664 60 v44"/>
+    <path d="M40 1220 h44 M40 1220 v-44"/><path d="M664 1220 h-44 M664 1220 v-44"/>
+  </g>
+</svg>
+</div>
+<script>
+(function(){
+  const r=(s)=>()=>{s=(s*1664525+1013904223)>>>0;return s/4294967296;};
+
+  // 光柱内浮尘
+  let m='';const R=r(13);
+  for(let i=0;i<58;i++){
+    const y=R()*600, spread=26+(y/600)*34;
+    const x=352+(R()-.5)*spread*2;
+    const rr=.7+R()*2.2;
+    m+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${rr.toFixed(1)}" fill="#ffffff" opacity="${(.15+R()*.55).toFixed(2)}"/>`;
+  }
+  document.getElementById('mot').innerHTML=m;
+
+  // 被截停的光粒：集中在断口下方，亮度递减
+  let s='';const R2=r(41);
+  for(let i=0;i<34;i++){
+    const y=684+R2()*70;
+    const x=352+(R2()-.5)*(120-(y-684)*1.1);
+    const rr=.8+R2()*2.4;
+    const o=Math.max(.05,.55-(y-684)/110);
+    s+=`<circle cx="${x.toFixed(0)}" cy="${y.toFixed(0)}" r="${rr.toFixed(1)}" fill="#c8f4ff" opacity="${o.toFixed(2)}"/>`;
+  }
+  document.getElementById('stuck').innerHTML=s;
+})();
+</script>
+</body></html>

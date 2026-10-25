@@ -24,10 +24,12 @@
   FILM=motion-sickness python scripts/gen_queue.py --force               # 全部重做
 """
 import argparse
+import glob
 import json
 import os
 import sys
 import time
+import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _film      # noqa: E402
@@ -36,6 +38,10 @@ import gpu_gate   # noqa: E402
 from gen_one import poll_history, disk_fallback  # noqa: E402
 
 MIN_BYTES = 200 * 1024
+# 本片素材的起始时刻：取 out/ai 下已有片段的最早修改时间。
+# 用途：ComfyUI 输出目录是多片共享的，判断"某个 sN_*.mp4 是不是本片的"只能靠时间。
+# 上一支片的输出最新到 10-23，本片从 10-24 18:21 起，用这个分界不会串片。
+SINCE = 0
 # 单镜硬上限。实测 4 步在显存吃紧时可达 60 分钟；8 步（三相位）约翻倍，故分开设。
 # 超时后**不重试**：任务很可能还在 ComfyUI 里跑，重试等于把同一条 GPU 活干两遍。
 MAX_SHOT_4 = 6000      # 4 步：100 分钟
@@ -44,6 +50,81 @@ MAX_SHOT_8 = 9600      # 8 步：160 分钟
 
 def P(*a):
     print(*a, flush=True)
+
+
+SERVER = "http://127.0.0.1:8188"
+
+
+def _queue_items():
+    """返回 ComfyUI 队列里 running + pending 的条目列表。"""
+    try:
+        with urllib.request.urlopen(SERVER + "/queue", timeout=8) as r:
+            d = json.load(r)
+        return list(d.get("queue_running", [])) + list(d.get("queue_pending", []))
+    except Exception:
+        return []
+
+
+def find_queued_pid(prefix):
+    """在 ComfyUI 队列里找 filename_prefix 等于 wan22/<prefix> 的任务。
+
+    为什么需要：GPU 被别人占满时，我们的任务会在 ComfyUI 里排很久。
+    上一轮超时判失败后如果直接重提交，同一条 GPU 活就干了两遍（还挤占别人）。
+    这里先查队列：已有同镜任务就直接接管轮询，不再提交。
+    """
+    want = f"wan22/{prefix}"
+    for item in _queue_items():
+        if not isinstance(item, (list, tuple)) or len(item) < 3:
+            continue
+        pid, wf = item[1], item[2]
+        if not isinstance(wf, dict):
+            continue
+        node = wf.get("20", {})
+        if isinstance(node, dict) and node.get("inputs", {}).get("filename_prefix") == want:
+            return str(pid)
+    return None
+
+
+def pid_in_queue(pid):
+    """pid 是否还在 ComfyUI 队列（running 或 pending）。读不到时保守返回 True。"""
+    items = _queue_items()
+    if not items:
+        return True          # 读不到队列就当作还在，宁可多等也不要重复提交
+    for item in items:
+        if isinstance(item, (list, tuple)) and len(item) > 1 and str(item[1]) == pid:
+            return True
+    return False
+
+
+def wait_job(pid, limit):
+    """等任务完成；**排队等待不计入执行超时**。
+
+    只有「不在队列里、也没成功、也没落盘」才算真失败。
+    这是 s8 被误判的根因：提交后排队 100 分钟，超时逻辑把它判死，
+    而它其实一直是队列里的第 1 位正在跑。
+    """
+    t0 = time.time()
+    deadline = t0 + limit
+    while True:
+        try:
+            h = json.load(urllib.request.urlopen(SERVER + "/history/" + pid, timeout=10))
+        except Exception:
+            h = {}
+        if pid in h:
+            rec = h[pid]
+            kinds = [m[0] for m in rec.get("status", {}).get("messages", [])]
+            if "execution_success" in kinds:
+                return rec
+            if "execution_error" in kinds:
+                raise RuntimeError("execution_error " + json.dumps(rec.get("status", {}))[:300])
+        now = time.time()
+        if now > deadline:
+            if pid_in_queue(pid):
+                deadline = now + limit
+                P(f"  仍在 ComfyUI 队列中，执行超时续期 {limit // 60} 分（已等 {(now - t0) / 60:.0f} 分）")
+            else:
+                raise TimeoutError(f"不在队列且无产物（已等 {(now - t0) / 60:.0f} 分）")
+        time.sleep(3)
 
 
 def shot_ids():
@@ -111,34 +192,45 @@ def gen_one(sid, seed, length, steps=4, tag="", tries=8):
             time.sleep(30)
             continue
 
-        try:
-            wf = wan22.build(wan22.SCENES[sid], name, seed + sid,
-                             length=length, steps=steps, neg=wan22.neg_for(sid))
-            wf["prompt"]["20"]["inputs"]["filename_prefix"] = f"wan22/{prefix}"
-            pid = wan22.submit(wf)
-        except Exception as e:
-            P(f"[{prefix}] 提交失败：{str(e)[:200]}")
-            time.sleep(20)
-            continue
-
-        P(f"[{prefix}] 已提交 pid={pid[:12]}（steps={steps}），等待执行…")
-        t_submit = time.time()
         dest = out_path(sid, tag)
         limit = MAX_SHOT_8 if steps > 4 else MAX_SHOT_4
+
+        # 提交前先看磁盘：上一轮可能已经跑完、只是没来得及拷回来
+        # （典型场景：任务在 ComfyUI 里排了很久，门控一直拦着我们，等轮到我们时
+        #  它早已跑完并从队列消失——不查磁盘就会重复提交，同一条活干两遍）
+        n = disk_fallback(sid, dest, min_mtime=SINCE, prefix=prefix)
+        if n >= MIN_BYTES:
+            P(f"[{prefix}] 磁盘已有本片产物（{n / 1048576:.1f}MB），直接取回，不重复提交")
+            return True, f"{n / 1048576:.1f}MB / 磁盘取回（未重新生成）"
+
+        # 再查队列：已有同镜任务就接管，不重复提交
+        pid = find_queued_pid(prefix)
+        if pid:
+            P(f"[{prefix}] 队列里已有同镜任务 pid={pid[:12]}，接管轮询（不重复提交）")
+        else:
+            try:
+                wf = wan22.build(wan22.SCENES[sid], name, seed + sid,
+                                 length=length, steps=steps, neg=wan22.neg_for(sid))
+                wf["prompt"]["20"]["inputs"]["filename_prefix"] = f"wan22/{prefix}"
+                pid = wan22.submit(wf)
+            except Exception as e:
+                P(f"[{prefix}] 提交失败：{str(e)[:200]}")
+                time.sleep(20)
+                continue
+            P(f"[{prefix}] 已提交 pid={pid[:12]}（steps={steps}），等待执行…")
+
+        t_submit = time.time()
         try:
-            rec = poll_history(pid, timeout=limit)
-        except TimeoutError:
-            # 超时 ≠ 失败：任务可能还在跑，或刚跑完但 history 还没返回。
-            # 先查磁盘，避免把同一条 GPU 活干两遍。
-            P(f"[{prefix}] 超过 {limit // 60} 分未完成，先查磁盘是否已落盘…")
+            rec = wait_job(pid, limit)
+        except TimeoutError as e:
+            # 排队等待不计入超时；走到这里说明它确实不在队列里了。
+            P(f"[{prefix}] {e}，先查磁盘是否已落盘…")
             n = disk_fallback(sid, dest, min_mtime=t_submit - 5, prefix=prefix)
             if n >= MIN_BYTES:
                 el = time.time() - t_submit
                 return True, f"{el:.0f}s / {n / 1048576:.1f}MB / 超时后磁盘取回"
-            # 磁盘也没有：不再重试。任务很可能仍挂在 ComfyUI 里，
-            # 重试会重复提交、把同一条 GPU 活干两遍，还可能把别人的任务挤得更久。
             P(f"[{prefix}] 磁盘无产物 → 记为失败并跳过（不中断 ComfyUI 队列）")
-            return False, f"超时 {limit // 60} 分且磁盘无产物"
+            return False, "任务从队列消失且磁盘无产物"
         except Exception as e:
             P(f"[{prefix}] 执行失败：{str(e)[:200]}")
             continue
@@ -185,6 +277,11 @@ def main():
     ids = ([int(x.strip().lstrip("s")) for x in a.shots.split(",") if x.strip()]
            if a.shots else shot_ids())
 
+    # 本片起始时刻：已有片段里最早的那个修改时间。用于在共享输出目录里区分本片/旧片产物。
+    global SINCE
+    existing = [f for f in glob.glob(os.path.join(wan22.AI, "s*.mp4")) if "_v" not in os.path.basename(f)]
+    SINCE = (min(os.path.getmtime(f) for f in existing) - 60) if existing else 0
+
     P("=" * 68)
     P(f"生成队列  film={_film.FILM or 'reference'}  seed={seed}  length={length}  "
       f"steps={steps}  tag={tag or '-'}")
@@ -226,12 +323,16 @@ def main():
             P(f"[s{sid}{sfx(tag)}] ✖ {msg}  总计 {el:.0f}s")
             # 安全阀：还没任何一镜成功就失败 → 大概率是系统性问题
             # （模型名不对 / 节点缺失 / ComfyUI 版本不匹配），继续跑只会逐个烧时间。
-            if not ok:
+            # 但**超时不算系统性问题**：GPU 被别人占满时单镜可能排队几小时，
+            # 这时候中止队列等于把剩下所有镜头一起放弃（曾因此漏掉 5 个镜头）。
+            if not ok and "超时" not in msg and "队列消失" not in msg:
                 P("")
-                P("!! 首镜即失败，判定为系统性问题，中止队列以免逐镜空跑。")
+                P("!! 首镜即失败（非超时），判定为系统性问题，中止队列以免逐镜空跑。")
                 P(f"!! 手动单镜试跑：FILM={_film.FILM or 'reference'} "
                   f"python scripts/gen_one.py {sid} {seed} {length}")
                 break
+            if not ok:
+                P(f"   （超时/掉队不计入系统性问题，继续下一镜）")
 
     P("")
     P("=" * 68)

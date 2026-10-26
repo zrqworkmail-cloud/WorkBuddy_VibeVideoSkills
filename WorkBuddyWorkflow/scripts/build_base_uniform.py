@@ -65,16 +65,15 @@ def probe_duration(path):
     return float(out)
 
 
-def build_segment(sid, src, target, dst):
+def build_segment(sid, src, target, dst, n_frames):
     """裁头 → 重定时到 target 秒 → 补帧到 24fps → 调色 → 放大到 1080×1920。
 
-    为什么不用 -t 裁时长：-t 按输出时间轴裁，而 minterpolate 补帧后末帧时间戳
-    未必落在 target 上，实测会短 0.09~0.10s（超出 0.06s 容差）。
-    改成「按帧数精确裁」：先 tpad 克隆末帧补足，再 trim 到 round(target×24) 帧，
-    时长就是 N/24，误差恒小于半帧（0.021s）。
+    n_frames 由调用方按**累计时间**算好（见 main 里的 cum/prev_n）。
+    为什么不在这里各自 round(target*24)：每段独立取整会各自向下偏一点，
+    18 段累加后总时长会短 0.3 秒（实测 136.416 vs 136.719），音画就错位了。
+    按累计边界取整，误差只在最后一段体现，总量恒等于 round(总时长×24)。
 
-    另注：不能在末尾再加 -r 24 —— 补帧后流已经是 24fps，再加 -r 会再补 2 帧，
-    实测把 179 帧变成 181 帧（+0.083s）。
+    另注：不能在末尾再加 -r 24 —— 补帧后流已经是 24fps，再加 -r 会再补 2 帧。
     """
     src_dur = probe_duration(src)
     head = TRIM_HEAD_OVERRIDE.get(sid, TRIM_HEAD)
@@ -82,7 +81,6 @@ def build_segment(sid, src, target, dst):
     if usable <= 0.5:
         raise SystemExit(f"{sid} 裁头 {head}s 后仅剩 {usable:.2f}s，不可用")
     k = target / usable           # setpts 乘数：>1 变慢，<1 变快
-    n_frames = round(target * FPS)
     vf = (f"trim=start={head:.3f},setpts=(PTS-STARTPTS)*{k:.6f},{MINTERP},{GRADE},"
           f"scale={W}:{H}:flags=lanczos,"
           f"tpad=stop_mode=clone:stop_duration=1,trim=end_frame={n_frames},"
@@ -109,6 +107,8 @@ def main():
     P(f"{'镜':5}{'拍':>4}{'目标':>8}{'源长':>8}{'倍率':>8}{'实长':>8}{'误差':>9}  判定")
     P("-" * 72)
     bad = 0
+    cum = 0.0          # 累计目标时间
+    prev_n = 0         # 累计帧边界
     for sc in tl["scenes"]:
         sid = sc["id"]
         num = sid.lstrip("s")
@@ -117,11 +117,15 @@ def main():
         src = os.path.join(ai, f"{sid}.mp4")
         dst = os.path.join(outdir, f"base_{sid}.mp4")
         target = sc["beats"] * beat
+        cum += target
+        n_end = round(cum * FPS)
+        n_frames = n_end - prev_n          # 本段帧数 = 累计边界之差
+        prev_n = n_end
         if not os.path.exists(src):
             P(f"{sid:5}{sc['beats']:>4}{target:>8.2f}{'':>8}{'':>8}{'':>8}{'':>9}  ✖ 素材缺失")
             bad += 1
             continue
-        src_dur, k = build_segment(sid, src, target, dst)
+        src_dur, k = build_segment(sid, src, target, dst, n_frames)
         real = probe_duration(dst)
         err = real - target
         ok = abs(err) <= TOL

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>为什么晕车时，闭眼不管用</title>
+<style>
+@font-face{font-family:'NSC';src:url('file:///C:/Windows/Fonts/NotoSansSC-VF.ttf') format('truetype');font-weight:100 900;font-display:block}
+@font-face{font-family:'NSerif';src:url('file:///C:/Windows/Fonts/NotoSerifSC-VF.ttf') format('truetype');font-weight:200 900;font-display:block}
+
+:root{
+  --ink:#EDF1F7;
+  --dim:#78829A;
+  --dim2:#4A5266;
+  --cyan:#57DFFF;      /* 内耳 / 前庭信号 */
+  --lime:#C9FF4E;      /* 视觉信号 */
+  --red:#FF5A3C;       /* 大脑警报 / 排毒 */
+  --bg:#07080C;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+body{font-family:'NSC','Microsoft YaHei',sans-serif;-webkit-font-smoothing:antialiased}
+
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:var(--bg)}
+
+/* ---------- 覆盖层模式：底图交给 AI 素材，本层只出 alpha ---------- */
+html.ov, html.ov body{background:transparent}
+body.ov #stage{background:transparent}
+.ov-scrim,.ov-grain{display:none;position:absolute;inset:0;pointer-events:none}
+body.ov .ov-scrim,body.ov .ov-grain{display:block}
+.ov-scrim{
+  background:
+    linear-gradient(to top,
+      rgba(3,5,9,.95) 0%, rgba(3,5,9,.90) 22%, rgba(3,5,9,.74) 34%,
+      rgba(3,5,9,.40) 46%, rgba(3,5,9,.10) 58%, rgba(3,5,9,0) 70%),
+    linear-gradient(to bottom,
+      rgba(3,5,9,.60) 0%, rgba(3,5,9,.10) 8%, rgba(3,5,9,0) 15%),
+    linear-gradient(to right, rgba(3,5,9,.35) 0%, rgba(3,5,9,0) 12%,
+      rgba(3,5,9,0) 88%, rgba(3,5,9,.35) 100%),
+    rgba(5,7,12,.22);
+}
+.ov-grain{
+  background-image:radial-gradient(rgba(255,255,255,.20) .5px, transparent .5px);
+  background-size:3px 3px;opacity:.07;mix-blend-mode:overlay;
+}
+
+.flash{position:absolute;inset:0;background:#dfe8ff;opacity:0;pointer-events:none;z-index:40;mix-blend-mode:screen}
+.progress{position:absolute;left:0;top:0;width:1080px;height:5px;background:rgba(255,255,255,.06);z-index:50}
+.progress i{display:block;height:100%;width:0;background:var(--cyan);box-shadow:0 0 18px rgba(87,223,255,.65)}
+
+/* ---------- 场景通用 ---------- */
+.scene{position:absolute;inset:0;opacity:0;visibility:hidden;will-change:opacity}
+.tag{
+  position:absolute;left:90px;top:250px;
+  font-size:27px;font-weight:700;letter-spacing:.26em;color:#C3CDDF;
+  display:flex;align-items:center;gap:18px;
+  -webkit-text-stroke:.5px rgba(6,8,14,.5);
+  text-shadow:0 2px 16px rgba(0,0,0,.66),0 1px 3px rgba(0,0,0,.6);
+}
+.tag::before{content:'';width:44px;height:2px;background:var(--cyan);opacity:.85}
+
+/* 布局：图表区 y 340–1040，文字区 y 1124–1460（全在抖音安全区内） */
+.txt{position:absolute;left:90px;width:900px;bottom:460px}
+.txt::before{
+  content:'';position:absolute;inset:-34px -52px;border-radius:40px;z-index:-1;
+  background:radial-gradient(120% 108% at 18% 100%,
+    rgba(5,7,12,.82) 0%, rgba(5,7,12,.60) 52%, rgba(5,7,12,.22) 78%, rgba(5,7,12,0) 100%);
+  filter:blur(9px);
+  opacity:var(--sc,0);
+}
+.h1{font-size:104px;font-weight:900;line-height:1.16;letter-spacing:-.03em;color:var(--ink);
+    -webkit-text-stroke:1.1px rgba(6,8,14,.62);
+    text-shadow:0 3px 26px rgba(0,0,0,.78),0 2px 6px rgba(0,0,0,.7),0 0 2px rgba(0,0,0,.5)}
+.h1.lg{font-size:120px}
+.h2{font-size:72px;font-weight:800;line-height:1.28;letter-spacing:-.02em;color:var(--ink);
+    -webkit-text-stroke:.6px rgba(6,8,14,.5);
+    text-shadow:0 3px 24px rgba(0,0,0,.66),0 1px 4px rgba(0,0,0,.6)}
+.h3{font-size:58px;font-weight:700;line-height:1.34;letter-spacing:-.015em;color:var(--dim);
+    -webkit-text-stroke:.6px rgba(6,8,14,.5);text-shadow:0 2px 20px rgba(0,0,0,.6)}
+.note{
+  margin-top:34px;font-size:36px;font-weight:500;line-height:1.78;
+  color:#C9D3E4;letter-spacing:.01em;max-width:880px;
+  -webkit-text-stroke:.45px rgba(6,8,14,.45);
+  text-shadow:0 2px 18px rgba(0,0,0,.74),0 1px 3px rgba(0,0,0,.58)}
+/* 关键词强调：字号差 + 颜色对比抢视线 */
+.note b{color:var(--cyan);font-weight:900;font-size:1.14em;letter-spacing:-.01em;
+        -webkit-text-stroke:.4px rgba(6,8,14,.55);text-shadow:0 0 26px rgba(87,223,255,.45),0 2px 12px rgba(0,0,0,.8)}
+.note b.lm{color:var(--lime);text-shadow:0 0 26px rgba(201,255,78,.42),0 2px 12px rgba(0,0,0,.8)}
+.note b.rd{color:var(--red);text-shadow:0 0 26px rgba(255,90,60,.45),0 2px 12px rgba(0,0,0,.8)}
+.note b.wh{color:#FFFFFF;text-shadow:0 0 30px rgba(255,255,255,.55),0 2px 12px rgba(0,0,0,.8)}
+
+/* 动画初始态（由 render 覆盖，这里只保证未渲染时不闪出来） */
+[data-anim]{opacity:0;will-change:transform,opacity}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div class="ov-scrim"></div>
+  <div class="ov-grain"></div>
+  <div class="flash" id="flash"></div>
+  <div class="progress"><i id="pbar"></i></div>
+
+<!-- ===================== s1 钩子 · 山道后座 ===================== -->
+<section class="scene" id="s1">
+  <div class="txt">
+    <div class="h1" data-t="0.5" data-anim="rise" data-d="0.55">车一拐弯</div>
+    <div class="h1" data-t="1.5" data-anim="rise" data-d="0.55">你的<b>胃</b>先知道了</div>
+  </div>
+</section>
+
+<!-- ===================== s2 本能 · 闭眼 ===================== -->
+<section class="scene" id="s2">
+  <div class="txt">
+    <div class="h1" data-t="0.45" data-anim="rise" data-d="0.55">你本能地闭上眼</div>
+    <div class="h2" data-t="1.9" data-anim="rise" data-d="0.55">想把晃动的世界关掉</div>
+  </div>
+</section>
+
+<!-- ===================== s3 反转① · 闭眼更晕 ===================== -->
+<section class="scene" id="s3">
+  <div class="tag" data-t="0.3" data-anim="fade" data-d="0.5">反转</div>
+  <div class="txt">
+    <div class="h2" data-t="0.55" data-anim="rise" data-d="0.55">但对不少人来说</div>
+    <div class="h1" data-t="2.0" data-anim="rise" data-d="0.6">闭上眼，<b class="rd">反而更晕</b></div>
+  </div>
+</section>
+
+<!-- s4–s18 待铺（文案见 films/motion-sickness/分镜.md） -->
+
+</div>
+<script src="timeline.js"></script>
+<script>
+(function(){
+'use strict';
+// 覆盖层模式：?ov=1 时必须把 html/body 切成透明，否则截图会带上 #000 底色，
+// 叠到底板上就是把素材整帧盖掉（预览会显示成"只有文字的纯黑画面"）。
+if(/[?&]ov=1/.test(location.search)){
+  document.documentElement.classList.add('ov');
+  document.body.classList.add('ov');
+}
+const TL = window.TIMELINE;
+const DUR = TL.duration;
+const clamp=(v,a=0,b=1)=>v<a?a:v>b?b:v;
+const easeOut=p=>1-Math.pow(1-clamp(p),3);
+const easeInOut=p=>p<0.5?4*p*p*p:1-Math.pow(-2*p+2,3)/2;
+
+/* ---------- 建立场景索引 ---------- */
+const scenes = TL.scenes.map(sc=>{
+  const el = document.getElementById(sc.id);
+  if(!el) return null;
+  return {id:sc.id, start:sc.start, end:sc.end, dur:sc.dur, el, items:[], out:0.26};
+}).filter(Boolean);
+
+/* ---------- 收集元素动画 ---------- */
+function collect(sc){
+  sc.items = [...sc.el.querySelectorAll('[data-t]')].map(el=>({
+    el,
+    t0: parseFloat(el.dataset.t)||0,
+    d:  parseFloat(el.dataset.d)||0.5,
+    anim: el.dataset.anim || 'fade',
+  }));
+}
+scenes.forEach(collect);
+
+/* ---------- 单元素动画：全部由时间算，禁止 CSS transition ---------- */
+function apply(it, t){
+  const lt = t;                       // 全局时间
+  const p = clamp((lt - it.t0)/it.d);
+  const e = easeOut(p);
+  let op = e, tx=0, ty=0, s=1, bl=0;
+  switch(it.anim){
+    case 'rise':  ty = (1-e)*34; break;
+    case 'fall':  ty = -(1-e)*30; break;
+    case 'scale': s = 0.93 + 0.07*e; break;
+    case 'pop':   s = 1.08 - 0.08*easeInOut(p); break;
+    case 'left':  tx = (1-e)*-46; break;
+    case 'right': tx = (1-e)*46; break;
+    case 'blur':  bl = (1-e)*10; break;
+    case 'fade':  break;
+    default:      break;
+  }
+  it.el.style.opacity = op.toFixed(3);
+  it.el.style.transform = `translate3d(${tx.toFixed(2)}px,${ty.toFixed(2)}px,0) scale(${s.toFixed(3)})`;
+  it.el.style.filter = bl>0.05 ? `blur(${bl.toFixed(1)}px)` : 'none';
+}
+
+/* ---------- 卡点光效：每镜独立配色/强度/衰减 ---------- */
+const FLASH = {
+  s1:{f:0.00,d:0.24,c:'#57DFFF'},   // 钩子不闪，保持安静
+  s2:{f:0.06,d:0.22,c:'#57DFFF'},
+  s3:{f:0.13,d:0.20,c:'#FF5A3C'},   // 反转点：红
+};
+
+/* ---------- 逐帧特殊逻辑（需要精确控制时用） ---------- */
+const FNS = {
+  // 示例：s3 的红色裂缝随进度扩张
+  // s3(lt,t,el){ ... }
+};
+
+const flashEl = document.getElementById('flash');
+const pbar = document.getElementById('pbar');
+
+function render(t){
+  let flash=0, flashColor='#dfe8ff';
+  for(const sc of scenes){
+    let vis=0;
+    if(t>=sc.start-0.001 && t<=sc.end+0.001){
+      vis = Math.min(clamp((t-sc.start)/0.22), clamp((sc.end-t)/sc.out));
+      const fs = FLASH[sc.id]||{f:0,d:0.16,c:'#dfe8ff'};
+      flash = fs.f*(1-clamp((t-sc.start)/fs.d));
+      flashColor = fs.c;
+    }
+    sc.el.style.opacity = vis.toFixed(3);
+    sc.el.style.visibility = vis>0.002?'visible':'hidden';
+    if(vis<=0.002) continue;
+    for(const it of sc.items) apply(it, t);
+    // 文字底板软光晕：只在文字出现后淡入
+    const txt = sc.el.querySelector('.txt');
+    if(txt){
+      const t0 = sc.items.length ? Math.min(...sc.items.map(i=>i.t0)) : 0;
+      txt.style.setProperty('--sc', clamp((t-sc.start-t0)/0.55).toFixed(3));
+      const k = (t-sc.start)/sc.dur;
+      txt.style.transform = `translateY(${(-7*k).toFixed(2)}px)`;
+    }
+    if(FNS[sc.id]) FNS[sc.id](t-sc.start, t, sc.el);
+  }
+  if(flash>0.001) flashEl.style.background = flashColor;
+  flashEl.style.opacity = flash.toFixed(3);
+  pbar.style.width = (clamp(t/DUR)*100).toFixed(3)+'%';
+}
+
+window.__seek = function(t){ render(t); };
+window.__DUR = DUR;
+render(0);
+document.fonts.ready.then(()=>{ render(0); window.__ready=true; });
+})();
+</script>
+</body>
+</html>

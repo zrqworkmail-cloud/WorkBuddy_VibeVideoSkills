@@ -86,17 +86,31 @@ def main():
     head = run(["git", "log", "--oneline", "-1"]).stdout.strip()
     print(f"✔ 已提交 {head}")
 
-    for attempt in range(1, 4):
+    # 先试标准通道。本机代理通常拦 github.com:443，所以大概率会失败，
+    # 因此只试 2 次（每次要等代理超时约 20 秒），然后转 API 通道。
+    for attempt in range(1, 3):
         r = run(["git", "push", "origin", "main"], check=False)
         if r.returncode == 0:
             print("✔ 已推送到 origin/main")
             return 0
         err = (r.stderr or r.stdout).strip().splitlines()
-        print(f"  第 {attempt}/3 次推送失败：{err[-1] if err else '未知错误'}")
-        if attempt < 3:
-            time.sleep(5 * attempt)
+        print(f"  第 {attempt}/2 次 git push 失败：{err[-1] if err else '未知错误'}")
+        if attempt < 2:
+            time.sleep(3)
 
-    print("✖ 推送三次均失败。本地已提交，未丢失；可稍后手动重跑本脚本。")
+    print("· git push 不通（代理拦 github.com:443），改用 GitHub API 推送…")
+    try:
+        import _gh_api
+        ok, msg = _gh_api.push_via_api()
+    except Exception as e:
+        ok, msg = False, f"{type(e).__name__}: {str(e)[:300]}"
+
+    if ok:
+        print(f"✔ {msg}")
+        return 0
+
+    print(f"✖ API 推送也失败：{msg}")
+    print("  本地已提交，未丢失；可稍后手动重跑本脚本。")
     return 3
 
 

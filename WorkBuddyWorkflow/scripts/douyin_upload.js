@@ -115,6 +115,8 @@ async function main() {
   log('==== 表单已填好，未点发布 ====');
   log('请手动完成：① 封面 ② 自主声明「内容由 AI 生成」 ③ 章节时间码 ④ 点发布');
   log('浏览器保持打开，别关。');
+  // 常驻：不退出进程，否则 puppeteer 会把浏览器一起关掉，表单状态全丢（踩过一次）
+  setInterval(() => {}, 1 << 30);
 }
 
 main().catch((e) => { console.error('✖ ' + e.message); process.exit(1); });

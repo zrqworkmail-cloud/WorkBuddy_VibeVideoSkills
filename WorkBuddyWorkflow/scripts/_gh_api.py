@@ -43,7 +43,10 @@ BASE = "https://api.github.com"
 
 # ---------------- git 辅助 ----------------
 def _git(args, binary=False):
-    r = subprocess.run(["git"] + args, cwd=REPO, capture_output=True)
+    # core.quotepath=false：否则中文路径会被输出成 "\350\247\206..." 这种八进制转义，
+    # 拿去 cat-file 直接失败（本仓库有中文文件名，必然踩到）。
+    r = subprocess.run(["git", "-c", "core.quotepath=false"] + args,
+                       cwd=REPO, capture_output=True)
     if r.returncode != 0:
         err = r.stderr.decode("utf-8", "replace")[:400]
         raise RuntimeError(f"git {' '.join(args)} 失败：{err}")

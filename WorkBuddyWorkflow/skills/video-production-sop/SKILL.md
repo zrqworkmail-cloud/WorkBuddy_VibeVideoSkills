@@ -56,8 +56,8 @@ agent_created: true
    - **分段帧数按累计边界取整**：`cum += target; n_end = round(cum*fps); n_frames = n_end - prev_n`。逐段各自 `round` 会让取整误差同向累加——单段 0.01s 的偏差，十几段就能漂出 0.3s，超出全片 0.06s 容差。判据要两条：每段 ≤0.06s **且** Σ段帧数 = `round(总时长×fps)`。
 5. **做覆盖层**：在 `src/index.html` 的 `<section id=sN>` 加 `data-t/data-anim/data-d`；需要逐帧逻辑写 `FNS.sN(lt,t,el)`；卡点光效配 `FLASH[N]`。
 6. **单镜预览（每次改画面必做）**：`node scripts/scene_preview.js s6 5 --base`，秒级出图，查排版/时序/构图 + JS 报错。
-7. **合成**：`node scripts/composite.js 24`（Puppeteer 逐帧截图 → ffmpeg 叠加 base+BGM）。
-8. **质检交付**：`python scripts/qc_rhythm.py` 必过 + `ffprobe` 音画时长一致 + 关键帧像素抽检 + 音频电平（mean≈-15dB）。
+7. **合成**：`node scripts/composite.js 24`（Puppeteer 逐帧截图 → ffmpeg 叠加 base+BGM）。吞吐约 **8fps**（1080×1920），2 分钟片约 7 分钟——合成不是瓶颈，别为省它砍质检。
+8. **质检交付**：`python scripts/qc_rhythm.py` 必过 + `ffprobe` 音画时长一致 + 关键帧像素抽检 + 音频电平（mean≈-15dB，**峰值留 ≥1dB 余量**，触顶即削波）。
 
 ## 七条硬规则（违反必出 bug）
 
@@ -78,7 +78,7 @@ agent_created: true
 |---|---|---|---|
 | ① 单镜 | `scene_preview.js` | 无 JS 报错；排版不压主体；**文字与底板亮部对比度**；时序 | 每次改画面 |
 | ② 节奏 | `qc_rhythm.py` | **每镜最长静止 ≤3.0s**；静止占比>45% 提示 | 合成后 |
-| ③ 成片 | ffprobe + 像素统计 | 时长严丝合缝；关键帧特征（如落点、文字带亮度、光效搏动）；音频电平 | 交付前 |
+| ③ 成片 | ffprobe + 像素统计 | 时长严丝合缝；关键帧特征（如落点、文字带亮度、光效搏动）；音频 mean≈-15dB 且峰值不触顶 | 交付前 |
 
 ### 闸门①之前：先确认预览工具可信
 

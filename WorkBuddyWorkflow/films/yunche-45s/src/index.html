@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>晕车 45 秒版</title>
+<style>
+@font-face{font-family:'NSC';src:url('file:///C:/Windows/Fonts/NotoSansSC-VF.ttf') format('truetype');font-weight:100 900;font-display:block}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:#000}
+html.ov,html.ov body{background:transparent}
+body.ov #stage{background:transparent}
+body{font-family:'NSC','Microsoft YaHei',sans-serif;-webkit-font-smoothing:antialiased}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#07080C}
+.ov-scrim{display:none;position:absolute;inset:0;pointer-events:none;
+  background:linear-gradient(to top,rgba(3,5,9,.92) 0%,rgba(3,5,9,.80) 24%,rgba(3,5,9,.42) 40%,rgba(3,5,9,.06) 56%,rgba(3,5,9,0) 66%),
+             linear-gradient(to bottom,rgba(3,5,9,.45) 0%,rgba(3,5,9,0) 12%)}
+body.ov .ov-scrim{display:block}
+.scene{position:absolute;inset:0;opacity:0;visibility:hidden}
+.txt{position:absolute;left:84px;width:912px;bottom:420px}
+.t1{font-size:112px;font-weight:900;line-height:1.1;letter-spacing:-.03em;color:#FFF;
+  -webkit-text-stroke:1.2px rgba(6,8,14,.65);
+  text-shadow:0 4px 30px rgba(0,0,0,.85),0 2px 8px rgba(0,0,0,.75)}
+.t2{margin-top:18px;font-size:96px;font-weight:900;line-height:1.12;letter-spacing:-.03em;
+  -webkit-text-stroke:1.1px rgba(6,8,14,.62);
+  text-shadow:0 4px 30px rgba(0,0,0,.85),0 2px 8px rgba(0,0,0,.75)}
+[data-anim]{opacity:0}
+</style></head><body>
+<div id="stage"><div class="ov-scrim"></div>
+<section class="scene" id="k1">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">闭上眼</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FF4A2E">反而更晕</div>
+  </div>
+</section>
+<section class="scene" id="k2">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">晕车时</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FFFFFF">第一反应是闭眼</div>
+  </div>
+</section>
+<section class="scene" id="k3">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">但问题不在</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FFFFFF">胃</div>
+  </div>
+</section>
+<section class="scene" id="k4">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">在</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#57DFFF">耳朵最深处</div>
+  </div>
+</section>
+<section class="scene" id="k5">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">三个半规管</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FFFFFF">身体唯一的加速度传感器</div>
+  </div>
+</section>
+<section class="scene" id="k6">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">车一晃</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FFFFFF">淋巴液推动毛细胞</div>
+  </div>
+</section>
+<section class="scene" id="k7">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">眼睛却报告</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#C9FF4E">我没动</div>
+  </div>
+</section>
+<section class="scene" id="k8">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">两套信号</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FF4A2E">对不上</div>
+  </div>
+</section>
+<section class="scene" id="k9">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">神经乱放电</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FFFFFF">产生不存在的感觉</div>
+  </div>
+</section>
+<section class="scene" id="k10">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">大脑判断</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FF4A2E">我可能中毒了</div>
+  </div>
+</section>
+<section class="scene" id="k11">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">于是启动</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FFFFFF">排毒程序</div>
+  </div>
+</section>
+<section class="scene" id="k12">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">流口水 出冷汗 脸发白</div>
+    
+  </div>
+</section>
+<section class="scene" id="k13">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">然后</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FF4A2E">吐</div>
+  </div>
+</section>
+<section class="scene" id="k14">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">闭眼没消除冲突</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FFFFFF">只是关掉了唯一的通道</div>
+  </div>
+</section>
+<section class="scene" id="k15">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">睡着了是麻痹</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FFFFFF">不是修复</div>
+  </div>
+</section>
+<section class="scene" id="k16">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">正解：让眼睛也看到我在动</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#57DFFF">盯住远处地平线</div>
+  </div>
+</section>
+<section class="scene" id="k17">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">司机不晕</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FFFFFF">低头看手机最晕</div>
+  </div>
+</section>
+<section class="scene" id="k18">
+  <div class="txt">
+    <div class="t1" data-t="0.02" data-anim="rise" data-d="0.26">晕车不是身体弱</div>
+    <div class="t2" data-t="0.28" data-anim="rise" data-d="0.3" style="color:#FF4A2E">是古老警报被误触发</div>
+  </div>
+</section>
+</div>
+<script src="timeline.js"></script>
+<script>
+(function(){
+'use strict';
+if(/[?&]ov=1/.test(location.search)){document.documentElement.classList.add('ov');document.body.classList.add('ov');}
+const TL=window.TIMELINE, DUR=TL.duration;
+const clamp=(v,a=0,b=1)=>v<a?a:v>b?b:v, easeOut=p=>1-Math.pow(1-clamp(p),3);
+const scenes=TL.scenes.map(sc=>{const el=document.getElementById(sc.id);
+  return el?{id:sc.id,start:sc.start,end:sc.start+sc.dur,dur:sc.dur,el,
+    items:[...el.querySelectorAll('[data-t]')].map(e=>({el:e,t0:parseFloat(e.dataset.t)||0,d:parseFloat(e.dataset.d)||.3}))}:null;}).filter(Boolean);
+function render(t){
+  for(const sc of scenes){
+    let vis=0;
+    if(t>=sc.start-.001&&t<=sc.end+.001) vis=Math.min(clamp((t-sc.start)/.10),clamp((sc.end-t)/.10));
+    sc.el.style.opacity=vis.toFixed(3);
+    sc.el.style.visibility=vis>.002?'visible':'hidden';
+    if(vis<=.002) continue;
+    for(const it of sc.items){
+      const p=clamp((t-sc.start-it.t0)/it.d), e=easeOut(p);
+      it.el.style.opacity=e.toFixed(3);
+      it.el.style.transform=`translate3d(0,${((1-e)*26).toFixed(2)}px,0)`;
+    }
+  }
+}
+window.__seek=t=>render(t); window.__DUR=DUR; render(0);
+document.fonts.ready.then(()=>{render(0);window.__ready=true;});
+})();
+</script></body></html>

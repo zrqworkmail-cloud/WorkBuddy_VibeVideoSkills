@@ -57,8 +57,11 @@ def main():
     t = 0.0
     scenes = []
     for sc in tl["scenes"]:
-        scenes.append((sc["id"], sc["name"], t, t + sc["beats"] * beat))
-        t += sc["beats"] * beat
+        # 时长优先取显式 dur：有些片（如重剪短版）按秒直排，没有"拍"的概念，
+        # beats 填 0 时按 beats*beat 算会得到 0 长，全片判据直接失效。
+        d = sc.get("dur") if sc.get("dur") else sc["beats"] * beat
+        scenes.append((sc["id"], sc["name"], t, t + d))
+        t += d
     dur = scenes[-1][3]
 
     energies = list(decode(vid))

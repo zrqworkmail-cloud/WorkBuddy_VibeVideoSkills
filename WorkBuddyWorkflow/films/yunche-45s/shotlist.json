@@ -1,0 +1,20 @@
+[
+  {"clip": "s3",  "in": 1.5, "dur": 2.4, "text": "闭上眼", "text2": "反而更晕", "accent": "red"},
+  {"clip": "s1",  "in": 1.2, "dur": 1.8, "text": "晕车时", "text2": "第一反应是闭眼"},
+  {"clip": "s5",  "in": 1.6, "dur": 2.2, "text": "但问题不在", "text2": "胃", "accent": "white"},
+  {"clip": "s5",  "in": 4.2, "dur": 2.0, "text": "在", "text2": "耳朵最深处", "accent": "cyan"},
+  {"clip": "s6",  "in": 1.4, "dur": 2.4, "text": "三个半规管", "text2": "身体唯一的加速度传感器"},
+  {"clip": "s7",  "in": 1.8, "dur": 2.2, "text": "车一晃", "text2": "淋巴液推动毛细胞"},
+  {"clip": "s8",  "in": 2.0, "dur": 2.2, "text": "眼睛却报告", "text2": "我没动", "accent": "lime"},
+  {"clip": "s9",  "in": 1.6, "dur": 2.4, "text": "两套信号", "text2": "对不上", "accent": "red"},
+  {"clip": "s11", "in": 1.8, "dur": 2.2, "text": "神经乱放电", "text2": "产生不存在的感觉"},
+  {"clip": "s10", "in": 1.8, "dur": 2.6, "text": "大脑判断", "text2": "我可能中毒了", "accent": "red"},
+  {"clip": "s12", "in": 1.6, "dur": 2.0, "text": "于是启动", "text2": "排毒程序"},
+  {"clip": "s13", "in": 2.2, "dur": 2.2, "text": "流口水 出冷汗 脸发白", "text2": ""},
+  {"clip": "s12", "in": 4.4, "dur": 1.8, "text": "然后", "text2": "吐", "accent": "red"},
+  {"clip": "s14", "in": 1.8, "dur": 2.4, "text": "闭眼没消除冲突", "text2": "只是关掉了唯一的通道"},
+  {"clip": "s15", "in": 2.0, "dur": 2.0, "text": "睡着了是麻痹", "text2": "不是修复"},
+  {"clip": "s16", "in": 1.6, "dur": 2.4, "text": "正解：让眼睛也看到我在动", "text2": "盯住远处地平线", "accent": "cyan"},
+  {"clip": "s17", "in": 1.8, "dur": 2.2, "text": "司机不晕", "text2": "低头看手机最晕"},
+  {"clip": "s18", "in": 1.8, "dur": 2.6, "text": "晕车不是身体弱", "text2": "是古老警报被误触发", "accent": "red"}
+]

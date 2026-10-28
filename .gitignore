@@ -10,5 +10,7 @@ __pycache__/
 
 # 日志与临时文件
 *.log
+# 渲染调试时重定向出来的 stderr 快照（err_v2..vN），属一次性排障产物
+err_v*.txt
 .DS_Store
 Thumbs.db

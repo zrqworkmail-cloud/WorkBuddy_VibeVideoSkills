@@ -41,8 +41,10 @@ print("frames read:", N, file=sys.stderr)
 means = [float(f.mean()) for f in frames]
 print("brightness: min=%.1f max=%.1f mean=%.1f" % (min(means), max(means), sum(means)/len(means)))
 
-# 帧间差分：用「变化像素占比」判断是否有真实运动（避免深色背景下局部动画被全局均值掩盖）
-CHG = 6.0  # 单像素变化阈值（灰度）
+# 双重判据：
+#  (a) chg_frac：变化像素占比（>6 灰度），衡量"强动效"强度（参考值）
+#  (b) 冻结判据：全帧平均绝对差 < 0.06 灰度 = 画面真的没动（真正的 dead air）
+CHG = 6.0
 diffs = []
 chg_frac = []
 for i in range(1, N):
@@ -52,14 +54,12 @@ for i in range(1, N):
 diffs = np.array(diffs)
 chg_frac = np.array(chg_frac)
 
-# 静止判定：相邻帧变化像素占比 < 0.3% 视为基本静止（真正冻结才会低于此）
-TH = 0.003
-static = (chg_frac < TH)
+FROZEN = 0.002
+frozen = diffs < FROZEN
 max_run = 0
 cur = 0
-max_run_start = 0
 runs = []
-for i, s in enumerate(static):
+for i, s in enumerate(frozen):
     if s:
         cur += 1
         if cur == 1:
@@ -76,8 +76,12 @@ if cur > 0:
         max_run = cur; max_run_start = run_start
 
 max_static_sec = max_run / fps
-print("longest static run: %d frames (%.2fs) starting near frame %d" % (max_run, max_static_sec, max_run_start))
-print("static runs (frame_idx, length_frames):", runs[:10])
+print("frozen-run (mean|diff| < %.2f gray): longest %d frames (%.2fs) at frame %d" % (FROZEN, max_run, max_static_sec, max_run_start))
+print("frozen runs:", runs[:12])
+print("min per-frame mean diff: %.4f gray" % float(diffs.min()))
+
+# 参考：强动效覆盖率
+print("strong-motion coverage: mean %.2f%%, min %.2f%%" % (chg_frac.mean()*100, chg_frac.min()*100))
 
 # 场景切换检测（变化像素占比 > 5%）
 big = np.where(chg_frac > 0.05)[0]

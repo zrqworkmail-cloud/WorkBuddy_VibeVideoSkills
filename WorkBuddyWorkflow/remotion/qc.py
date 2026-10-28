@@ -1,16 +1,28 @@
 """
 质检：帧间运动检测（最长静止 <= 3s）+ 亮度抽检（排除全黑/全白）+ 音频电平。
-输入：out/lgm_final.mp4
+用法：python qc.py [video_path]  （默认 out/lgm_final.mp4）
 """
 import subprocess, numpy as np, json, sys
 
 PY = "C:/Users/Admin/.workbuddy-ai/binaries/python/versions/3.13.12/python.exe"
 FF = subprocess.check_output([PY, "-c", "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())"]).decode().strip()
+VIDEO = sys.argv[1] if len(sys.argv) > 1 else "out/lgm_final.mp4"
+print("QC target:", VIDEO)
 
-W, H = 270, 480
+# 自动探测画幅，等比缩到宽 270
+probe = subprocess.run([FF, "-i", VIDEO], stdout=subprocess.DEVNULL, stderr=subprocess.PIPE).stderr.decode(errors="ignore")
+import re
+m = re.search(r"Video:.*?, (\d{3,5})x(\d{3,5})", probe)
+if not m:
+    raise SystemExit("cannot detect video size")
+src_w, src_h = int(m.group(1)), int(m.group(2))
+W = 270
+H = int(round(W * src_h / src_w / 2)) * 2
+print(f"source {src_w}x{src_h} -> analyze {W}x{H}")
+
 fps = 24
 # 抽帧为灰度 rawvideo
-cmd = [FF, "-i", "out/lgm_final.mp4", "-vf", f"scale={W}:{H}", "-pix_fmt", "gray",
+cmd = [FF, "-i", VIDEO, "-vf", f"scale={W}:{H}", "-pix_fmt", "gray",
        "-f", "rawvideo", "-"]
 print("reading frames (grayscale %dx%d)..." % (W, H), file=sys.stderr)
 proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)

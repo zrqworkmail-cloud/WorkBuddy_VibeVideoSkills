@@ -38,7 +38,9 @@ def run(args, check=True, capture=True):
 
 
 def staged_files():
-    r = run(["git", "diff", "--cached", "--name-only"], check=False)
+    # core.quotepath=false：否则中文路径被输出成八进制转义，下面的 os.path 检查全部落空，
+    # 大文件拦截会静默失效（本仓库有中文文件名）
+    r = run(["git", "-c", "core.quotepath=false", "diff", "--cached", "--name-only"], check=False)
     return [l for l in r.stdout.splitlines() if l.strip()]
 
 

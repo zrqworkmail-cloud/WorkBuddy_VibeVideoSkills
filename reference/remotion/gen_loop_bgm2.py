@@ -12,8 +12,9 @@ BGM 无缝循环 v2：先找"音乐上相似"的两个点，再等功率交叉�
 输出：out/bgm_loop_v2_<dur>.m4a，并打印选点与相似度
 """
 import subprocess, numpy as np, sys, wave
+import sys
 
-PY = "C:/Users/Admin/.workbuddy-ai/binaries/python/versions/3.13.12/python.exe"
+PY = sys.executable   # 当前解释器，换机器无需改
 FF = subprocess.check_output([PY, "-c", "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())"]).decode().strip()
 SR = 44100
 TARGET = float(sys.argv[1]) if len(sys.argv) > 1 else 213.0

@@ -5,8 +5,9 @@
   B = out/audio/bgm_final.m4a (136.72s, 既有管线 BGM)
 """
 import subprocess, numpy as np
+import sys
 
-PY = "C:/Users/Admin/.workbuddy-ai/binaries/python/versions/3.13.12/python.exe"
+PY = sys.executable   # 当前解释器，换机器无需改
 FF = subprocess.check_output([PY, "-c", "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())"]).decode().strip()
 SR = 44100
 

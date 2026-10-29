@@ -8,9 +8,10 @@ const path = require('path');
 const fs = require('fs');
 const puppeteer = require('puppeteer-core');
 
-const CHROME = 'C:/Program Files/Google/Chrome/Application/chrome.exe';
+const CHROME = process.env.CHROME_PATH || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
 const UPLOAD_URL = 'https://creator.douyin.com/creator-micro/content/upload';
-const PROFILE = 'C:/Users/Admin/AppData/Local/Temp/douyin-upload-profile';
+const os = require('os');
+const PROFILE = path.join(os.tmpdir(), 'douyin-upload-profile');
 
 const VIDEO = process.argv[2];
 const TITLE = process.argv[3] || '';

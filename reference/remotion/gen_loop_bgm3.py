@@ -14,8 +14,9 @@ BGM 无缝循环 v3：前奏只播一次 + 在主体内找相似点循环
 5. out = x[0:S] + 循环铺满至目标时长，片尾 3s 淡出
 """
 import subprocess, numpy as np, sys, wave
+import sys
 
-PY = "C:/Users/Admin/.workbuddy-ai/binaries/python/versions/3.13.12/python.exe"
+PY = sys.executable   # 当前解释器，换机器无需改
 FF = subprocess.check_output([PY, "-c", "import imageio_ffmpeg;print(imageio_ffmpeg.get_ffmpeg_exe())"]).decode().strip()
 SR = 44100
 TARGET = float(sys.argv[1]) if len(sys.argv) > 1 else 213.0

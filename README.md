@@ -20,15 +20,12 @@ vibe-knowledge-video/
 ├── README.md                    ← 本文件
 ├── .gitignore
 │
-├── skills/                      ★ 技能（按平台分，跨项目复用）
+├── skills/                      ★ 技能（跨项目复用）
 │   ├── README.md                ← 存放规则、同步命令、写作约定
-│   ├── WorkBuddy_Skills/
-│   │   └── WorkBuddy_Video_Workflow/
-│   │       ├── SKILL.md         ← 主干流程（八阶段）
-│   │       └── references/      ← 按需加载的详细手册
-│   ├── Codex_Skills/
-│   ├── Qoder_Skills/
-│   └── Zcode_Skills/
+│   └── WorkBuddy_Skills/
+│       └── WorkBuddy_Video_Workflow/
+│           ├── SKILL.md         ← 主干流程（八阶段）
+│           └── references/      ← 按需加载的详细手册
 │
 ├── docs/                        ← 方法论（回答"为什么"）
 │   ├── 视频制作通用流程.md        ← 代码渲染的完整方法论
@@ -55,7 +52,7 @@ vibe-knowledge-video/
 
 每阶段给「做什么 / 判据 / 常见错误」。换题材、换工具、换平台，阶段顺序不变，只有「素材」那一步的实现方式变（代码渲染 / AI 生成 / 实拍 / 混剪 / 图文）。
 
-**按平台分目录**：不同 AI 编程工具的加载路径与元信息格式不同，所以 `skills/` 下按 `WorkBuddy_Skills` / `Codex_Skills` / `Qoder_Skills` / `Zcode_Skills` 分开放。
+**按平台分一层**：`skills/<平台>_Skills/<技能名>/`。目前只有 `WorkBuddy_Skills`，留这一层是为了以后往别的工具迁时不打乱结构。
 
 **为什么仓库里还要存一份**：WorkBuddy 只从用户级目录 `~/.workbuddy-ai/skills/` 加载技能，不认仓库路径；但仓库要管版本。所以**仓库为源，用户级为运行时副本**，单向同步。详见 [skills/README.md](./skills/README.md)。
 

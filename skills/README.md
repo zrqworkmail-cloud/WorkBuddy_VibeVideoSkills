@@ -1,37 +1,23 @@
-# skills/ · 按平台分类的技能
-
-同一个技能，不同 AI 编程工具的**加载路径与元信息格式不同**，所以按平台分目录存放。
+# skills/ · 技能
 
 ```
 skills/
-├── WorkBuddy_Skills/        ← WorkBuddy 的技能
-│   └── WorkBuddy_Video_Workflow/
-│       ├── SKILL.md
-│       └── references/
-├── Codex_Skills/            ← Codex 的技能
-├── Qoder_Skills/            ← Qoder 的技能
-└── Zcode_Skills/            ← Zcode 的技能
+└── WorkBuddy_Skills/            ← WorkBuddy 平台的技能
+    └── WorkBuddy_Video_Workflow/
+        ├── SKILL.md             ← 主干流程，加载时只读这个
+        └── references/          ← 按需加载的详细手册
 ```
 
-## 为什么分平台
+按平台分一层（`<平台>_Skills/`），是为了以后往别的工具迁时不打乱现有结构。目前只有 `WorkBuddy_Skills`。
 
-| 工具 | 加载路径 | 元信息 |
-|---|---|---|
-| **WorkBuddy** | `~/.workbuddy-ai/skills/<name>/SKILL.md` | YAML frontmatter：`name` / `description` / `agent_created` |
-| Codex | 待填（各版本不同） | 待填 |
-| Qoder | 待填 | 待填 |
-| Zcode | 待填 | 待填 |
+## 双份机制
 
-**只有 WorkBuddy 的路径是实测验证过的**，其余三处等你用起来再补——不确定的东西不写进文档，免得下次照着做踩空。
-
-## 双份机制（WorkBuddy）
-
-WorkBuddy 只认用户级目录，不认仓库路径；但仓库要管版本。所以：
+WorkBuddy 只认用户级目录 `~/.workbuddy-ai/skills/<name>/SKILL.md`，不认仓库路径；但仓库要管版本。所以：
 
 ```
-仓库（进 Git，版本管理）                用户级（运行时，不进 Git）
-skills/WorkBuddy_Skills/              ~/.workbuddy-ai/skills/
-└── WorkBuddy_Video_Workflow/    ──▶  └── WorkBuddy_Video_Workflow/
+仓库（进 Git，版本管理）                    用户级（运行时，不进 Git）
+skills/WorkBuddy_Skills/                  ~/.workbuddy-ai/skills/
+└── WorkBuddy_Video_Workflow/        ──▶  └── WorkBuddy_Video_Workflow/
 ```
 
 **单向同步**：永远改仓库那份，再覆盖到用户级。反向改会丢。
@@ -48,13 +34,13 @@ diff -r "$SRC" "$DST"   # 无输出 = 一致
 
 ## 当前收录
 
-| 平台 | 技能 | 作用 |
+| 技能 | 作用 | 入口 |
 |---|---|---|
-| WorkBuddy | `WorkBuddy_Video_Workflow` | 视频制作流程：选题 → 脚本 → 分镜 → 素材 → 剪辑合成 → 质检 → 交付 → 发布复盘 |
+| `WorkBuddy_Video_Workflow` | 视频制作流程：选题 → 脚本 → 分镜 → 素材 → 剪辑合成 → 质检 → 交付 → 发布复盘 | `SKILL.md` |
 
 ## 新增一个技能
 
-1. 在对应平台目录下建 `<SkillName>/`，写 `SKILL.md`
+1. 在 `WorkBuddy_Skills/` 下建 `<SkillName>/`，写 `SKILL.md`
 2. `SKILL.md` 必须带 YAML frontmatter：
 
 ```yaml
@@ -87,7 +73,7 @@ SK="skills/WorkBuddy_Skills/WorkBuddy_Video_Workflow"
 diff -r "$SK" "$HOME/.workbuddy-ai/skills/WorkBuddy_Video_Workflow"
 
 # 2. 有没有残留项目特定路径（应该为 0）
-grep -c "WorkBuddy_Workflow/\|remotion/\|scripts/" "$SK/SKILL.md"
+grep -c "reference/\|remotion/\|scripts/" "$SK/SKILL.md"
 
 # 3. references 里的链接是否都存在
 grep -oE "references/[a-zA-Z0-9._-]+" "$SK/SKILL.md" | sort -u | while read f; do

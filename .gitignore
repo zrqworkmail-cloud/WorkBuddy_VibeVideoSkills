@@ -17,3 +17,7 @@ Thumbs.db
 
 # 投稿副本（成片已在 out/ 内且不入库）
 *.mp4
+
+# 渲染排障日志（一次性产物，不入库）
+err_*.txt
+render_log*.txt

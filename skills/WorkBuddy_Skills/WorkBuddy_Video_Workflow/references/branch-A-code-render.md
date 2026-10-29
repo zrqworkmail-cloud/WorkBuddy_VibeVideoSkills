@@ -16,7 +16,7 @@
 - 排查这类管线的问题：文字消失、慢放掉帧、音画错位、生成 OOM、成片"卡住"。
 - 不适用：真人口播、纯剪辑（非代码渲染）、复杂三维。
 
-> 完整方法论（七参数决策表、迁移清单、判据来源）见仓库 `WorkBuddy_Workflow/视频制作通用流程.md`；
+> 完整方法论（七参数决策表、迁移清单、判据来源）见仓库 `docs/视频制作通用流程.md`；
 > 本文是给执行用的浓缩版，判据与硬规则优先。
 
 ## 核心思想
@@ -51,7 +51,7 @@
 
 ## 八步流程
 
-> 命令与路径是**参考实现**（仓库 `WorkBuddy_Workflow/src|scripts`）的写法。换项目/换画幅时替换成你的路径，
+> 命令与路径是**参考实现**（仓库 `reference/src|scripts`）的写法。换项目/换画幅时替换成你的路径，
 > 步骤顺序与判据不变。
 
 1. **定节奏**：改 `src/timeline.json` → `python scripts/build_timeline.py`，核对总拍数与每镜时长。
@@ -408,7 +408,7 @@
 **结构类镜头 AI 的失败方式不是糊，是"似是而非"**：
 说"三个半规管"，它给三根交叉细线框，观众数不出三个。**精致 ≠ 准确。**
 
-参考实现：`WorkBuddy_Workflow/remotion/`（Remotion 4 + SVG，规格对齐 704×1280/16fps/121 帧）。
+参考实现：`reference/remotion/`（Remotion 4 + SVG，规格对齐 704×1280/16fps/121 帧）。
 
 ## 素材生成：运动镜头的三条物理约束
 
@@ -473,8 +473,8 @@ Wan2.2 Lightning 4 步蒸馏有明显**运动迟缓**倾向：画面会动，但
 
 ## 资源
 
-- **`WorkBuddy_Workflow/视频制作通用流程.md`（仓库内）**：完整方法论——七参数决策表、通用八步、迁移清单、判据出处。做新题材先读这份。
-- 本技能在仓库 `WorkBuddy_Workflow/skills/WorkBuddy_Video_Workflow/SKILL.md` 有手工副本，**改完这里必须同步覆盖过去**，否则下次加载到的仍是旧规则。
+- **`docs/视频制作通用流程.md`（仓库内）**：完整方法论——七参数决策表、通用八步、迁移清单、判据出处。做新题材先读这份。
+- 本技能在仓库 `skills/WorkBuddy_Skills/WorkBuddy_Video_Workflow/SKILL.md` 有手工副本，**改完这里必须同步覆盖过去**，否则下次加载到的仍是旧规则。
 - `references/workflow-sop.md`：完整 SOP（文件地图、更详细的步骤与自检项）。
 - `references/qc_rhythm.py`：节奏体检参考实现（拷进项目 scripts/ 并改路径即可用）。
 - `references/narration-guidance.md`：口播文案 13 条写作原则（出处 anything2explainer，★2.7k）。

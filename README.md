@@ -14,7 +14,7 @@
 .
 ├── README.md                 ← 本文件
 ├── .gitignore                ← 排除 out/ 与 node_modules/
-└── WorkBuddyWorkflow/        ← 所有工作流
+└── WorkBuddy_Workflow/        ← 所有工作流
     ├── README.md             ← 工作流索引（从这里进）
     ├── 视频制作通用流程.md
     ├── 视频制作流程演进记录.md
@@ -30,13 +30,13 @@
 
 核心是四条原则：逐帧确定性渲染、素材层/覆盖层/音轨分层、量化质检闸门、先找轮子再造轮子。
 
-👉 入口：[`WorkBuddyWorkflow/README.md`](./WorkBuddyWorkflow/README.md)
+👉 入口：[`WorkBuddy_Workflow/README.md`](./WorkBuddy_Workflow/README.md)
 
 ## 使用方式
 
 ```bash
 git clone https://github.com/zrqworkmail-cloud/vibe-knowledge-video.git
-cd vibe-knowledge-video/WorkBuddyWorkflow
+cd vibe-knowledge-video/WorkBuddy_Workflow
 ```
 
 要做新片，从《视频制作通用流程.md》第 2 节的七参数表开始填；想抄代码，直接看 `src/` 与 `scripts/`。

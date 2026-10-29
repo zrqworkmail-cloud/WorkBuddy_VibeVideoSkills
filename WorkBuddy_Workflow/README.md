@@ -1,4 +1,4 @@
-# WorkBuddyWorkflow
+# WorkBuddy_Workflow
 
 这里沉淀**用 Workbuddy 跑通、可复用的工作流**。每条工作流都包含三部分：
 
@@ -11,13 +11,15 @@
 ## 目录
 
 ```
-WorkBuddyWorkflow/
+WorkBuddy_Workflow/
 ├── 视频制作通用流程.md        ← 通用 SOP（先读这个）
 ├── 视频制作流程演进记录.md     ← 决策记录：为什么这么改
-├── src/                      ← 参考实现：时间轴、覆盖层、概念帧
-├── scripts/                  ← 参考实现：构建与渲染脚本
-├── tools/oss-skills/         ← 嫁接的开源技能库
-└── skills/                   ← 本地技能（可复制到 ~/.workbuddy-ai/skills/）
+├── 第二支片复盘.md
+├── films/                    ← 各支片交付（分镜 / 文案 / 质检 / 成片）
+├── remotion/                 ← 当前参考实现（Remotion + SVG，代码逐帧渲染）
+├── src/ scripts/ tools/      ← 初代参考实现（HTML + Puppeteer + I2V）
+└── skills/
+    └── WorkBuddy_Video_Workflow/   ← 本地技能，复制到 ~/.workbuddy-ai/skills/
 ```
 
 ---

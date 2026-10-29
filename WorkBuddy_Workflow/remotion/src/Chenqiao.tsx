@@ -142,16 +142,21 @@ const Steam: React.FC<{ x: number; y: number; s?: number; n?: number }> = ({ x, 
   );
 };
 
+// 旗帜（尺寸随 h 等比，杆更粗）
 const Flag: React.FC<{ x: number; y: number; label: string; up: number; fall: number; color?: string; h?: number }> =
-  ({ x, y, label, up, fall, color = '#7A2E24', h = 170 }) => (
-    <g transform={`translate(${x} ${y}) rotate(${fall * 76})`}>
-      <line x1={0} y1={0} x2={0} y2={-h * Math.max(up, 0.001)} stroke="#3A2C18" strokeWidth={6} />
-      <g opacity={Math.min(up, 1)} transform={`translate(0 ${-h * up})`}>
-        <path d="M 0 -34 L 92 -24 L 0 -14 Z" fill={color} stroke={GOLD_D} strokeWidth={3} />
-        <text x={32} y={-20} textAnchor="middle" fontFamily={FONT} fontSize={21} fontWeight={900} fill={PAPER}>{label}</text>
+  ({ x, y, label, up, fall, color = '#7A2E24', h = 170 }) => {
+    const bw = h * 0.58;
+    return (
+      <g transform={`translate(${x} ${y}) rotate(${fall * 76})`}>
+        <line x1={0} y1={0} x2={0} y2={-h * Math.max(up, 0.001)} stroke="#3A2C18" strokeWidth={7} />
+        <circle cx={0} cy={-h * Math.max(up, 0.001)} r={6} fill={GOLD_D} />
+        <g opacity={Math.min(up, 1)} transform={`translate(0 ${-h * up})`}>
+          <path d={`M 0 ${-h * 0.22} L ${bw} ${-h * 0.15} L 0 ${-h * 0.08} Z`} fill={color} stroke={GOLD_D} strokeWidth={3} />
+          <text x={bw * 0.36} y={-h * 0.128} textAnchor="middle" fontFamily={FONT} fontSize={h * 0.13} fontWeight={900} fill={PAPER}>{label}</text>
+        </g>
       </g>
-    </g>
-  );
+    );
+  };
 
 // 帐篷
 const Tent: React.FC<{ x: number; y: number; s?: number }> = ({ x, y, s = 1 }) => (
@@ -177,11 +182,11 @@ const ROLE: Record<Role, { robe: string; robe2: string; trim: string; skin: stri
 
 const Person: React.FC<{
   x: number; y: number; s?: number; role?: Role; walk?: number; flip?: boolean; armUp?: number; grey?: number; bow?: number;
-  pose?: 'idle' | 'raise' | 'cup';
-}> = ({ x, y, s = 1, role = 'civilian', walk, flip = false, armUp = 0, grey = 0, bow = 0, pose = 'idle' }) => {
+  pose?: 'idle' | 'raise' | 'cup'; walkRate?: number;
+}> = ({ x, y, s = 1, role = 'civilian', walk, flip = false, armUp = 0, grey = 0, bow = 0, pose = 'idle', walkRate = 0.3 }) => {
   const f = useCurrentFrame();
   const c = ROLE[role];
-  const step = walk === undefined ? 0 : Math.sin(f * 0.3 + walk * 2);
+  const step = walk === undefined ? 0 : Math.sin(f * walkRate + walk * 2);
   const breathe = Math.sin(f * 0.09 + (walk ?? 0)) * 1.2;
   const headY = -104 + breathe + bow * 14;
   // 手臂：上臂 + 前臂 + 手（三段式，始终可见）
@@ -267,6 +272,9 @@ const Person: React.FC<{
           <path d={`M -19 ${headY - 10} Q 0 ${headY - 30} 19 ${headY - 10} Z`} fill="#3A4A6E" stroke="#54648C" strokeWidth={1.5} />
           <rect x={-21} y={headY - 10} width={42} height={6} rx={3} fill="#54648C" />
           <rect x={-26} y={-58} width={52} height={9} rx={4} fill="#54648C" opacity={0.75} />
+          {/* 长矛（指示朝向） */}
+          <line x1={26} y1={-96} x2={30} y2={22} stroke="#8A7A5A" strokeWidth={4} strokeLinecap="round" />
+          <path d="M 30 -104 l 5 10 l -10 0 Z" fill="#C9C2B0" />
         </g>
       )}
       {role === 'official' && (
@@ -274,8 +282,8 @@ const Person: React.FC<{
           <rect x={-19} y={headY - 27} width={38} height={21} rx={7} fill="#12141C" />
           <rect x={-60} y={headY - 20} width={42} height={5} rx={2.5} fill="#12141C" />
           <rect x={18} y={headY - 20} width={42} height={5} rx={2.5} fill="#12141C" />
-          {/* 笏板 */}
-          <rect x={R - 2} y={LY - 26} width={7} height={30} rx={3} fill="#D8D2C2" opacity={0.85} />
+          {/* 笏板（握在右手） */}
+          <rect x={hR[0] - 2} y={hR[1] - 30} width={7} height={30} rx={3} fill="#D8D2C2" opacity={0.85} />
         </g>
       )}
       {role === 'child' && (
@@ -355,7 +363,7 @@ const TigerTally: React.FC<{ x: number; y: number; s?: number; split?: number; l
     </g>
   );
 
-// 城门（城墙 → 城台 → 楼身 → 出檐 → 屋脊，五层结构）
+// 城门（压缩在 y 20–780 内，避开字幕区）
 const CityGate: React.FC<{ open: number }> = ({ open }) => {
   const W = 180;
   const cw = Math.max(W * (1 - open * 0.9), 3);
@@ -363,65 +371,60 @@ const CityGate: React.FC<{ open: number }> = ({ open }) => {
     <g>
       {/* 1 城墙体 + 垛口 */}
       {Array.from({ length: 24 }).map((_, i) => (
-        <rect key={i} x={20 + i * 80} y={392} width={46} height={40} fill="#1A2440" />
+        <rect key={i} x={20 + i * 80} y={262} width={46} height={40} fill="#1A2440" />
       ))}
-      <rect x={0} y={432} width={1920} height={648} fill="#141C34" />
-      {/* 砖缝 */}
-      {Array.from({ length: 8 }).map((_, i) => (
-        <line key={i} x1={0} y1={470 + i * 76} x2={1920} y2={470 + i * 76} stroke="#0F1730" strokeWidth={2} opacity={0.6} />
+      <rect x={0} y={300} width={1920} height={490} fill="#141C34" />
+      {Array.from({ length: 5 }).map((_, i) => (
+        <line key={i} x1={0} y1={340 + i * 90} x2={1920} y2={340 + i * 90} stroke="#0F1730" strokeWidth={2} opacity={0.6} />
       ))}
-      {/* 2 城台（马面台基） */}
-      <rect x={600} y={300} width={720} height={132} fill="#182240" stroke="#2A3A5F" strokeWidth={3} />
-      <line x1={600} y1={344} x2={1320} y2={344} stroke="#0F1730" strokeWidth={2} opacity={0.7} />
-      <line x1={600} y1={388} x2={1320} y2={388} stroke="#0F1730" strokeWidth={2} opacity={0.7} />
-      {/* 3 楼身：柱 + 墙 + 窗 */}
-      <rect x={646} y={186} width={628} height={114} fill="#1B2440" stroke="#2A3A5F" strokeWidth={3} />
+      {/* 2 城台 */}
+      <rect x={600} y={158} width={720} height={144} fill="#182240" stroke="#2A3A5F" strokeWidth={3} />
+      <line x1={600} y1={206} x2={1320} y2={206} stroke="#0F1730" strokeWidth={2} opacity={0.7} />
+      {/* 3 楼身 */}
+      <rect x={646} y={58} width={628} height={100} fill="#1B2440" stroke="#2A3A5F" strokeWidth={3} />
       {[700, 790, 1130, 1220].map((x, i) => (
-        <rect key={i} x={x} y={186} width={16} height={114} fill="#3A2C18" />
+        <rect key={i} x={x} y={58} width={16} height={100} fill="#3A2C18" />
       ))}
       {[860, 960, 1060].map((x, i) => (
-        <rect key={i} x={x - 30} y={212} width={60} height={62} rx={4} fill="#FFB84D" opacity={0.22 + 0.12 * Math.sin(i * 1.7 + 0.4)} />
+        <rect key={i} x={x - 30} y={80} width={60} height={56} rx={4} fill="#FFB84D" opacity={0.22 + 0.12 * Math.sin(i * 1.7 + 0.4)} />
       ))}
-      {/* 4 额枋 + 出檐（翘角） */}
-      <rect x={628} y={172} width={664} height={16} fill="#0E1526" stroke={GOLD_D} strokeWidth={2} />
-      <path d="M 590 172 Q 600 150 646 146 L 1274 146 Q 1320 150 1330 172 L 1298 184 L 622 184 Z"
-        fill="#0E1526" stroke={GOLD_D} strokeWidth={3} />
-      <path d="M 640 146 Q 760 104 960 100 Q 1160 104 1280 146 Z" fill="#0E1526" stroke={GOLD_D} strokeWidth={3} />
-      {/* 5 屋脊 + 鸱吻 */}
-      <path d="M 900 100 L 960 78 L 1020 100" fill="none" stroke={GOLD_D} strokeWidth={5} strokeLinecap="round" />
-      <path d="M 640 146 q -14 -18 4 -26" stroke={GOLD_D} strokeWidth={4} fill="none" strokeLinecap="round" />
-      <path d="M 1280 146 q 14 -18 -4 -26" stroke={GOLD_D} strokeWidth={4} fill="none" strokeLinecap="round" />
-      {/* 匾额：门洞正上方城墙面，繁体、自右向左（開在右，封在左） */}
-      <rect x={860} y={470} width={200} height={62} rx={6} fill="#3A1C18" stroke={GOLD} strokeWidth={3} />
-      <text x={1004} y={516} textAnchor="middle" fontFamily={FONT} fontSize={38} fontWeight={900} fill={GOLD}>開</text>
-      <text x={916} y={516} textAnchor="middle" fontFamily={FONT} fontSize={38} fontWeight={900} fill={GOLD}>封</text>
+      {/* 4 额枋 + 出檐 */}
+      <rect x={628} y={46} width={664} height={14} fill="#0E1526" stroke={GOLD_D} strokeWidth={2} />
+      <path d="M 590 46 Q 600 26 646 22 L 1274 22 Q 1320 26 1330 46 L 1298 58 L 622 58 Z" fill="#0E1526" stroke={GOLD_D} strokeWidth={3} />
+      <path d="M 640 22 Q 760 -14 960 -18 Q 1160 -14 1280 22 Z" fill="#0E1526" stroke={GOLD_D} strokeWidth={3} />
+      <path d="M 900 -18 L 960 -38 L 1020 -18" fill="none" stroke={GOLD_D} strokeWidth={5} strokeLinecap="round" />
+      <path d="M 640 22 q -14 -18 4 -26" stroke={GOLD_D} strokeWidth={4} fill="none" strokeLinecap="round" />
+      <path d="M 1280 22 q 14 -18 -4 -26" stroke={GOLD_D} strokeWidth={4} fill="none" strokeLinecap="round" />
+      {/* 匾额：门洞正上方城墙面，繁体右起（開在右、封在左） */}
+      <rect x={860} y={372} width={200} height={58} rx={6} fill="#3A1C18" stroke={GOLD} strokeWidth={3} />
+      <text x={1002} y={416} textAnchor="middle" fontFamily={FONT} fontSize={36} fontWeight={900} fill={GOLD}>開</text>
+      <text x={918} y={416} textAnchor="middle" fontFamily={FONT} fontSize={36} fontWeight={900} fill={GOLD}>封</text>
       {/* 门洞 */}
-      <path d="M 790 1080 L 790 640 Q 960 556 1130 640 L 1130 1080 Z" fill="#05070F" />
-      {/* 左扇（铰链 x=790，向内开） */}
+      <path d="M 790 790 L 790 520 Q 960 452 1130 520 L 1130 790 Z" fill="#05070F" />
+      {/* 左扇 */}
       <g>
-        <rect x={790} y={640} width={cw} height={440} fill="#6A2A22" stroke="#3A1C18" strokeWidth={4} />
-        {Array.from({ length: 12 }).map((_, i) => {
+        <rect x={790} y={520} width={cw} height={270} fill="#6A2A22" stroke="#3A1C18" strokeWidth={4} />
+        {Array.from({ length: 9 }).map((_, i) => {
           const cx = 790 + (18 + (i % 3) * 50) * (cw / W);
-          const cy = 700 + Math.floor(i / 3) * 76;
-          return <circle key={i} cx={cx} cy={cy} r={7} fill={GOLD} opacity={0.9} />;
+          const cy = 566 + Math.floor(i / 3) * 72;
+          return <circle key={i} cx={cx} cy={cy} r={6} fill={GOLD} opacity={0.9} />;
         })}
-        <rect x={790} y={640} width={Math.max(cw * 0.12, 2)} height={440} fill="#4A1C16" opacity={0.85} />
+        <rect x={790} y={520} width={Math.max(cw * 0.12, 2)} height={270} fill="#4A1C16" opacity={0.85} />
       </g>
-      {/* 右扇（铰链 x=1130） */}
+      {/* 右扇 */}
       <g>
-        <rect x={1130 - cw} y={640} width={cw} height={440} fill="#5A241C" stroke="#3A1C18" strokeWidth={4} />
-        {Array.from({ length: 12 }).map((_, i) => {
+        <rect x={1130 - cw} y={520} width={cw} height={270} fill="#5A241C" stroke="#3A1C18" strokeWidth={4} />
+        {Array.from({ length: 9 }).map((_, i) => {
           const cx = 1130 - (18 + (i % 3) * 50) * (cw / W);
-          const cy = 700 + Math.floor(i / 3) * 76;
-          return <circle key={i} cx={cx} cy={cy} r={7} fill={GOLD} opacity={0.9} />;
+          const cy = 566 + Math.floor(i / 3) * 72;
+          return <circle key={i} cx={cx} cy={cy} r={6} fill={GOLD} opacity={0.9} />;
         })}
-        <rect x={1130 - Math.max(cw * 0.12, 2)} y={640} width={Math.max(cw * 0.12, 2)} height={440} fill="#3E1610" opacity={0.85} />
+        <rect x={1130 - Math.max(cw * 0.12, 2)} y={520} width={Math.max(cw * 0.12, 2)} height={270} fill="#3E1610" opacity={0.85} />
       </g>
       {/* 台阶 + 路面 */}
-      <rect x={760} y={1032} width={400} height={16} fill="#2A3450" />
-      <rect x={790} y={1048} width={340} height={14} fill="#222B44" />
-      <rect x={0} y={1062} width={1920} height={18} fill="#1A2238" />
-      <ellipse cx={960} cy={1010} rx={150 * open} ry={36 * open} fill={GOLD} opacity={0.15 * open} />
+      <rect x={760} y={762} width={400} height={12} fill="#2A3450" />
+      <rect x={0} y={774} width={1920} height={16} fill="#1A2238" />
+      <ellipse cx={960} cy={740} rx={150 * open} ry={30 * open} fill={GOLD} opacity={0.15 * open} />
     </g>
   );
 };
@@ -559,7 +562,7 @@ const S1: React.FC = () => {
         <Sub f={f} delay={158} lines={['公元 960 年正月初三，又一件黄袍', '披上了一个人的肩膀']} sub={['所有人都在赌：他还能撑几年？']} />
       )}
       {f >= 156 && (
-        <div style={{ position: 'absolute', left: 0, right: 0, bottom: 290, textAlign: 'center', ...up(f, 182, 16, 60) }}>
+        <div style={{ position: 'absolute', left: 0, right: 0, bottom: 318, textAlign: 'center', ...up(f, 182, 16, 60) }}>
           <span style={{ fontSize: 62, fontWeight: 900, color: GOLD, letterSpacing: 14, textShadow: `0 0 30px ${GOLD}99` }}>赵匡胤</span>
         </div>
       )}
@@ -578,14 +581,14 @@ const S2: React.FC = () => {
       <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{ position: 'absolute', inset: 0 }}>
         <Stars n={36} h={260} />
         <Ridge baseY={760} amp={26} color={INK2} seed={5.5} />
-        <Fire x={960} y={760} s={1.0} />
+        <Fire x={795} y={768} s={0.9} />
         {dyn.map((d, i) => {
           const up1 = interpolate(f, [6 + i * 8, 20 + i * 8], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
           const fall = interpolate(f, [96 + i * 10, 110 + i * 10], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
           return (
             <g key={i}>
-              <Flag x={300 + i * 330} y={700} label={d.l} up={up1} fall={fall} h={170} />
-              <text x={300 + i * 330} y={740} textAnchor="middle" fontFamily={FONT} fontSize={26} fontWeight={800} fill={GREY} opacity={0.7}>{d.y}</text>
+              <Flag x={300 + i * 330} y={706} label={d.l} up={up1} fall={fall} h={224} />
+              <text x={300 + i * 330} y={748} textAnchor="middle" fontFamily={FONT} fontSize={26} fontWeight={800} fill={GREY} opacity={0.7}>{d.y}</text>
             </g>
           );
         })}
@@ -661,24 +664,24 @@ const S3: React.FC = () => {
         </g>
         {/* 救柴荣 */}
         <g opacity={interpolate(f, [160, 176], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })}>
-          <rect x={0} y={650} width={1920} height={430} fill="#0A0E1C" />
-          <Fire x={1640} y={1040} s={0.75} />
-          <g transform="translate(980 940)">
-            <Person x={0} y={0} s={1.15} role="general" />
-            <text x={0} y={62} textAnchor="middle" fontFamily={FONT} fontSize={26} fontWeight={800} fill="#8FB8D8">柴荣</text>
+          <rect x={0} y={620} width={1920} height={460} fill="#0A0E1C" />
+          <Fire x={1640} y={790} s={0.7} />
+          <g transform="translate(980 760)">
+            <Person x={0} y={0} s={1.0} role="general" />
+            <text x={0} y={58} textAnchor="middle" fontFamily={FONT} fontSize={25} fontWeight={800} fill="#8FB8D8">柴荣</text>
           </g>
-          {[[820, 900], [1150, 890], [860, 1000], [1120, 1005], [760, 950], [1200, 950]].map(([bx, by], i) => {
+          {[[830, 730], [1140, 724], [870, 790], [1120, 792], [760, 762], [1210, 762]].map(([bx, by], i) => {
             const dx = (bx - 980) * scatter * 2.4;
             const rot = scatter * (i % 2 ? 1 : -1) * 70;
             return (
               <g key={i} transform={`translate(${bx + dx} ${by}) rotate(${rot})`} opacity={1 - scatter * 0.5}>
-                <Person x={0} y={0} s={0.95} role="soldier" flip={i % 2 === 0} />
+                <Person x={0} y={0} s={0.85} role="soldier" flip={i % 2 === 0} />
               </g>
             );
           })}
-          <g transform={`translate(${heroX} 940) scale(${1 + 0.05 * Math.sin(f * 0.4)})`} opacity={rescue}>
-            <Person x={0} y={0} s={1.2} role="general" armUp={0.25} />
-            <text x={0} y={66} textAnchor="middle" fontFamily={FONT} fontSize={26} fontWeight={800} fill={GOLD}>赵匡胤</text>
+          <g transform={`translate(${heroX} 760) scale(${1 + 0.05 * Math.sin(f * 0.4)})`} opacity={rescue}>
+            <Person x={0} y={0} s={1.05} role="general" pose="raise" />
+            <text x={0} y={62} textAnchor="middle" fontFamily={FONT} fontSize={25} fontWeight={800} fill={GOLD}>赵匡胤</text>
           </g>
         </g>
       </svg>
@@ -713,10 +716,10 @@ const S4: React.FC = () => {
           <rect x={-20} y={124} width={40} height={52} rx={6} fill="#FFB84D" opacity={0.45 + 0.35 * Math.abs(Math.sin(f * 0.3))} />
           <Fire x={0} y={176} s={0.26} />
         </g>
-        <Person x={1060} y={800} s={0.72} role="child" />
-        <text x={1060} y={862} textAnchor="middle" fontFamily={FONT} fontSize={24} fontWeight={800} fill={PAPER}>7 岁幼帝</text>
-        <Person x={1270} y={800} s={1.02} role="official" />
-        <text x={1270} y={862} textAnchor="middle" fontFamily={FONT} fontSize={24} fontWeight={800} fill={GREY}>托孤大臣</text>
+        <Person x={1060} y={700} s={0.72} role="child" />
+        <text x={1060} y={776} textAnchor="middle" fontFamily={FONT} fontSize={24} fontWeight={800} fill={PAPER}>7 岁幼帝</text>
+        <Person x={1270} y={670} s={1.02} role="official" />
+        <text x={1270} y={776} textAnchor="middle" fontFamily={FONT} fontSize={24} fontWeight={800} fill={GREY}>托孤大臣</text>
         <g transform="translate(560 800)">
           <rect x={-6} y={-110} width={12} height={110} fill="#5A4428" />
           <rect x={-22} y={0} width={44} height={10} rx={4} fill="#5A4428" />
@@ -747,8 +750,15 @@ const S5: React.FC = () => {
           <rect x={-330} y={-170} width={660} height={300} rx={16} fill="#7A5C38" stroke="#54401F" strokeWidth={10} />
           <rect x={-310} y={-150} width={620} height={260} rx={10} fill="none" stroke="#63481F" strokeWidth={4} opacity={0.8} />
           <g opacity={carve}>
-            <text x={2} y={-16} textAnchor="middle" dominantBaseline="middle" fontFamily={FONT} fontSize={84} fontWeight={900} fill="#241708" letterSpacing={10}>点检作天子</text>
-            <text x={0} y={-20} textAnchor="middle" dominantBaseline="middle" fontFamily={FONT} fontSize={84} fontWeight={900} fill="#F5E2B8" letterSpacing={10} opacity={0.3}>点检作天子</text>
+            {/* 繁体、自右向左：點 檢 作 天 子 */}
+            {['點', '檢', '作', '天', '子'].map((ch, i) => (
+              <g key={i}>
+                <text x={236 - i * 118 + 2} y={-14} textAnchor="middle" dominantBaseline="middle" fontFamily={FONT}
+                  fontSize={84} fontWeight={900} fill="#241708">{ch}</text>
+                <text x={236 - i * 118} y={-18} textAnchor="middle" dominantBaseline="middle" fontFamily={FONT}
+                  fontSize={84} fontWeight={900} fill="#F5E2B8" opacity={0.3}>{ch}</text>
+              </g>
+            ))}
           </g>
         </g>
         <Ridge baseY={880} amp={22} color={INK2} seed={6.4} />
@@ -770,8 +780,8 @@ const S6: React.FC = () => {
         <Stars n={26} h={220} />
         <Ridge baseY={700} amp={44} color={INK3} seed={4.2} />
         <Ridge baseY={790} amp={36} color={INK2} seed={7.7} />
-        <rect x={0} y={860} width={1920} height={220} fill={INK1} />
-        <path d="M -40 910 C 500 888 1300 934 1960 900" stroke="#0E1428" strokeWidth={24} fill="none" strokeLinecap="round" />
+        <rect x={0} y={760} width={1920} height={320} fill={INK1} />
+        <path d="M -40 806 C 500 786 1300 828 1960 796" stroke="#0E1428" strokeWidth={24} fill="none" strokeLinecap="round" />
         <g transform="translate(1640 560)">
           <rect x={-36} y={0} width={72} height={200} fill={INK2} />
           <rect x={-46} y={-20} width={92} height={24} fill={INK2} />
@@ -780,7 +790,7 @@ const S6: React.FC = () => {
             <circle key={i} cx={0} cy={-70 - ((f * 1.6 + i * 40) % 120)} r={16 + i * 6} fill="#6A5A70" opacity={0.26 - i * 0.06} />
           ))}
         </g>
-        <Horse x={riderX} y={880} s={1.15} />
+        <Horse x={riderX} y={778} s={1.05} />
         <g transform={`translate(960 300) scale(${Math.max(docP, 0.001)})`} opacity={docP}>
           <rect x={-220} y={-120} width={440} height={240} rx={10} fill="#E8DCC0" stroke="#B8A47C" strokeWidth={4} />
           <path d="M -190 -70 h 380 M -190 -20 h 380 M -190 30 h 300 M -190 80 h 340" stroke="#8A7A5A" strokeWidth={5} />
@@ -818,18 +828,18 @@ const S7: React.FC = () => {
         <Stars n={30} h={360} />
         <Ridge baseY={700} amp={40} color={INK3} seed={2.6} shift={-f * 0.8} />
         <Ridge baseY={790} amp={34} color={INK2} seed={5.1} shift={-f * 1.6} />
-        <rect x={0} y={860} width={1920} height={220} fill={INK1} />
-        {/* 军营：帐篷 + 篝火 + 歇息士兵（不再有循环跳动的队伍） */}
+        <rect x={0} y={762} width={1920} height={318} fill={INK1} />
+        {/* 军营：帐篷 + 篝火 + 歇息士兵（整体在字幕区之上） */}
         <g opacity={camp}>
-          <Tent x={420} y={930} s={1.0} />
-          <Tent x={620} y={950} s={0.85} />
-          <Tent x={1500} y={940} s={0.95} />
-          <Fire x={900} y={952} s={0.95} />
-          <Fire x={1620} y={962} s={0.7} />
-          <Person x={780} y={950} s={0.86} role="soldier" />
-          <Person x={1040} y={955} s={0.84} role="soldier" flip />
-          <Person x={1180} y={948} s={0.88} role="general" />
-          <Horse x={1320} y={948} s={0.62} rider={false} />
+          <Tent x={420} y={758} s={0.92} />
+          <Tent x={610} y={772} s={0.78} />
+          <Tent x={1500} y={766} s={0.86} />
+          <Fire x={880} y={770} s={0.82} />
+          <Fire x={1610} y={776} s={0.6} />
+          <Person x={760} y={770} s={0.78} role="soldier" />
+          <Person x={1020} y={772} s={0.76} role="soldier" flip />
+          <Person x={1160} y={768} s={0.8} role="general" />
+          <Horse x={1300} y={770} s={0.56} rider={false} />
         </g>
         {/* 距离小地图 */}
         <g opacity={interpolate(f, [40, 70], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })} transform="translate(110 560)">
@@ -859,11 +869,30 @@ const S8: React.FC = () => {
   return (
     <AbsoluteFill style={{ background: 'radial-gradient(110% 100% at 50% 55%, #131B36 0%, #090D1E 58%, #04060D 100%)', fontFamily: FONT }}>
       <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{ position: 'absolute', inset: 0 }}>
-        <path d="M 200 840 L 960 200 L 1720 840 Z" fill="#0A0F22" stroke={INK3} strokeWidth={4} />
-        {[[660, 870], [850, 900], [1080, 900], [1270, 865]].map(([x, y], i) => (
-          <Person key={i} x={x} y={y} s={0.82} role={i % 2 ? 'official' : 'general'} />
+        {/* 军帐内部：脊杆 + 布幔褶皱 + 后门 + 立柱（整体在字幕区之上） */}
+        <g>
+          <path d="M 200 760 L 960 150 L 1720 760 Z" fill="#0A0F22" stroke={INK3} strokeWidth={4} />
+          {/* 布幔褶皱 */}
+          {[-2.5, -1.5, -0.5, 0.5, 1.5, 2.5].map((k, i) => (
+            <path key={i} d={`M ${960 + k * 270} 182 Q ${960 + k * 300} 470 ${960 + k * 360} 758`}
+              stroke="#131C33" strokeWidth={3} fill="none" opacity={0.6} />
+          ))}
+          <path d="M 300 722 Q 620 380 960 164 Q 1300 380 1620 722" stroke="#182240" strokeWidth={4} fill="none" opacity={0.85} />
+          {/* 后门（帘子掀开，露出夜色） */}
+          <path d="M 830 760 L 884 500 L 1036 500 L 1090 760 Z" fill="#050810" />
+          <path d="M 830 760 L 884 500 L 906 500 L 862 760 Z" fill="#1B2440" />
+          <path d="M 1090 760 L 1036 500 L 1014 500 L 1058 760 Z" fill="#1B2440" />
+          <path d="M 884 500 L 1036 500" stroke="#2A3A5F" strokeWidth={4} />
+          {/* 脊杆 + 立柱 */}
+          <line x1={960} y1={156} x2={960} y2={70} stroke="#3A2C18" strokeWidth={7} />
+          <line x1={330} y1={720} x2={330} y2={250} stroke="#3A2C18" strokeWidth={5} opacity={0.65} />
+          <line x1={1590} y1={720} x2={1590} y2={250} stroke="#3A2C18" strokeWidth={5} opacity={0.65} />
+          <line x1={200} y1={760} x2={1720} y2={760} stroke="#2A3A5F" strokeWidth={5} opacity={0.7} />
+        </g>
+        {[[660, 726], [850, 752], [1080, 752], [1270, 722]].map(([x, y], i) => (
+          <Person key={i} x={x} y={y} s={0.78} role={i % 2 ? 'official' : 'general'} />
         ))}
-        <Fire x={960} y={890} s={1.05} />
+        <Fire x={960} y={742} s={1.0} />
         <g opacity={b1}>
           <rect x={340} y={330} width={400} height={88} rx={22} fill="#101A36" stroke={INK3} strokeWidth={3} />
           <path d="M 510 418 l 24 32 l 18 -32 Z" fill="#101A36" />
@@ -899,19 +928,19 @@ const S9: React.FC = () => {
     <AbsoluteFill style={{ background: `linear-gradient(180deg, ${lerpC([16, 24, 56], [44, 56, 104], dawnT)} 0%, ${lerpC([22, 28, 54], [180, 132, 66], dawnT)} 62%, #0B0F22 100%)`, fontFamily: FONT }}>
       <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{ position: 'absolute', inset: 0 }}>
         <Stars n={20} h={200} />
-        <Ridge baseY={880} amp={24} color={INK1} seed={3.3} />
+        <Ridge baseY={770} amp={22} color={INK1} seed={3.3} />
         {/* 后排（更小更暗） */}
         {crowd.filter((_, i) => i % 2 === 0).map((p, i) => (
           <g key={'b' + i} opacity={0.75}>
-            <Person x={p.x + 40} y={852} s={0.8} role={p.r} armUp={0.85} />
+            <Person x={p.x + 40} y={726} s={0.7} role={p.r} pose="raise" />
           </g>
         ))}
-        {/* 前排（振臂，随节拍上下） */}
+        {/* 前排（振臂） */}
         {crowd.filter((_, i) => i % 2 === 1).map((p, i) => (
-          <Person key={'f' + i} x={p.x} y={880} s={0.92} role={p.r} pose="raise" />
+          <Person key={'f' + i} x={p.x} y={754} s={0.8} role={p.r} pose="raise" />
         ))}
-        {/* 主角：将军形象 → 黄袍形象，交叉淡化体现"加身" */}
-        <g transform="translate(960 720) scale(1.4)">
+        {/* 主角 */}
+        <g transform="translate(960 604) scale(1.24)">
           <g opacity={1 - Math.max(robeP, 0)}>
             <Person x={0} y={0} s={1} role="general" pose="raise" />
           </g>
@@ -930,9 +959,9 @@ const S9: React.FC = () => {
             const rise = interpolate(f, [st, st + 50], [0, 160], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
             const fade = interpolate(f, [st + 36, st + 64], [1, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
             return (
-              <text key={`${wave}-${i}`} x={sx} y={792 - rise} textAnchor="middle" fontFamily={FONT}
+              <text key={`${wave}-${i}`} x={sx} y={672 - rise} textAnchor="middle" fontFamily={FONT}
                 fontSize={36 + (i % 3) * 8} fontWeight={900} fill={GOLD}
-                opacity={p * fade} transform={`scale(${0.8 + 0.3 * p})`} style={{ transformOrigin: `${sx}px ${792 - rise}px` }}>
+                opacity={p * fade} transform={`scale(${0.8 + 0.3 * p})`} style={{ transformOrigin: `${sx}px ${672 - rise}px` }}>
                 万岁
               </text>
             );
@@ -958,10 +987,10 @@ const S10: React.FC = () => {
         {[0, 1, 2, 3, 4, 5, 6, 7].map((i) => {
           const p = ((f * 0.85 + i * 37) % 300) / 300;
           const x = 1860 - p * 900;
-          const sc = 1 - p * 0.42;
+          const sc = 0.95 - p * 0.4;
           const vis = p > 0.02 ? 1 : 0;
           return (
-            <g key={i} transform={`translate(${x} ${1052}) scale(${sc})`} opacity={vis * (1 - Math.max(0, (p - 0.9) / 0.1))}>
+            <g key={i} transform={`translate(${x} ${768}) scale(${sc})`} opacity={vis * (1 - Math.max(0, (p - 0.9) / 0.1))}>
               <Person x={0} y={0} s={1} role="soldier" walk={i * 0.8} flip />
             </g>
           );
@@ -969,7 +998,7 @@ const S10: React.FC = () => {
       </svg>
       <EraTag text="初三 · 回师" />
       {/* 约法三章：移到右侧竖排，避开城楼与匾额 */}
-      <div style={{ position: 'absolute', right: 70, top: 180, width: 340, display: 'flex', flexDirection: 'column', gap: 18 }}>
+      <div style={{ position: 'absolute', left: 70, top: 380, width: 300, display: 'flex', flexDirection: 'column', gap: 16 }}>
         {chips.map((c, i) => {
           const p = spring({ frame: f - 90 - i * 10, fps: 24, config: { damping: 12, stiffness: 110 } });
           return (
@@ -1001,7 +1030,7 @@ const S11: React.FC = () => {
       <div style={{ position: 'absolute', top: '12%', left: 0, right: 0, textAlign: 'center' }}>
         <div style={{ ...up(f, 2, 16, 50), fontSize: 52, fontWeight: 900, color: PAPER, textShadow: `0 0 24px ${GOLD}88` }}>故事讲完了。四个问题，一个个拆</div>
       </div>
-      <div style={{ position: 'absolute', top: '32%', left: 380, right: 380 }}>
+      <div style={{ position: 'absolute', top: '26%', left: 380, right: 380 }}>
         {qs.map((q, i) => {
           const p = spring({ frame: f - 14 - i * 12, fps: 24, config: { damping: 11, stiffness: 130 } });
           const pulse = 1 + 0.07 * Math.max(0, Math.sin(f * 0.26 - i * 0.9));
@@ -1045,11 +1074,11 @@ const S12: React.FC = () => {
         {/* 禁军阵列：五帝一出现完就接上，不留空镜 */}
         <g opacity={interpolate(f, [52, 84], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })}>
           {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-            <Person key={i} x={430 + i * 120} y={880} s={0.92} role="soldier" walk={i * 0.6} />
+            <Person key={i} x={430 + i * 120} y={752} s={0.86} role="soldier" walk={i * 0.6} />
           ))}
         </g>
         {/* 点检印：独立位置，不压任何人物 */}
-        <g opacity={interpolate(f, [200, 232], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })} transform="translate(1720 300)">
+        <g opacity={interpolate(f, [200, 232], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })} transform="translate(1720 250)">
           <g transform={`rotate(${-9 * (1 - Math.min(tokenP, 1))}) scale(${Math.max(tokenP, 0.001)})`}>
             <rect x={-60} y={-60} width={120} height={120} rx={12} fill={VERM} opacity={0.92} />
             <rect x={-48} y={-48} width={96} height={96} rx={8} fill="none" stroke={PAPER} strokeWidth={5} />
@@ -1058,8 +1087,8 @@ const S12: React.FC = () => {
           <text x={0} y={94} textAnchor="middle" fontFamily={FONT} fontSize={26} fontWeight={900} fill={PAPER}>殿前都点检</text>
         </g>
         {/* 虎符：与点检印分置 */}
-        <g transform={`translate(1700 640) scale(${Math.max(tokenP, 0.001)})`} opacity={tokenP}>
-          <TigerTally x={0} y={0} s={1.1} split={0.35} />
+        <g transform={`translate(1700 560) scale(${Math.max(tokenP, 0.001)})`} opacity={tokenP}>
+          <TigerTally x={0} y={0} s={1.05} split={0.35} />
         </g>
       </svg>
       <ChapterTag text="条件一 · 位置" />
@@ -1081,31 +1110,49 @@ const S13: React.FC = () => {
           <clipPath id="plateClip">
             <circle cx={0} cy={0} r={140} />
           </clipPath>
+          <clipPath id="rightClip">
+            <rect x={0} y={-140} width={140} height={280} />
+          </clipPath>
         </defs>
         <Stars n={26} h={520} />
         <g transform="translate(960 380)">
           {/* 外圈 */}
           <circle cx={0} cy={0} r={170} fill="#1A2338" stroke="#3A4A6E" strokeWidth={8} />
-          {/* 左半锁面：图层在钥匙之下 */}
-          <g clipPath="url(#plateClip)">
-            <rect x={-140} y={-140} width={140} height={280} fill="#0E1628" />
-          </g>
-          {/* 钥匙（匙尖在 x=0） */}
+          {/* 锁盘底 + 内圈描边：先画，钥匙压在上面（避免线条穿过钥匙） */}
+          <circle cx={0} cy={0} r={140} fill="#0E1628" />
+          <circle cx={0} cy={0} r={140} fill="none" stroke="#2A3A5F" strokeWidth={3} />
+          {/* 钥匙（匙尖在 x=0，压在锁盘之上） */}
           <g transform={`translate(${keyX} -18)`}>
             <circle cx={-172} cy={0} r={22} fill="none" stroke={GOLD} strokeWidth={10} />
             <rect x={-150} y={-7} width={150} height={14} rx={4} fill={GOLD} />
             <rect x={-38} y={6} width={16} height={22} fill={GOLD} />
             <rect x={-70} y={6} width={14} height={18} fill={GOLD} />
           </g>
-          {/* 右半锁面：图层在钥匙之上，遮住插进去的部分 */}
+          {/* 右半锁面（含右半内圈）：盖住插进去的部分，恢复右侧描边 */}
           <g clipPath="url(#plateClip)">
             <rect x={0} y={-140} width={140} height={280} fill="#0E1628" />
           </g>
-          {/* 锁孔（盖在最上） */}
+          <g clipPath="url(#rightClip)">
+            <circle cx={0} cy={0} r={140} fill="none" stroke="#2A3A5F" strokeWidth={3} />
+          </g>
+          {/* 锁孔（最上层） */}
           <circle cx={0} cy={-18} r={22} fill="#04060D" />
           <path d="M -10 0 L 10 0 L 7 48 L -7 48 Z" fill="#04060D" />
-          <circle cx={0} cy={0} r={140} fill="none" stroke="#2A3A5F" strokeWidth={3} />
-          <circle cx={0} cy={0} r={190 + glowP * 40} fill="none" stroke={GOLD} strokeWidth={3} opacity={glowP * 0.7} />
+          <circle cx={0} cy={-18} r={22} fill="none" stroke="#2A3A5F" strokeWidth={2} />
+          <circle cx={0} cy={0} r={190 + glowP * 30} fill="none" stroke={GOLD} strokeWidth={3} opacity={glowP * 0.55} />
+          {/* 涟漪：插入完成（第 70 帧）后才开始；三圈错开、缓慢扩散到出屏 */}
+          {f >= 70 && [0, 1, 2].map((i) => {
+            const period = 120;                       // 每圈 5s
+            const p = (((f - 70) + i * 40) % period) / period;
+            const e = 1 - Math.pow(1 - p, 2.2);       // 先快后慢，像水波
+            const r = 150 + 1120 * e;                 // 150 → 1270（超出屏幕半对角线）
+            const op = Math.min(1, p * 8) * (1 - p) * 0.5;
+            const w = 5 - p * 3.6;
+            return (
+              <circle key={i} cx={0} cy={0} r={r} fill="none" stroke={GOLD}
+                strokeWidth={w} opacity={op} />
+            );
+          })}
           <circle cx={0} cy={0} r={140} fill={GOLD} opacity={glowP * 0.14} />
         </g>
       </svg>
@@ -1179,7 +1226,7 @@ const S15: React.FC = () => {
           <rect x={-32} y={110} width={64} height={80} rx={10} fill="#5A2A24" stroke={GOLD_D} strokeWidth={3} />
           <rect x={-20} y={124} width={40} height={52} rx={6} fill="#FFB84D" opacity={0.45 + 0.35 * Math.abs(Math.sin(f * 0.3))} />
         </g>
-        <g transform={`translate(960 720) scale(${0.86 + throne * 0.1})`} opacity={throne}>
+        <g transform={`translate(960 560) scale(${0.8 + throne * 0.1})`} opacity={throne}>
           {/* 身后屏风（三扇） */}
           <g opacity={0.9}>
             <rect x={-430} y={-330} width={280} height={210} rx={6} fill="#241A2E" stroke={GOLD_D} strokeWidth={3} />
@@ -1235,16 +1282,15 @@ const S15: React.FC = () => {
           </g>
         </g>
         {/* 太后在侧 */}
-        <Person x={700} y={860} s={0.95} role="empress" />
-        <text x={700} y={922} textAnchor="middle" fontFamily={FONT} fontSize={24} fontWeight={800} fill={PAPER}>太后</text>
+        <Person x={700} y={690} s={0.9} role="empress" />
+        <text x={700} y={776} textAnchor="middle" fontFamily={FONT} fontSize={24} fontWeight={800} fill={PAPER}>太后</text>
         {/* 文武大臣：左右各三个，忽明忽暗 */}
         {[220, 340, 460, 1460, 1580, 1700].map((x, i) => (
           <g key={i} opacity={flick(i)}>
-            <Person x={x} y={880} s={0.88} role="official" />
+            <Person x={x} y={690} s={0.84} role="official" />
           </g>
         ))}
-        <text x={960} y={1000} textAnchor="middle" fontFamily={FONT} fontSize={28} fontWeight={900} fill={GOLD} opacity={0.85}>龙椅 · 无人坐得稳</text>
-        <Ridge baseY={1020} amp={16} color={INK2} seed={1.4} />
+        <Ridge baseY={790} amp={14} color={INK2} seed={1.4} />
       </svg>
       <ChapterTag text="条件三 · 时机" />
       <Sub f={f} delay={40} lines={['主少国疑 · 权力出现真空']} sub={['39 岁的雄主骤逝，7 岁的孩子坐上龙椅——五代人知道，这种局面只有一种结局']} />
@@ -1326,16 +1372,16 @@ const S17: React.FC = () => {
             const x = 300 + i * 330;
             return (
               <g key={i}>
-                <g opacity={rise} transform={`translate(${x} 740)`}>
-                  <Person x={0} y={0} s={1.0} role="emperor" grey={die} bow={die * 0.25} />
+                <g opacity={rise} transform={`translate(${x} 640)`}>
+                  <Person x={0} y={0} s={0.95} role="emperor" grey={die} bow={die * 0.25} />
                 </g>
-                <g opacity={rise} transform={`translate(${x} 790)`}>
-                  <text x={0} y={0} textAnchor="middle" fontFamily={FONT} fontSize={27} fontWeight={900}
+                <g opacity={rise} transform={`translate(${x} 742)`}>
+                  <text x={0} y={0} textAnchor="middle" fontFamily={FONT} fontSize={26} fontWeight={900}
                     fill={die > 0.5 ? GREY : PAPER}>{e.d} · {e.n}</text>
-                  {/* 死因：随死亡同时出现，放大到 26px 保证可读 */}
-                  <text x={0} y={38} textAnchor="middle" fontFamily={FONT} fontSize={26} fontWeight={800}
+                  {/* 死因：随死亡同时出现 */}
+                  <text x={0} y={34} textAnchor="middle" fontFamily={FONT} fontSize={25} fontWeight={800}
                     fill={RED} opacity={die}>{e.how}</text>
-                  <line x1={-100} y1={-30} x2={100} y2={28} stroke={RED} strokeWidth={7} strokeLinecap="round" opacity={die * 0.85} />
+                  <line x1={-96} y1={-28} x2={96} y2={26} stroke={RED} strokeWidth={7} strokeLinecap="round" opacity={die * 0.85} />
                 </g>
               </g>
             );
@@ -1371,69 +1417,65 @@ const S18: React.FC = () => {
   return (
     <AbsoluteFill style={{ background: 'radial-gradient(100% 90% at 50% 34%, #241C30 0%, #100C1A 58%, #05040A 100%)', fontFamily: FONT }}>
       <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{ position: 'absolute', inset: 0 }}>
-        <Stars n={20} h={260} />
+        <Stars n={20} h={240} />
         {/* 屏风 */}
-        <rect x={700} y={330} width={520} height={210} rx={8} fill="#1A1424" stroke={GOLD_D} strokeWidth={3} />
+        <rect x={700} y={280} width={520} height={200} rx={8} fill="#1A1424" stroke={GOLD_D} strokeWidth={3} />
         {[0, 1, 2, 3].map((i) => (
-          <line key={i} x1={700 + i * 173} y1={330} x2={700 + i * 173} y2={540} stroke="#2A2038" strokeWidth={3} />
+          <line key={i} x1={700 + i * 173} y1={280} x2={700 + i * 173} y2={480} stroke="#2A2038" strokeWidth={3} />
         ))}
-        <path d="M 760 400 q 80 -60 160 0 q 80 60 160 0" stroke={GOLD_D} strokeWidth={2} fill="none" opacity={0.5} />
+        <path d="M 760 346 q 80 -56 160 0 q 80 56 160 0" stroke={GOLD_D} strokeWidth={2} fill="none" opacity={0.5} />
         {/* 地毯 */}
-        <ellipse cx={960} cy={960} rx={720} ry={90} fill="#3A1420" opacity={0.55} />
-        {/* 上位：御案 + 皇帝举杯 */}
-        <rect x={700} y={560} width={520} height={28} rx={6} fill="#4A3820" stroke="#3A2C18" strokeWidth={3} />
-        <rect x={740} y={588} width={440} height={14} fill="#3A2C18" />
-        <g transform="translate(960 560)">
-          <Person x={0} y={0} s={1.12} role="emperor" pose={cupRaise > 0.35 ? 'cup' : 'idle'} />
+        <ellipse cx={960} cy={800} rx={700} ry={70} fill="#3A1420" opacity={0.5} />
+        {/* 上位：御案 + 皇帝持杯 */}
+        <rect x={700} y={500} width={520} height={26} rx={6} fill="#4A3820" stroke="#3A2C18" strokeWidth={3} />
+        <rect x={740} y={526} width={440} height={12} fill="#3A2C18" />
+        <g transform="translate(960 500)">
+          <Person x={0} y={0} s={1.08} role="emperor" pose={cupRaise > 0.35 ? 'cup' : 'idle'} />
         </g>
-        {/* 御案陈设：酒壶、酒樽、果盘、烛台 */}
-        <g transform="translate(830 552)">
-          <path d="M -16 0 L 16 0 L 12 34 L -12 34 Z" fill="#C9B06A" stroke={GOLD_D} strokeWidth={3} />
-          <path d="M 14 8 q 14 6 0 18" stroke={GOLD_D} strokeWidth={3} fill="none" />
+        {/* 御案陈设 */}
+        <g transform="translate(830 494)">
+          <path d="M -16 0 L 16 0 L 12 32 L -12 32 Z" fill="#C9B06A" stroke={GOLD_D} strokeWidth={3} />
+          <path d="M 14 8 q 14 6 0 16" stroke={GOLD_D} strokeWidth={3} fill="none" />
           <path d="M -8 -10 q 8 -8 16 0" stroke={GOLD_D} strokeWidth={3} fill="none" />
         </g>
-        <g transform="translate(1090 552)">
-          <ellipse cx={0} cy={10} rx={38} ry={11} fill="#2A2038" stroke="#4A3A5A" strokeWidth={2} />
-          <ellipse cx={0} cy={6} rx={28} ry={8} fill="#8A5A3A" />
-          <circle cx={-10} cy={2} r={5} fill="#C9A227" />
+        <g transform="translate(1090 494)">
+          <ellipse cx={0} cy={10} rx={36} ry={10} fill="#2A2038" stroke="#4A3A5A" strokeWidth={2} />
+          <ellipse cx={0} cy={6} rx={26} ry={7} fill="#8A5A3A" />
+          <circle cx={-9} cy={2} r={5} fill="#C9A227" />
           <circle cx={6} cy={0} r={5} fill="#A83232" />
         </g>
-        <Steam x={830} y={540} s={0.7} n={3} />
+        <Steam x={830} y={484} s={0.65} n={3} />
         {/* 烛台一对 */}
         {[640, 1280].map((x, i) => (
-          <g key={i} transform={`translate(${x} 600)`}>
-            <rect x={-4} y={-60} width={8} height={60} fill="#5A4428" />
+          <g key={i} transform={`translate(${x} 536)`}>
+            <rect x={-4} y={-54} width={8} height={54} fill="#5A4428" />
             <rect x={-16} y={0} width={32} height={8} rx={3} fill="#5A4428" />
-            <Fire x={0} y={-64} s={0.24} />
+            <Fire x={0} y={-58} s={0.22} />
           </g>
         ))}
-        {/* 下位：四将军两列坐席（案上有菜） */}
-        {[{ x: 300, y: 830 }, { x: 500, y: 862 }, { x: 1420, y: 862 }, { x: 1620, y: 830 }].map((p, i) => (
+        {/* 下位：四将军两列坐席（案上三碟 + 酒杯 + 筷） */}
+        {[{ x: 300, y: 660 }, { x: 500, y: 686 }, { x: 1420, y: 686 }, { x: 1620, y: 660 }].map((p, i) => (
           <g key={i}>
-            <rect x={p.x - 140} y={p.y + 44} width={280} height={20} rx={6} fill="#4A3820" stroke="#3A2C18" strokeWidth={2} />
-            <Person x={p.x} y={p.y} s={0.94} role="general" flip={i > 1} />
-            {/* 案上：三碟菜 + 酒杯 + 筷 */}
+            <rect x={p.x - 140} y={p.y + 42} width={280} height={18} rx={6} fill="#4A3820" stroke="#3A2C18" strokeWidth={2} />
+            <Person x={p.x} y={p.y} s={0.88} role="general" flip={i > 1} />
             {[-88, -20, 56].map((dx, k) => (
               <g key={k}>
-                <ellipse cx={p.x + dx} cy={p.y + 38} rx={26} ry={9} fill="#2A2038" stroke="#4A3A5A" strokeWidth={2} />
-                <ellipse cx={p.x + dx} cy={p.y + 35} rx={18} ry={6} fill={['#8A5A3A', '#5A6A4A', '#A83232'][k]} />
+                <ellipse cx={p.x + dx} cy={p.y + 36} rx={24} ry={8} fill="#2A2038" stroke="#4A3A5A" strokeWidth={2} />
+                <ellipse cx={p.x + dx} cy={p.y + 33} rx={16} ry={5} fill={['#8A5A3A', '#5A6A4A', '#A83232'][k]} />
               </g>
             ))}
-            <ellipse cx={p.x + 108} cy={p.y + 36} rx={12} ry={14} fill="#C9B06A" stroke={GOLD_D} strokeWidth={2} />
-            <line x1={p.x - 130} y1={p.y + 30} x2={p.x - 96} y2={p.y + 26} stroke="#D8D2C2" strokeWidth={3} />
-            <line x1={p.x - 130} y1={p.y + 34} x2={p.x - 96} y2={p.y + 30} stroke="#D8D2C2" strokeWidth={3} />
+            <ellipse cx={p.x + 104} cy={p.y + 34} rx={11} ry={13} fill="#C9B06A" stroke={GOLD_D} strokeWidth={2} />
+            <line x1={p.x - 128} y1={p.y + 28} x2={p.x - 96} y2={p.y + 24} stroke="#D8D2C2" strokeWidth={3} />
+            <line x1={p.x - 128} y1={p.y + 32} x2={p.x - 96} y2={p.y + 28} stroke="#D8D2C2" strokeWidth={3} />
           </g>
         ))}
         {/* 侍者 */}
-        <Person x={760} y={880} s={0.78} role="civilian" />
-        <Person x={1160} y={880} s={0.78} role="civilian" flip />
+        <Person x={760} y={700} s={0.72} role="civilian" />
+        <Person x={1160} y={700} s={0.72} role="civilian" flip />
         {/* 兵符交接 */}
-        <g transform={`translate(1200 780) translate(0 ${(1 - tokenP) * 40})`} opacity={tokenP}>
-          <TigerTally x={0} y={0} s={0.9} split={0.5} />
+        <g transform={`translate(1180 640) translate(0 ${(1 - tokenP) * 40})`} opacity={tokenP}>
+          <TigerTally x={0} y={0} s={0.82} split={0.5} />
         </g>
-        <text x={960} y={960} textAnchor="middle" fontFamily={FONT} fontSize={26} fontWeight={800} fill={GREY} opacity={0.85}>
-          皇帝在上，将军在下 —— 一杯酒，换回兵权
-        </text>
       </svg>
       <ChapterTag text="特殊性二 · 杯酒" />
       <Sub f={f} delay={60} lines={['建隆二年，一场酒席']} sub={['请老兄弟们交出兵权、回家享福——没有杀一个人']} />
@@ -1457,18 +1499,23 @@ const S19: React.FC = () => {
               <rect x={0} y={0} width={440} height={340} rx={18} fill="rgba(10,16,32,0.9)" stroke={`${GOLD_D}66`} strokeWidth={3} />
               {i === 0 && (
                 <g transform="translate(220 170)">
+                  {/* 禁军：右侧目的地 */}
                   <rect x={96} y={-56} width={110} height={112} rx={10} fill="#1A2338" stroke={GOLD} strokeWidth={3} />
                   <text x={151} y={6} textAnchor="middle" fontFamily={FONT} fontSize={24} fontWeight={900} fill={GOLD}>禁军</text>
+                  {/* 士兵：向右行进（1.5× 速度），进入禁军后缩小淡出 */}
                   {[0, 1, 2].map((k) => {
-                    const prog = ((f * 0.26 + k * 0.33) % 1);
-                    const px = -170 + prog * 250;
+                    const period = 173;
+                    const prog = ((f + k * 58) % period) / period;
+                    const px = -180 + prog * 300;
+                    const fade = prog > 0.86 ? Math.max(0, 1 - (prog - 0.86) / 0.14) : 1;
+                    const sc = 0.58 - prog * 0.1;
                     return (
-                      <g key={k} transform={`translate(${px} ${40 - k * 8}) scale(0.55)`}>
-                        <Person x={0} y={0} s={1} role="soldier" walk={k * 0.7} flip={false} />
+                      <g key={k} transform={`translate(${px} ${44 - k * 10}) scale(${sc})`} opacity={fade}>
+                        <Person x={0} y={0} s={1} role="soldier" walk={k * 1.1} walkRate={0.15} />
                       </g>
                     );
                   })}
-                  <path d="M -180 70 L 90 70" stroke={GOLD} strokeWidth={3} strokeDasharray="10 10" opacity={0.7} />
+                  <path d="M -190 76 L 92 76" stroke={GOLD} strokeWidth={3} strokeDasharray="10 10" opacity={0.6} />
                 </g>
               )}
               {i === 1 && (
@@ -1519,7 +1566,7 @@ const S20: React.FC = () => {
   const spans = [16, 13, 11, 4, 9]; // 梁/唐/晋/汉/周 = 53 年
   const cells: number[] = [];
   spans.forEach((n, d) => { for (let i = 0; i < n; i++) cells.push(d); });
-  const cell = 26, gap = 4, pitch = cell + gap;
+  const cell = 24, gap = 4, pitch = cell + gap;
   return (
     <AbsoluteFill style={{ background: 'radial-gradient(110% 100% at 50% 30%, #131C3E 0%, #0A0F22 55%, #04060D 100%)', fontFamily: FONT }}>
       <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{ position: 'absolute', inset: 0 }}>

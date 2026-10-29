@@ -14,3 +14,6 @@ __pycache__/
 err_v*.txt
 .DS_Store
 Thumbs.db
+
+# 投稿副本（成片已在 out/ 内且不入库）
+*.mp4

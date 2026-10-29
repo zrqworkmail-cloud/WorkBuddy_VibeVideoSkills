@@ -3,8 +3,8 @@
 """影片路径解析（Python 侧）。
 
 多片共用一个 scripts/ 目录：用环境变量 FILM 选择影片。
-  FILM 未设        → 参考实现（WorkBuddyWorkflow 根，即第一支片）
-  FILM=motion-sickness → WorkBuddyWorkflow/films/motion-sickness/
+  FILM 未设        → 参考实现（WorkBuddy_Workflow 根，即第一支片）
+  FILM=motion-sickness → WorkBuddy_Workflow/films/motion-sickness/
 
 用法：
   FILM=motion-sickness python scripts/build_timeline.py
@@ -12,7 +12,7 @@
 """
 import os
 
-WB = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # WorkBuddyWorkflow
+WB = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # WorkBuddy_Workflow
 FILM = os.environ.get("FILM", "").strip()
 FILMROOT = os.path.join(WB, "films", FILM) if FILM else WB
 SRC = os.path.join(FILMROOT, "src")

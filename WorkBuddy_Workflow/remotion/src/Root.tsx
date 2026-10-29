@@ -8,6 +8,7 @@ import { Mirror } from './Mirror';
 import { MirrorCover } from './MirrorCover';
 import { Chenqiao } from './Chenqiao';
 import { ChenqiaoCover } from './ChenqiaoCover';
+import { ChenqiaoCover43, ChenqiaoCover34 } from './ChenqiaoCovers';
 
 // 与管线原生规格严格一致：704×1280 / 16fps / 121 帧 = 7.5625s
 // 这样渲染产物可以直接当 sN.mp4 用，build_base_uniform 无需任何改动。
@@ -81,6 +82,23 @@ export const Root: React.FC = () => (
       fps={24}
       width={1920}
       height={1080}
+    />
+    {/* 抖音封面：横 4:3 / 竖 3:4 */}
+    <Composition
+      id="ChenqiaoCover43"
+      component={ChenqiaoCover43}
+      durationInFrames={1}
+      fps={24}
+      width={1440}
+      height={1080}
+    />
+    <Composition
+      id="ChenqiaoCover34"
+      component={ChenqiaoCover34}
+      durationInFrames={1}
+      fps={24}
+      width={1080}
+      height={1440}
     />
   </>
 );

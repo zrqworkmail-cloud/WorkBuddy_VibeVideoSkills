@@ -36,13 +36,14 @@ print("trim tail at %.2fs (drop fade-out)" % (cut / SR))
 x = x[:cut]
 
 # 2) 首尾交叉淡化，做成无缝环
-cf = int(2.0 * SR)  # 2s 交叉
+cf = int(4.0 * SR)  # 4s 交叉（等功率）
 head = x[:cf].copy()
 body = x[cf:].copy()
 # 把 head 与尾部最后 cf 段混合：loop = body + blend(tail, head)
 tail = x[-cf:].copy()
 t = np.linspace(0, 1, cf)[:, None]
-blend = tail * (1 - t) + head * t
+# 等功率交叉：sqrt 曲线，避免中间出现音量凹陷（这正是"接缝明显"的主因）
+blend = tail * np.sqrt(1 - t) + head * np.sqrt(t)
 loop = np.concatenate([body, blend], axis=0)
 print("seamless loop length: %.2fs" % (len(loop) / SR))
 

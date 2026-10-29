@@ -177,17 +177,28 @@ const ROLE: Record<Role, { robe: string; robe2: string; trim: string; skin: stri
 
 const Person: React.FC<{
   x: number; y: number; s?: number; role?: Role; walk?: number; flip?: boolean; armUp?: number; grey?: number; bow?: number;
-}> = ({ x, y, s = 1, role = 'civilian', walk, flip = false, armUp = 0, grey = 0, bow = 0 }) => {
+  pose?: 'idle' | 'raise' | 'cup';
+}> = ({ x, y, s = 1, role = 'civilian', walk, flip = false, armUp = 0, grey = 0, bow = 0, pose = 'idle' }) => {
   const f = useCurrentFrame();
   const c = ROLE[role];
-  // 关键修复：walk 未传入时腿部完全静止（此前会一直抖）
   const step = walk === undefined ? 0 : Math.sin(f * 0.3 + walk * 2);
   const breathe = Math.sin(f * 0.09 + (walk ?? 0)) * 1.2;
   const headY = -104 + breathe + bow * 14;
-  const armSwing = walk === undefined ? 0 : step * 0.5;
-  const L = -44 - armSwing * 12;
-  const R = 44 + armSwing * 12;
-  const LY = -6 - armUp * 56;
+  // 手臂：上臂 + 前臂 + 手（三段式，始终可见）
+  const p = armUp > 0.4 ? 'raise' : pose;
+  let eL: [number, number] = [-36, -20], hL: [number, number] = [-32, 24];
+  let eR: [number, number] = [36, -20], hR: [number, number] = [32, 24];
+  if (p === 'raise') { eL = [-46, -52]; hL = [-58, -92]; eR = [46, -52]; hR = [58, -92]; }
+  if (p === 'cup') { eL = [-38, -16]; hL = [-24, -38]; eR = [38, -16]; hR = [22, -40]; }
+  const arm = (e: [number, number], h: [number, number], side: number) => (
+    <g>
+      <path d={`M ${side * 24} -60 L ${e[0]} ${e[1]} L ${h[0]} ${h[1]}`} stroke={c.robe} strokeWidth={15}
+        strokeLinejoin="round" strokeLinecap="round" fill="none" />
+      <path d={`M ${side * 24} -60 L ${e[0]} ${e[1]} L ${h[0]} ${h[1]}`} stroke={c.robe2} strokeWidth={5}
+        strokeLinejoin="round" strokeLinecap="round" fill="none" opacity={0.45} />
+      <ellipse cx={h[0]} cy={h[1]} rx={7} ry={8.5} fill={c.skin} />
+    </g>
+  );
   return (
     <g transform={`translate(${x} ${y}) scale(${flip ? -s : s} ${s})`} style={{ filter: grey > 0 ? `grayscale(${grey}) brightness(${1 - grey * 0.42})` : undefined }}>
       {/* 靴 */}
@@ -196,24 +207,25 @@ const Person: React.FC<{
       {/* 腿 */}
       <line x1={-8} y1={36} x2={-8 - step * 10} y2={92} stroke={c.robe2} strokeWidth={14} strokeLinecap="round" />
       <line x1={8} y1={36} x2={8 + step * 10} y2={92} stroke={c.robe2} strokeWidth={14} strokeLinecap="round" />
+      {/* 后臂（先画，压在身后） */}
+      {arm(eL, hL, -1)}
       {/* 袍身（下摆微张） */}
       <path d="M -30 -70 L 30 -70 L 40 44 L -40 44 Z" fill={c.robe} />
       <path d="M -30 -70 L 0 -50 L 30 -70 L 30 -60 L 0 -40 L -30 -60 Z" fill={c.robe2} opacity={0.9} />
-      {/* 交领右衽：两片衣襟交叉压叠（不是挂绳） */}
+      {/* 交领右衽：两片衣襟交叉压叠 */}
       <path d="M -15 -70 L 5 -28" stroke={c.trim} strokeWidth={7} strokeLinecap="round" />
       <path d="M 15 -70 L -5 -28" stroke={c.robe2} strokeWidth={7} strokeLinecap="round" />
       {/* 腰带 */}
       <rect x={-34} y={14} width={68} height={12} fill={c.trim} />
       <rect x={-10} y={12} width={20} height={16} rx={3} fill={GOLD_D} opacity={0.9} />
-      {/* 臂：袖身 + 袖口 + 手（抬高时仍可辨识为手臂） */}
-      <line x1={-28} y1={-62} x2={L} y2={LY} stroke={c.robe} strokeWidth={17} strokeLinecap="round" />
-      <line x1={28} y1={-62} x2={R} y2={LY} stroke={c.robe} strokeWidth={17} strokeLinecap="round" />
-      <line x1={-28} y1={-62} x2={L} y2={LY} stroke={c.robe2} strokeWidth={6} strokeLinecap="round" opacity={0.55} />
-      <line x1={28} y1={-62} x2={R} y2={LY} stroke={c.robe2} strokeWidth={6} strokeLinecap="round" opacity={0.55} />
-      <circle cx={L * 0.94} cy={LY * 0.94} r={9} fill={c.robe2} />
-      <circle cx={R * 0.94} cy={LY * 0.94} r={9} fill={c.robe2} />
-      <ellipse cx={L} cy={LY} rx={7} ry={9} fill={c.skin} />
-      <ellipse cx={R} cy={LY} rx={7} ry={9} fill={c.skin} />
+      {/* 前臂 */}
+      {arm(eR, hR, 1)}
+      {p === 'cup' && (
+        <g transform={`translate(${hR[0]} ${hR[1] - 12})`}>
+          <path d="M -11 0 L 11 0 L 8 15 L -8 15 Z" fill="#C9B06A" stroke={GOLD_D} strokeWidth={2} />
+          <ellipse cx={0} cy={1} rx={11} ry={3} fill="#FFE8A3" opacity={0.9} />
+        </g>
+      )}
       {/* 颈头 */}
       <rect x={-7} y={-84} width={14} height={16} fill={c.skin} />
       <circle cx={0} cy={headY} r={20} fill={c.skin} />
@@ -379,9 +391,10 @@ const CityGate: React.FC<{ open: number }> = ({ open }) => {
       <path d="M 900 100 L 960 78 L 1020 100" fill="none" stroke={GOLD_D} strokeWidth={5} strokeLinecap="round" />
       <path d="M 640 146 q -14 -18 4 -26" stroke={GOLD_D} strokeWidth={4} fill="none" strokeLinecap="round" />
       <path d="M 1280 146 q 14 -18 -4 -26" stroke={GOLD_D} strokeWidth={4} fill="none" strokeLinecap="round" />
-      {/* 匾额：门洞正上方的城墙面 */}
-      <rect x={868} y={470} width={184} height={60} rx={6} fill="#3A1C18" stroke={GOLD} strokeWidth={3} />
-      <text x={960} y={514} textAnchor="middle" fontFamily={FONT} fontSize={36} fontWeight={900} fill={GOLD} letterSpacing={8}>开封</text>
+      {/* 匾额：门洞正上方城墙面，繁体、自右向左（開在右，封在左） */}
+      <rect x={860} y={470} width={200} height={62} rx={6} fill="#3A1C18" stroke={GOLD} strokeWidth={3} />
+      <text x={1004} y={516} textAnchor="middle" fontFamily={FONT} fontSize={38} fontWeight={900} fill={GOLD}>開</text>
+      <text x={916} y={516} textAnchor="middle" fontFamily={FONT} fontSize={38} fontWeight={900} fill={GOLD}>封</text>
       {/* 门洞 */}
       <path d="M 790 1080 L 790 640 Q 960 556 1130 640 L 1130 1080 Z" fill="#05070F" />
       {/* 左扇（铰链 x=790，向内开） */}
@@ -895,15 +908,17 @@ const S9: React.FC = () => {
         ))}
         {/* 前排（振臂，随节拍上下） */}
         {crowd.filter((_, i) => i % 2 === 1).map((p, i) => (
-          <Person key={'f' + i} x={p.x} y={880} s={0.92} role={p.r} armUp={0.9 + 0.09 * Math.sin(f * 0.42 + i)} />
+          <Person key={'f' + i} x={p.x} y={880} s={0.92} role={p.r} pose="raise" />
         ))}
-        {/* 主角：形象与前面一致，只多一层披在肩上的黄袍 */}
+        {/* 主角：将军形象 → 黄袍形象，交叉淡化体现"加身" */}
         <g transform="translate(960 720) scale(1.4)">
-          <Person x={0} y={0} s={1} role="emperor" armUp={armP} />
+          <g opacity={1 - Math.max(robeP, 0)}>
+            <Person x={0} y={0} s={1} role="general" pose="raise" />
+          </g>
           <g opacity={Math.max(robeP, 0)}>
-            <path d="M -31 -68 Q 0 -52 31 -68 L 37 18 Q 0 40 -37 18 Z" fill={GOLD} opacity={0.62} />
+            <Person x={0} y={0} s={1} role="emperor" pose="raise" />
+            <path d="M -31 -68 Q 0 -52 31 -68 L 37 18 Q 0 40 -37 18 Z" fill={GOLD} opacity={0.5} />
             <path d="M -31 -68 Q 0 -54 31 -68" stroke={GOLD_D} strokeWidth={3} fill="none" opacity={0.9} />
-            <path d="M -24 -60 L -34 6 M 24 -60 L 34 6" stroke={GOLD_D} strokeWidth={2} opacity={0.5} />
           </g>
         </g>
         {/* 万岁：三波，从士兵头顶冒出、上浮、淡出（填满整幕，不留空镜） */}
@@ -1063,33 +1078,33 @@ const S13: React.FC = () => {
     <AbsoluteFill style={{ background: 'radial-gradient(100% 90% at 50% 40%, #141C38 0%, #0A0F22 58%, #04060D 100%)', fontFamily: FONT }}>
       <svg width={1920} height={1080} viewBox="0 0 1920 1080" style={{ position: 'absolute', inset: 0 }}>
         <defs>
-          {/* 锁体（带孔）作为蒙版：钥匙只在孔洞处可见 */}
-          <mask id="lockMask">
-            <rect x={-400} y={-400} width={800} height={800} fill="white" />
-            <circle cx={0} cy={-18} r={22} fill="black" />
-            <path d="M -10 0 L 10 0 L 7 48 L -7 48 Z" fill="black" />
-          </mask>
+          <clipPath id="plateClip">
+            <circle cx={0} cy={0} r={140} />
+          </clipPath>
         </defs>
         <Stars n={26} h={520} />
         <g transform="translate(960 380)">
-          {/* 锁盘底 */}
+          {/* 外圈 */}
           <circle cx={0} cy={0} r={170} fill="#1A2338" stroke="#3A4A6E" strokeWidth={8} />
-          <circle cx={0} cy={0} r={140} fill="#0E1628" stroke="#2A3A5F" strokeWidth={3} />
-          {/* 钥匙（先画，会被锁体遮住进入部分） */}
+          {/* 左半锁面：图层在钥匙之下 */}
+          <g clipPath="url(#plateClip)">
+            <rect x={-140} y={-140} width={140} height={280} fill="#0E1628" />
+          </g>
+          {/* 钥匙（匙尖在 x=0） */}
           <g transform={`translate(${keyX} -18)`}>
             <circle cx={-172} cy={0} r={22} fill="none" stroke={GOLD} strokeWidth={10} />
             <rect x={-150} y={-7} width={150} height={14} rx={4} fill={GOLD} />
             <rect x={-38} y={6} width={16} height={22} fill={GOLD} />
             <rect x={-70} y={6} width={14} height={18} fill={GOLD} />
           </g>
-          {/* 锁体面（蒙版：只在锁孔处露出钥匙） */}
-          <g mask="url(#lockMask)">
-            <circle cx={0} cy={0} r={140} fill="#0E1628" />
+          {/* 右半锁面：图层在钥匙之上，遮住插进去的部分 */}
+          <g clipPath="url(#plateClip)">
+            <rect x={0} y={-140} width={140} height={280} fill="#0E1628" />
           </g>
-          {/* 锁孔描边 */}
-          <circle cx={0} cy={-18} r={22} fill="none" stroke="#2A3A5F" strokeWidth={3} />
-          <path d="M -10 0 L 10 0 L 7 48 L -7 48 Z" fill="none" stroke="#2A3A5F" strokeWidth={3} />
-          {/* 开锁光 */}
+          {/* 锁孔（盖在最上） */}
+          <circle cx={0} cy={-18} r={22} fill="#04060D" />
+          <path d="M -10 0 L 10 0 L 7 48 L -7 48 Z" fill="#04060D" />
+          <circle cx={0} cy={0} r={140} fill="none" stroke="#2A3A5F" strokeWidth={3} />
           <circle cx={0} cy={0} r={190 + glowP * 40} fill="none" stroke={GOLD} strokeWidth={3} opacity={glowP * 0.7} />
           <circle cx={0} cy={0} r={140} fill={GOLD} opacity={glowP * 0.14} />
         </g>
@@ -1164,24 +1179,47 @@ const S15: React.FC = () => {
           <rect x={-32} y={110} width={64} height={80} rx={10} fill="#5A2A24" stroke={GOLD_D} strokeWidth={3} />
           <rect x={-20} y={124} width={40} height={52} rx={6} fill="#FFB84D" opacity={0.45 + 0.35 * Math.abs(Math.sin(f * 0.3))} />
         </g>
-        <g transform={`translate(960 700) scale(${0.9 + throne * 0.1})`} opacity={throne}>
-          {/* 台基 */}
-          <rect x={-300} y={150} width={600} height={26} fill="#1A2338" />
-          <rect x={-260} y={124} width={520} height={26} fill="#1E2840" />
-          {/* 龙椅：靠背 + 扶手 + 座 */}
-          <path d="M -150 124 L -150 -120 Q -150 -190 0 -200 Q 150 -190 150 -120 L 150 124 Z" fill="#3A1C18" stroke={GOLD_D} strokeWidth={5} />
-          {/* 靠背龙纹 */}
-          <path d="M -90 -60 q 30 -50 90 -56 q 60 6 90 56" stroke={GOLD} strokeWidth={4} fill="none" opacity={0.9} />
-          <circle cx={0} cy={-150} r={26} fill="none" stroke={GOLD} strokeWidth={4} />
-          <path d="M -18 -150 q 18 -22 36 0 q -18 22 -36 0" stroke={GOLD} strokeWidth={3} fill="none" />
-          {/* 扶手 */}
-          <path d="M -150 -40 L -190 -40 L -190 30" stroke={GOLD_D} strokeWidth={10} fill="none" strokeLinecap="round" />
-          <path d="M 150 -40 L 190 -40 L 190 30" stroke={GOLD_D} strokeWidth={10} fill="none" strokeLinecap="round" />
-          {/* 座面 */}
-          <rect x={-120} y={-30} width={240} height={34} rx={8} fill="#8A1F1A" stroke={GOLD_D} strokeWidth={4} />
-          <rect x={-120} y={4} width={240} height={120} fill="#2A1410" stroke={GOLD_D} strokeWidth={3} />
-          {/* 幼帝：坐姿（短袍、垂腿、双髻、双手扶膝） */}
-          <g transform="translate(0 -30)">
+        <g transform={`translate(960 720) scale(${0.86 + throne * 0.1})`} opacity={throne}>
+          {/* 身后屏风（三扇） */}
+          <g opacity={0.9}>
+            <rect x={-430} y={-330} width={280} height={210} rx={6} fill="#241A2E" stroke={GOLD_D} strokeWidth={3} />
+            <rect x={-140} y={-350} width={280} height={230} rx={6} fill="#2A1E36" stroke={GOLD_D} strokeWidth={3} />
+            <rect x={150} y={-330} width={280} height={210} rx={6} fill="#241A2E" stroke={GOLD_D} strokeWidth={3} />
+            <path d="M -40 -300 q 40 -40 80 0 q 40 40 80 0" stroke={GOLD_D} strokeWidth={2} fill="none" opacity={0.5} />
+          </g>
+          {/* 须弥座：三层收分台基 */}
+          <rect x={-360} y={160} width={720} height={26} fill="#1A2338" stroke="#2A3A5F" strokeWidth={2} />
+          <rect x={-320} y={134} width={640} height={26} fill="#1E2840" stroke="#2A3A5F" strokeWidth={2} />
+          <rect x={-280} y={108} width={560} height={26} fill="#22304C" stroke="#2A3A5F" strokeWidth={2} />
+          {/* 脚踏 */}
+          <rect x={-96} y={134} width={192} height={16} rx={4} fill="#3A2C18" stroke={GOLD_D} strokeWidth={2} />
+          {/* 宝座：圈椅式椅背 */}
+          <path d="M -150 108 L -150 -40 C -158 -140 -90 -196 0 -200 C 90 -196 158 -140 150 -40 L 150 108 Z"
+            fill="#7A5A1E" stroke={GOLD} strokeWidth={4} />
+          {/* 椅背云龙纹 */}
+          <path d="M -96 -60 C -70 -130 70 -130 96 -60" stroke={GOLD_D} strokeWidth={3} fill="none" opacity={0.85} />
+          <path d="M -70 -30 C -50 -96 50 -96 70 -30" stroke={GOLD_D} strokeWidth={2} fill="none" opacity={0.6} />
+          {/* 中央双龙戏珠 */}
+          <circle cx={0} cy={-118} r={52} fill="#5A3E12" stroke={GOLD} strokeWidth={3} />
+          <circle cx={0} cy={-118} r={14} fill={GOLD} opacity={0.95} />
+          <path d="M -44 -110 q 22 -22 40 -2" stroke={GOLD} strokeWidth={4} fill="none" strokeLinecap="round" />
+          <path d="M 44 -110 q -22 -22 -40 -2" stroke={GOLD} strokeWidth={4} fill="none" strokeLinecap="round" />
+          {/* 立柱盘龙（左右各一） */}
+          {[-140, 140].map((x, i) => (
+            <g key={i}>
+              <rect x={x - 10} y={-40} width={20} height={148} fill="#5A3E12" stroke={GOLD_D} strokeWidth={2} />
+              <path d={`M ${x} -30 q 16 -18 0 -34 q -16 -18 0 -34 q 16 -18 0 -34`} stroke={GOLD} strokeWidth={3} fill="none" opacity={0.85} />
+            </g>
+          ))}
+          {/* 扶手（向外卷） */}
+          <path d="M -150 -34 C -196 -40 -206 6 -178 20" stroke={GOLD} strokeWidth={9} fill="none" strokeLinecap="round" />
+          <path d="M 150 -34 C 196 -40 206 6 178 20" stroke={GOLD} strokeWidth={9} fill="none" strokeLinecap="round" />
+          {/* 座面 + 束腰 */}
+          <rect x={-150} y={-40} width={300} height={44} rx={8} fill="#8A1F1A" stroke={GOLD} strokeWidth={4} />
+          <rect x={-130} y={4} width={260} height={44} fill="#5A3E12" stroke={GOLD_D} strokeWidth={3} />
+          <path d="M -110 26 q 20 -12 40 0 q 20 12 40 0 q 20 -12 40 0" stroke={GOLD} strokeWidth={2} fill="none" opacity={0.7} />
+          {/* 幼帝：坐姿 */}
+          <g transform="translate(0 -34)">
             <path d="M -24 4 L 24 4 L 20 44 L -20 44 Z" fill="#8A4A5A" />
             <path d="M -20 4 L 0 20 L 20 4 L 16 -6 L 0 6 L -16 -6 Z" fill="#6A3444" />
             <path d="M -16 44 L -30 76 L -8 76 L -2 50 L 2 50 L 8 76 L 30 76 L 16 44 Z" fill="#6A3444" />
@@ -1346,7 +1384,7 @@ const S18: React.FC = () => {
         <rect x={700} y={560} width={520} height={28} rx={6} fill="#4A3820" stroke="#3A2C18" strokeWidth={3} />
         <rect x={740} y={588} width={440} height={14} fill="#3A2C18" />
         <g transform="translate(960 560)">
-          <Person x={0} y={0} s={1.12} role="emperor" armUp={cupRaise * 0.9} />
+          <Person x={0} y={0} s={1.12} role="emperor" pose={cupRaise > 0.35 ? 'cup' : 'idle'} />
         </g>
         {/* 御案陈设：酒壶、酒樽、果盘、烛台 */}
         <g transform="translate(830 552)">
@@ -1422,7 +1460,7 @@ const S19: React.FC = () => {
                   <rect x={96} y={-56} width={110} height={112} rx={10} fill="#1A2338" stroke={GOLD} strokeWidth={3} />
                   <text x={151} y={6} textAnchor="middle" fontFamily={FONT} fontSize={24} fontWeight={900} fill={GOLD}>禁军</text>
                   {[0, 1, 2].map((k) => {
-                    const prog = ((f * 0.45 + k * 0.33) % 1);
+                    const prog = ((f * 0.26 + k * 0.33) % 1);
                     const px = -170 + prog * 250;
                     return (
                       <g key={k} transform={`translate(${px} ${40 - k * 8}) scale(0.55)`}>

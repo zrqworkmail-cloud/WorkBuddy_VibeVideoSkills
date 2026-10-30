@@ -25,8 +25,8 @@ from datetime import datetime
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(os.path.dirname(HERE))      # vibe-knowledge-video/
-GIT_NAME = "Ruoquan Zhou"
-GIT_EMAIL = "252115044@stu.sdufe.edu.cn"
+GIT_NAME = os.environ.get("GIT_NAME", "WorkBuddy Workflow")
+GIT_EMAIL = os.environ.get("GIT_EMAIL", "workbuddy@users.noreply.github.com")
 MAX_FILE_MB = 95
 
 
